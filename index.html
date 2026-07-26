@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TurnApp — Gestioná los turnos de tu negocio</title>
+<link rel="manifest" href="./manifest.json" />
+<meta name="theme-color" content="#3F5044" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #F5EFE4;
+    --cream-deep: #EDE3D3;
+    --ink: #262A20;
+    --forest: #2F4033;
+    --forest-soft: #3F5044;
+    --gold: #B8862E;
+    --gold-soft: #D9B876;
+    --rose: #C48B93;
+    --line: rgba(38,42,32,0.14);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Work Sans', system-ui, sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+
+  header{
+    padding:28px 24px 0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .brand{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    color:var(--forest);
+    letter-spacing:-0.01em;
+  }
+
+  main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 20px 60px;
+    gap:40px;
+  }
+
+  .hero{
+    text-align:center;
+    max-width:520px;
+  }
+  .hero h1{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-style:italic;
+    font-size:clamp(30px, 5vw, 44px);
+    line-height:1.12;
+    margin:0 0 14px;
+    color:var(--forest);
+  }
+  .hero p{
+    font-size:16px;
+    line-height:1.55;
+    color:rgba(38,42,32,0.72);
+    margin:0;
+  }
+
+  /* --- signature: agenda viva --- */
+  .schedule{
+    width:280px;
+    max-width:80vw;
+    margin:28px auto 0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .slot{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    border-radius:10px;
+    background:rgba(47,64,51,0.06);
+    border:1px solid var(--line);
+    font-size:13px;
+    color:rgba(38,42,32,0.65);
+  }
+  .slot .time{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:13px;
+    color:var(--forest);
+    width:44px;
+    flex-shrink:0;
+  }
+  .slot.busy{ background:rgba(47,64,51,0.11); }
+  .slot.open{
+    background:rgba(184,134,46,0.10);
+    border-color:rgba(184,134,46,0.35);
+    color:var(--gold);
+    font-weight:500;
+    animation:breathe 3.2s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ box-shadow:0 0 0 0 rgba(184,134,46,0.0); }
+    50%{ box-shadow:0 0 0 6px rgba(184,134,46,0.08); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .slot.open{ animation:none; }
+  }
+
+  /* --- tarjeta de acceso --- */
+  .card{
+    width:100%;
+    max-width:380px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px 26px 26px;
+    box-shadow:0 24px 48px -32px rgba(38,42,32,0.35);
+  }
+  .tabs{
+    display:flex;
+    gap:4px;
+    background:var(--cream-deep);
+    border-radius:999px;
+    padding:4px;
+    margin-bottom:22px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:9px 0;
+    border-radius:999px;
+    font-size:13.5px;
+    font-weight:600;
+    color:rgba(38,42,32,0.55);
+    cursor:pointer;
+    border:none;
+    background:transparent;
+    font-family:inherit;
+    transition:background .2s ease, color .2s ease;
+  }
+  .tab.active{
+    background:var(--forest);
+    color:var(--cream);
+  }
+
+  form{ display:none; flex-direction:column; gap:14px; }
+  form.active{ display:flex; }
+
+  label{
+    font-size:12.5px;
+    font-weight:600;
+    color:rgba(38,42,32,0.6);
+    margin-bottom:5px;
+    display:block;
+  }
+  .field input{
+    width:100%;
+    padding:11px 13px;
+    border-radius:9px;
+    border:1px solid var(--line);
+    background:var(--cream);
+    font-family:inherit;
+    font-size:14.5px;
+    color:var(--ink);
+  }
+  .field input:focus{
+    outline:2px solid var(--gold-soft);
+    outline-offset:1px;
+    border-color:var(--gold);
+  }
+
+  .submit{
+    margin-top:6px;
+    padding:12px 0;
+    border:none;
+    border-radius:9px;
+    background:var(--forest);
+    color:var(--cream);
+    font-family:inherit;
+    font-weight:600;
+    font-size:14.5px;
+    cursor:pointer;
+    transition:background .2s ease, transform .1s ease;
+  }
+  .submit:hover{ background:var(--forest-soft); }
+  .submit:active{ transform:scale(0.98); }
+  .submit:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+
+  .hint{
+    font-size:12.5px;
+    color:rgba(38,42,32,0.5);
+    text-align:center;
+    margin-top:4px;
+  }
+
+  .msg{
+    font-size:13px;
+    padding:10px 12px;
+    border-radius:8px;
+    display:none;
+  }
+  .msg.show{ display:block; }
+  .msg.error{ background:rgba(196,66,66,0.1); color:#9C3B3B; }
+  .msg.ok{ background:rgba(63,80,68,0.1); color:var(--forest); }
+
+  footer{
+    text-align:center;
+    padding:18px;
+    font-size:12px;
+    color:rgba(38,42,32,0.4);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">TurnApp</div>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>La agenda se acomoda a vos,<br>no al revés.</h1>
+    <p>Cada servicio, cada profesional, cada hueco entre turnos — vos decidís cómo se usa.</p>
+
+    <div class="schedule" aria-hidden="true">
+      <div class="slot busy"><span class="time">14:00</span> Corte — Melina</div>
+      <div class="slot open"><span class="time">14:30</span> Hueco liberado — disponible</div>
+      <div class="slot busy"><span class="time">15:00</span> Tintura — Rocío</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="tabs" role="tablist">
+      <button class="tab active" id="tab-login" role="tab" aria-selected="true">Iniciar sesión</button>
+      <button class="tab" id="tab-register" role="tab" aria-selected="false">Crear cuenta</button>
+    </div>
+
+    <div class="msg" id="msg"></div>
+
+    <form id="form-login" class="active" novalidate>
+      <div class="field">
+        <label for="login-email">Correo</label>
+        <input type="email" id="login-email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="login-pass">Contraseña</label>
+        <input type="password" id="login-pass" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="submit">Entrar</button>
+    </form>
+
+    <form id="form-register" novalidate>
+      <div class="field">
+        <label for="reg-nombre">Nombre del negocio</label>
+        <input type="text" id="reg-nombre" autocomplete="organization" required>
+      </div>
+      <div class="field">
+        <label for="reg-email">Correo</label>
+        <input type="email" id="reg-email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="reg-pass">Contraseña</label>
+        <input type="password" id="reg-pass" autocomplete="new-password" minlength="6" required>
+      </div>
+      <button type="submit" class="submit">Crear mi cuenta</button>
+      <p class="hint">Empezás con 6 meses gratis, sin tarjeta.</p>
+    </form>
+  </div>
+</main>
+
+<footer>TurnApp</footer>
+
+<script type="module">
+  import { firebaseConfig, DIAS_PLAN_GRATIS } from "./config.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const tabLogin = document.getElementById("tab-login");
+  const tabRegister = document.getElementById("tab-register");
+  const formLogin = document.getElementById("form-login");
+  const formRegister = document.getElementById("form-register");
+  const msg = document.getElementById("msg");
+
+  function showTab(which){
+    const isLogin = which === "login";
+    tabLogin.classList.toggle("active", isLogin);
+    tabRegister.classList.toggle("active", !isLogin);
+    tabLogin.setAttribute("aria-selected", isLogin);
+    tabRegister.setAttribute("aria-selected", !isLogin);
+    formLogin.classList.toggle("active", isLogin);
+    formRegister.classList.toggle("active", !isLogin);
+    hideMsg();
+  }
+  tabLogin.addEventListener("click", () => showTab("login"));
+  tabRegister.addEventListener("click", () => showTab("register"));
+
+  function showMsg(text, type){
+    msg.textContent = text;
+    msg.className = "msg show " + type;
+  }
+  function hideMsg(){ msg.className = "msg"; }
+
+  formLogin.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    hideMsg();
+    const email = document.getElementById("login-email").value.trim();
+    const pass = document.getElementById("login-pass").value;
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      window.location.href = "./panel/index.html";
+    } catch (err) {
+      showMsg("No pudimos iniciar sesión. Revisá el correo y la contraseña.", "error");
+    }
+  });
+
+  formRegister.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    hideMsg();
+    const nombreComercio = document.getElementById("reg-nombre").value.trim();
+    const email = document.getElementById("reg-email").value.trim();
+    const pass = document.getElementById("reg-pass").value;
+
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      const businessId = cred.user.uid;
+      const vencimiento = new Date();
+      vencimiento.setDate(vencimiento.getDate() + DIAS_PLAN_GRATIS);
+
+      await setDoc(doc(db, "businesses", businessId), {
+        nombreComercio,
+        whatsapp: null,
+        tema: "default",
+        plan: "gratis",
+        fechaVencimiento: vencimiento,
+        creadoEl: serverTimestamp(),
+      });
+
+      window.location.href = "./panel/index.html";
+    } catch (err) {
+      showMsg("No pudimos crear la cuenta. Probá con otro correo o revisá la contraseña (mínimo 6 caracteres).", "error");
+    }
+  });
+</script>
+
+</body>
+</html>
