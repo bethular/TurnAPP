@@ -3,12 +3,12 @@
 // de TurnApp (Firebase Console → Configuración del proyecto → Tus apps → SDK).
 
 export const firebaseConfig = {
-  apiKey: "REEMPLAZAR",
-  authDomain: "REEMPLAZAR.firebaseapp.com",
-  projectId: "REEMPLAZAR",
-  storageBucket: "REEMPLAZAR.appspot.com",
-  messagingSenderId: "REEMPLAZAR",
-  appId: "REEMPLAZAR",
+  apiKey: "AIzaSyCY9qgRC1XEeP9H1pODe1ngvjGKKlLBlYs",
+  authDomain: "turnapp-717ba.firebaseapp.com",
+  projectId: "turnapp-717ba",
+  storageBucket: "turnapp-717ba.firebasestorage.app",
+  messagingSenderId: "811218200487",
+  appId: "1:811218200487:web:6c2260a35ba92109553882",
 };
 
 // Datos fijos de TurnApp (no configurables por negocio — son de Sebas como dueño
