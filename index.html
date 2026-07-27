@@ -210,6 +210,68 @@
     margin-top:4px;
   }
 
+  .field{ position:relative; }
+  .toggle-pass{
+    position:absolute;
+    right:10px;
+    top:34px;
+    background:none;
+    border:none;
+    font-size:12px;
+    font-weight:600;
+    color:rgba(38,42,32,0.5);
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .toggle-pass:hover{ color:var(--forest); }
+
+  .forgot{
+    text-align:right;
+    font-size:12px;
+    color:var(--gold);
+    background:none;
+    border:none;
+    font-family:inherit;
+    cursor:pointer;
+    padding:0;
+    margin-top:-6px;
+  }
+  .forgot:hover{ text-decoration:underline; }
+
+  .divider{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:16px 0 4px;
+    color:rgba(38,42,32,0.4);
+    font-size:12px;
+  }
+  .divider::before, .divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  .google-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:11px 0;
+    border:1px solid var(--line);
+    border-radius:9px;
+    background:#fff;
+    font-family:inherit;
+    font-weight:600;
+    font-size:14px;
+    color:var(--ink);
+    cursor:pointer;
+    margin-top:12px;
+  }
+  .google-btn:hover{ background:var(--cream); }
+  .google-btn svg{ width:17px; height:17px; }
+
   .msg{
     font-size:13px;
     padding:10px 12px;
@@ -262,8 +324,16 @@
       <div class="field">
         <label for="login-pass">Contraseña</label>
         <input type="password" id="login-pass" autocomplete="current-password" required>
+        <button type="button" class="toggle-pass" data-target="login-pass">Ver</button>
       </div>
+      <button type="button" class="forgot" id="btn-forgot">¿Olvidaste tu contraseña?</button>
       <button type="submit" class="submit">Entrar</button>
+
+      <div class="divider">o</div>
+      <button type="button" class="google-btn" id="btn-google-login">
+        <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.4 0 10.3-2 14-5.4l-6.5-5.5C29.4 34.9 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.6 5C9.6 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.6l6.5 5.5C40.9 36.6 44 30.9 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        Continuar con Google
+      </button>
     </form>
 
     <form id="form-register" novalidate>
@@ -278,9 +348,21 @@
       <div class="field">
         <label for="reg-pass">Contraseña</label>
         <input type="password" id="reg-pass" autocomplete="new-password" minlength="6" required>
+        <button type="button" class="toggle-pass" data-target="reg-pass">Ver</button>
+      </div>
+      <div class="field">
+        <label for="reg-pass2">Repetir contraseña</label>
+        <input type="password" id="reg-pass2" autocomplete="new-password" minlength="6" required>
+        <button type="button" class="toggle-pass" data-target="reg-pass2">Ver</button>
       </div>
       <button type="submit" class="submit">Crear mi cuenta</button>
       <p class="hint">Empezás con 6 meses gratis, sin tarjeta.</p>
+
+      <div class="divider">o</div>
+      <button type="button" class="google-btn" id="btn-google-register">
+        <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.4 0 10.3-2 14-5.4l-6.5-5.5C29.4 34.9 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.6 5C9.6 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.6l6.5 5.5C40.9 36.6 44 30.9 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        Registrarme con Google
+      </button>
     </form>
   </div>
 </main>
@@ -291,15 +373,79 @@
   import { firebaseConfig, DIAS_PLAN_GRATIS } from "./config.js";
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
-    getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword
+    getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+    sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, doc, setDoc, serverTimestamp
+    getFirestore, doc, setDoc, getDoc, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+  const googleProvider = new GoogleAuthProvider();
+
+  // --- crear el documento del negocio si todavía no existe (registro o Google) ---
+  async function asegurarNegocio(uid, nombreSugerido){
+    const ref = doc(db, "businesses", uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) return;
+
+    let nombreComercio = nombreSugerido;
+    if (!nombreComercio){
+      nombreComercio = prompt("¿Cómo se llama tu negocio?") || "Mi negocio";
+    }
+    const vencimiento = new Date();
+    vencimiento.setDate(vencimiento.getDate() + DIAS_PLAN_GRATIS);
+
+    await setDoc(ref, {
+      nombreComercio,
+      whatsapp: null,
+      tema: "default",
+      plan: "gratis",
+      fechaVencimiento: vencimiento,
+      creadoEl: serverTimestamp(),
+    });
+  }
+
+  // --- mostrar/ocultar contraseña ---
+  document.querySelectorAll(".toggle-pass").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const input = document.getElementById(btn.dataset.target);
+      const showing = input.type === "text";
+      input.type = showing ? "password" : "text";
+      btn.textContent = showing ? "Ver" : "Ocultar";
+    });
+  });
+
+  // --- login con Google (ambos botones) ---
+  async function loginConGoogle(){
+    hideMsg();
+    try {
+      const cred = await signInWithPopup(auth, googleProvider);
+      await asegurarNegocio(cred.user.uid, null);
+      window.location.href = "./panel/index.html";
+    } catch (err) {
+      showMsg("No pudimos completar el ingreso con Google. Probá de nuevo.", "error");
+    }
+  }
+  document.getElementById("btn-google-login").addEventListener("click", loginConGoogle);
+  document.getElementById("btn-google-register").addEventListener("click", loginConGoogle);
+
+  // --- recuperar contraseña ---
+  document.getElementById("btn-forgot").addEventListener("click", async () => {
+    const email = document.getElementById("login-email").value.trim();
+    if (!email){
+      showMsg("Escribí tu correo arriba y volvé a tocar el enlace.", "error");
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showMsg("Te mandamos un correo para reestablecer la contraseña.", "ok");
+    } catch (err) {
+      showMsg("No pudimos enviar el correo de recuperación. Revisá que el correo esté bien escrito.", "error");
+    }
+  });
 
   const tabLogin = document.getElementById("tab-login");
   const tabRegister = document.getElementById("tab-register");
@@ -345,22 +491,16 @@
     const nombreComercio = document.getElementById("reg-nombre").value.trim();
     const email = document.getElementById("reg-email").value.trim();
     const pass = document.getElementById("reg-pass").value;
+    const pass2 = document.getElementById("reg-pass2").value;
+
+    if (pass !== pass2){
+      showMsg("Las contraseñas no coinciden.", "error");
+      return;
+    }
 
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      const businessId = cred.user.uid;
-      const vencimiento = new Date();
-      vencimiento.setDate(vencimiento.getDate() + DIAS_PLAN_GRATIS);
-
-      await setDoc(doc(db, "businesses", businessId), {
-        nombreComercio,
-        whatsapp: null,
-        tema: "default",
-        plan: "gratis",
-        fechaVencimiento: vencimiento,
-        creadoEl: serverTimestamp(),
-      });
-
+      await asegurarNegocio(cred.user.uid, nombreComercio);
       window.location.href = "./panel/index.html";
     } catch (err) {
       showMsg("No pudimos crear la cuenta. Probá con otro correo o revisá la contraseña (mínimo 6 caracteres).", "error");
