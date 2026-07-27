@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — TurnApp</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #F5EFE4; --cream-deep: #EDE3D3; --ink: #262A20;
+    --forest: #2F4033; --gold: #B8862E; --line: rgba(38,42,32,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'Work Sans', sans-serif; background:var(--cream); color:var(--ink);
+    margin:0; padding:24px; min-height:100vh;
+  }
+  h1{ font-family:'Fraunces', serif; font-weight:600; color:var(--forest); font-size:22px; margin:0 0 4px; }
+  .sub{ font-size:13px; color:rgba(38,42,32,0.55); margin:0 0 24px; }
+
+  .card{
+    background:#fff; border:1px solid var(--line); border-radius:14px;
+    padding:20px; margin-bottom:20px; max-width:520px;
+  }
+
+  input{
+    width:100%; padding:11px 13px; border-radius:9px; border:1px solid var(--line);
+    background:var(--cream); font-family:inherit; font-size:14.5px; margin-bottom:10px;
+  }
+  button{
+    font-family:inherit; font-weight:600; font-size:14px; cursor:pointer;
+    border:none; border-radius:9px; padding:11px 18px;
+  }
+  .btn-primary{ background:var(--forest); color:#fff; width:100%; }
+  .btn-secondary{ background:var(--cream-deep); color:var(--ink); margin-right:8px; }
+
+  .resultado{
+    display:none; margin-top:16px; padding:16px; border-radius:10px;
+    background:rgba(184,134,46,0.08); border:1px solid rgba(184,134,46,0.3);
+  }
+  .resultado.show{ display:block; }
+  .codigo-grande{
+    font-family:'Fraunces', serif; font-size:26px; font-weight:600; color:var(--gold);
+    letter-spacing:0.03em; margin:0 0 12px; word-break:break-all;
+  }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th, td{ text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); }
+  th{ color:rgba(38,42,32,0.5); font-weight:600; font-size:11.5px; text-transform:uppercase; }
+  .estado-usado{ color:#9C3B3B; font-weight:600; }
+  .estado-libre{ color:#3D6B4A; font-weight:600; }
+
+  #login-gate{ max-width:380px; }
+  .msg{ font-size:13px; padding:10px 12px; border-radius:8px; margin-top:10px; display:none; }
+  .msg.show{ display:block; background:rgba(196,66,66,0.1); color:#9C3B3B; }
+</style>
+</head>
+<body>
+
+<h1>Panel de administración — TurnApp</h1>
+<p class="sub">Generar códigos de la versión Pro, sin entrar a Firebase.</p>
+
+<div class="card" id="login-gate">
+  <p style="margin-top:0; font-size:13.5px;">Iniciá sesión con tu cuenta de administrador.</p>
+  <input type="email" id="admin-email" placeholder="Correo">
+  <input type="password" id="admin-pass" placeholder="Contraseña">
+  <button class="btn-primary" id="btn-admin-login">Entrar</button>
+  <div class="msg" id="login-msg"></div>
+</div>
+
+<div id="panel" style="display:none;">
+  <div class="card">
+    <p style="margin-top:0; font-size:13.5px;">Nota para vos, opcional (ej: nombre del negocio o cliente):</p>
+    <input type="text" id="nota-codigo" placeholder="Ej: Coquetas peluquería">
+    <button class="btn-primary" id="btn-generar">Generar código nuevo</button>
+
+    <div class="resultado" id="resultado">
+      <p class="codigo-grande" id="codigo-generado"></p>
+      <button class="btn-secondary" id="btn-copiar">Copiar código</button>
+      <button class="btn-secondary" id="btn-whatsapp">Enviar por WhatsApp</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <p style="margin-top:0; font-weight:600; font-size:14px;">Códigos generados</p>
+    <table>
+      <thead><tr><th>Código</th><th>Nota</th><th>Estado</th></tr></thead>
+      <tbody id="tabla-codigos"><tr><td colspan="3">Cargando…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<script type="module">
+  import { firebaseConfig } from "../config.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, doc, setDoc, collection, getDocs, orderBy, query
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const ADMIN_UID = "eYcLh69WczLsEa0f612k5hbyULq2";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const loginGate = document.getElementById("login-gate");
+  const panel = document.getElementById("panel");
+  const loginMsg = document.getElementById("login-msg");
+
+  document.getElementById("btn-admin-login").addEventListener("click", async () => {
+    loginMsg.className = "msg";
+    const email = document.getElementById("admin-email").value.trim();
+    const pass = document.getElementById("admin-pass").value;
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch (err) {
+      loginMsg.className = "msg show";
+      loginMsg.textContent = "No pudimos iniciar sesión. Revisá el correo y la contraseña.";
+    }
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    if (user && user.uid === ADMIN_UID) {
+      loginGate.style.display = "none";
+      panel.style.display = "block";
+      cargarCodigos();
+    } else {
+      loginGate.style.display = "block";
+      panel.style.display = "none";
+      if (user && user.uid !== ADMIN_UID) {
+        loginMsg.className = "msg show";
+        loginMsg.textContent = "Esta cuenta no tiene permiso de administrador.";
+      }
+    }
+  });
+
+  function generarCodigoAlAzar(){
+    const letras = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sin caracteres confusos (0/O, 1/I)
+    let parte = "";
+    for (let i = 0; i < 6; i++) parte += letras[Math.floor(Math.random() * letras.length)];
+    return "PRO-" + parte;
+  }
+
+  document.getElementById("btn-generar").addEventListener("click", async () => {
+    const nota = document.getElementById("nota-codigo").value.trim();
+    const codigo = generarCodigoAlAzar();
+
+    await setDoc(doc(db, "codigosPro", codigo), {
+      usado: false,
+      nota: nota || null,
+      creadoEl: new Date(),
+    });
+
+    document.getElementById("codigo-generado").textContent = codigo;
+    document.getElementById("resultado").classList.add("show");
+
+    document.getElementById("btn-copiar").onclick = () => {
+      navigator.clipboard.writeText(codigo);
+      document.getElementById("btn-copiar").textContent = "¡Copiado!";
+      setTimeout(() => { document.getElementById("btn-copiar").textContent = "Copiar código"; }, 1500);
+    };
+    document.getElementById("btn-whatsapp").onclick = () => {
+      const texto = `¡Hola! Tu versión Pro de TurnApp ya está lista. Para activarla, entrá a Configuración dentro de la app y cargá este código: ${codigo}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, "_blank");
+    };
+
+    document.getElementById("nota-codigo").value = "";
+    cargarCodigos();
+  });
+
+  async function cargarCodigos(){
+    const tabla = document.getElementById("tabla-codigos");
+    tabla.innerHTML = `<tr><td colspan="3">Cargando…</td></tr>`;
+    const snap = await getDocs(query(collection(db, "codigosPro"), orderBy("creadoEl", "desc")));
+    if (snap.empty){
+      tabla.innerHTML = `<tr><td colspan="3">Todavía no generaste ningún código.</td></tr>`;
+      return;
+    }
+    tabla.innerHTML = "";
+    snap.forEach((d) => {
+      const c = d.data();
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
+        <td>${d.id}</td>
+        <td>${c.nota || "—"}</td>
+        <td class="${c.usado ? "estado-usado" : "estado-libre"}">${c.usado ? "Usado" : "Libre"}</td>
+      `;
+      tabla.appendChild(fila);
+    });
+  }
+</script>
+
+</body>
+</html>

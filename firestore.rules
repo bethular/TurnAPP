@@ -34,5 +34,20 @@ service cloud.firestore {
     match /businesses/{businessId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == businessId;
     }
+
+    // Códigos de canje para pasar a la versión Pro.
+    // Solo la cuenta de administrador (Sebas) puede crearlos y ver la lista completa,
+    // desde el panel privado admin/index.html. Cualquier negocio autenticado puede
+    // leer un código puntual para canjearlo (necesita saber el ID exacto), y solo
+    // puede marcarlo como usado si todavía no fue canjeado — esto lo garantiza la
+    // regla del lado del servidor, no se puede reusar aunque se manipule el cliente.
+    match /codigosPro/{codigo} {
+      allow get: if request.auth != null;
+      allow list: if request.auth != null && request.auth.uid == "eYcLh69WczLsEa0f612k5hbyULq2";
+      allow create: if request.auth != null && request.auth.uid == "eYcLh69WczLsEa0f612k5hbyULq2";
+      allow update: if (request.auth != null && resource.data.usado == false)
+                     || (request.auth != null && request.auth.uid == "eYcLh69WczLsEa0f612k5hbyULq2");
+      allow delete: if request.auth != null && request.auth.uid == "eYcLh69WczLsEa0f612k5hbyULq2";
+    }
   }
 }

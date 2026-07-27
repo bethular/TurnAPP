@@ -346,7 +346,24 @@
     <section class="view" id="view-config">
       <h1 class="view-title">Configuración</h1>
       <p class="view-sub">Nombre del negocio, WhatsApp, tema de color y profesionales.</p>
-      <div class="stub">Todavía no armamos esta sección.</div>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:12px; margin-bottom:16px;">
+        <div>
+          <strong id="plan-label">Plan actual: —</strong>
+          <div class="turno-servicio" id="plan-detalle"></div>
+        </div>
+        <div id="canje-form" style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="input-codigo" placeholder="Código de la versión Pro" style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:14px;">
+          <button class="submit" id="btn-canjear" style="width:auto; padding:10px 18px;">Canjear</button>
+        </div>
+        <div class="msg" id="msg-canje"></div>
+      </div>
+
+      <div class="stub" style="text-align:left; padding:24px;">
+        <p style="margin-top:0;">Todavía no armamos la edición de estos datos. Mientras tanto, podés cargar datos de ejemplo para ver la app funcionando:</p>
+        <button class="submit" id="btn-seed" style="max-width:260px;">Cargar datos de ejemplo</button>
+        <p id="seed-msg" style="font-size:12.5px; color:rgba(38,42,32,0.55); margin-top:10px;"></p>
+      </div>
     </section>
 
   </main>
@@ -365,7 +382,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, collection, query, orderBy, onSnapshot, updateDoc
+    getFirestore, doc, getDoc, collection, query, orderBy, onSnapshot, updateDoc, addDoc, Timestamp, runTransaction
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const app = initializeApp(firebaseConfig);
@@ -418,6 +435,24 @@
   // --- auth guard ---
   let businessId = null;
   let planVencido = false;
+  let planActual = "gratis";
+
+  function pintarPlan(negocio){
+    const label = document.getElementById("plan-label");
+    const detalle = document.getElementById("plan-detalle");
+    const canjeForm = document.getElementById("canje-form");
+    if (negocio.plan === "pro"){
+      label.textContent = "Plan actual: Pro";
+      const venc = negocio.fechaVencimiento?.toDate ? negocio.fechaVencimiento.toDate() : null;
+      detalle.textContent = venc ? "Vence el " + venc.toLocaleDateString("es-AR") : "";
+      canjeForm.style.display = "none";
+    } else {
+      label.textContent = "Plan actual: Gratis";
+      const venc = negocio.fechaVencimiento?.toDate ? negocio.fechaVencimiento.toDate() : null;
+      detalle.textContent = venc ? "Vence el " + venc.toLocaleDateString("es-AR") : "";
+      canjeForm.style.display = "flex";
+    }
+  }
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -432,9 +467,60 @@
 
     const vencimiento = negocio.fechaVencimiento?.toDate ? negocio.fechaVencimiento.toDate() : null;
     planVencido = negocio.plan === "gratis" && vencimiento && vencimiento < new Date();
+    planActual = negocio.plan || "gratis";
     document.getElementById("overlay-vencido").classList.toggle("show", !!planVencido);
+    pintarPlan(negocio);
 
     escucharTurnos();
+  });
+
+  // --- canje de código Pro ---
+  document.getElementById("btn-canjear").addEventListener("click", async () => {
+    const msgCanje = document.getElementById("msg-canje");
+    const codigo = document.getElementById("input-codigo").value.trim();
+    if (!codigo){
+      msgCanje.className = "msg show error";
+      msgCanje.textContent = "Escribí el código que te dieron.";
+      return;
+    }
+    msgCanje.className = "msg show ok";
+    msgCanje.textContent = "Verificando…";
+    try {
+      const codigoRef = doc(db, "codigosPro", codigo);
+      const negocioRef = doc(db, "businesses", businessId);
+
+      await runTransaction(db, async (tx) => {
+        const codigoSnap = await tx.get(codigoRef);
+        if (!codigoSnap.exists()){
+          throw new Error("Ese código no existe.");
+        }
+        if (codigoSnap.data().usado){
+          throw new Error("Ese código ya fue usado.");
+        }
+        const vencimiento = new Date();
+        vencimiento.setFullYear(vencimiento.getFullYear() + 1);
+
+        tx.update(codigoRef, {
+          usado: true,
+          businessId: businessId,
+          fechaCanjeado: Timestamp.now(),
+        });
+        tx.update(negocioRef, {
+          plan: "pro",
+          fechaVencimiento: Timestamp.fromDate(vencimiento),
+        });
+      });
+
+      msgCanje.className = "msg show ok";
+      msgCanje.textContent = "¡Listo! Tu negocio ya está en la versión Pro.";
+      const negocioSnap = await getDoc(negocioRef);
+      pintarPlan(negocioSnap.data());
+      planVencido = false;
+      document.getElementById("overlay-vencido").classList.remove("show");
+    } catch (err) {
+      msgCanje.className = "msg show error";
+      msgCanje.textContent = err.message || "No pudimos validar el código.";
+    }
   });
 
   // --- turnos reservados en tiempo real ---
@@ -456,6 +542,68 @@
       });
     });
   }
+
+  // --- datos de ejemplo para mostrar la app funcionando ---
+  const SERVICIOS_EJEMPLO = [
+    { nombre: "Corte de pelo", precio: 6500, duracionMin: 30 },
+    { nombre: "Tintura", precio: 14000, duracionMin: 90 },
+    { nombre: "Peinado / brushing", precio: 5000, duracionMin: 40 },
+    { nombre: "Manicura", precio: 4500, duracionMin: 45 },
+    { nombre: "Masaje relajante", precio: 12000, duracionMin: 60, oferta: "20% off los martes" },
+  ];
+  const CLIENTES_EJEMPLO = [
+    { nombre: "Melina Ríos", whatsapp: "5493764111111" },
+    { nombre: "Rocío Gómez", whatsapp: "5493764222222" },
+    { nombre: "Facundo Ibarra", whatsapp: "5493764333333" },
+    { nombre: "Ana Duarte", whatsapp: "5493764444444" },
+    { nombre: "Julián Paredes", whatsapp: "5493764555555" },
+  ];
+  const ESTADOS_EJEMPLO = ["Reservado", "Confirmado", "Atendido", "Ausente", "Confirmado"];
+
+  document.getElementById("btn-seed").addEventListener("click", async () => {
+    const seedMsg = document.getElementById("seed-msg");
+    seedMsg.textContent = "Cargando…";
+    try {
+      const serviciosRef = collection(db, "businesses", businessId, "servicios");
+      const idsServicios = [];
+      for (const s of SERVICIOS_EJEMPLO){
+        const r = await addDoc(serviciosRef, s);
+        idsServicios.push({ id: r.id, ...s });
+      }
+
+      const clientesRef = collection(db, "businesses", businessId, "clientes");
+      for (const c of CLIENTES_EJEMPLO){
+        await addDoc(clientesRef, { ...c, ultimoTurno: Timestamp.now() });
+      }
+
+      const turnosRef = collection(db, "businesses", businessId, "turnos");
+      const hoy = new Date();
+      for (let i = 0; i < 5; i++){
+        const fecha = new Date(hoy);
+        fecha.setHours(10 + i * 1, i % 2 === 0 ? 0 : 30, 0, 0);
+        const cliente = CLIENTES_EJEMPLO[i];
+        const servicio = idsServicios[i % idsServicios.length];
+        await addDoc(turnosRef, {
+          clienteNombre: cliente.nombre,
+          clienteWhatsapp: cliente.whatsapp,
+          servicioId: servicio.id,
+          servicioNombre: servicio.nombre,
+          fechaHora: Timestamp.fromDate(fecha),
+          estado: ESTADOS_EJEMPLO[i],
+          reabierto: i === 2,
+        });
+      }
+
+      const cajaRef = collection(db, "businesses", businessId, "caja");
+      await addDoc(cajaRef, { tipo: "ingreso", monto: 6500, categoria: "Corte de pelo", medioPago: "Efectivo", fecha: Timestamp.now() });
+      await addDoc(cajaRef, { tipo: "ingreso", monto: 14000, categoria: "Tintura", medioPago: "Transferencia", fecha: Timestamp.now() });
+      await addDoc(cajaRef, { tipo: "gasto", monto: 3200, categoria: "Insumos", medioPago: "Efectivo", fecha: Timestamp.now() });
+
+      seedMsg.textContent = "Listo — 5 servicios, 5 clientes, 5 turnos y movimientos de caja cargados.";
+    } catch (err) {
+      seedMsg.textContent = "No se pudo cargar: " + err.message;
+    }
+  });
 
   function renderTurno(id, t){
     const hora = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
