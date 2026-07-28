@@ -56,5 +56,10 @@ service cloud.firestore {
                      || (request.auth != null && request.auth.uid == "eYcLh69WczLsEa0f612k5hbyULq2");
       allow delete: if request.auth != null && request.auth.uid == "eYcLh69WczLsEa0f612k5hbyULq2";
     }
+    // Configuración general de la plataforma (ej: días de aviso antes del
+    // vencimiento). Solo la cuenta admin puede leerla y escribirla.
+    match /configuracion/{doc} {
+      allow read, write: if request.auth != null && request.auth.uid == "eYcLh69WczLsEa0f612k5hbyULq2";
+    }
   }
 }

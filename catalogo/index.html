@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Reservar turno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #F5EFE4; --cream-deep: #EDE3D3; --ink: #262A20;
+    --forest: #2F4033; --forest-soft: #3F5044; --gold: #B8862E; --line: rgba(38,42,32,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Work Sans', sans-serif; background:var(--cream); color:var(--ink);
+    min-height:100vh; padding-bottom:40px;
+  }
+  header{ padding:26px 20px 10px; text-align:center; }
+  header h1{ font-family:'Fraunces', serif; font-weight:600; font-size:24px; color:var(--forest); margin:0 0 4px; }
+  header p{ font-size:13px; color:rgba(38,42,32,0.55); margin:0; }
+
+  .contenedor{ max-width:480px; margin:0 auto; padding:0 18px; }
+
+  .servicio-card{
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:14px 16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+    cursor:pointer;
+  }
+  .servicio-card.elegido{ border-color:var(--gold); background:rgba(184,134,46,0.06); }
+  .servicio-nombre{ font-weight:600; font-size:14.5px; }
+  .servicio-detalle{ font-size:12.5px; color:rgba(38,42,32,0.55); margin-top:2px; }
+  .servicio-precio{ font-family:'Fraunces', serif; font-weight:600; color:var(--forest); font-size:16px; white-space:nowrap; }
+  .oferta-tag{ display:inline-block; background:rgba(184,134,46,0.15); color:var(--gold); font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; margin-top:4px; }
+
+  .card-form{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px; margin-top:18px;
+  }
+  .campo{ margin-bottom:14px; }
+  .campo label{ font-size:12.5px; font-weight:600; color:rgba(38,42,32,0.6); display:block; margin-bottom:5px; }
+  .campo input{
+    width:100%; padding:11px 12px; border-radius:9px; border:1px solid var(--line);
+    background:var(--cream); font-family:inherit; font-size:14.5px;
+  }
+  .slots-grid{ display:flex; flex-wrap:wrap; gap:8px; }
+  .slot-btn{
+    padding:8px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream);
+    font-family:inherit; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer;
+  }
+  .slot-btn.ocupado{ display:none; }
+  .slot-btn.elegido{ background:var(--forest); color:var(--cream); border-color:var(--forest); }
+
+  .submit{
+    width:100%; margin-top:6px; padding:13px 0; border:none; border-radius:9px;
+    background:var(--forest); color:var(--cream); font-family:inherit; font-weight:600; font-size:14.5px; cursor:pointer;
+  }
+  .submit:hover{ background:var(--forest-soft); }
+
+  .msg{ font-size:13px; padding:10px 12px; border-radius:8px; margin-top:10px; display:none; }
+  .msg.show{ display:block; }
+  .msg.error{ background:rgba(196,66,66,0.1); color:#9C3B3B; }
+  .msg.ok{ background:rgba(63,80,68,0.1); color:var(--forest); }
+
+  .pantalla-msg{ text-align:center; padding:60px 24px; color:rgba(38,42,32,0.55); font-size:14.5px; }
+  .pantalla-msg h2{ font-family:'Fraunces', serif; color:var(--forest); font-weight:500; }
+</style>
+</head>
+<body>
+
+<div id="raiz">
+  <header>
+    <h1 id="nombre-negocio">Cargando…</h1>
+    <p>Elegí un servicio y pedí tu turno</p>
+  </header>
+  <div class="contenedor" id="contenedor"></div>
+</div>
+
+<script type="module">
+  import { firebaseConfig } from "../config.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore, doc, getDoc, collection, getDocs, addDoc, query, orderBy, Timestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const params = new URLSearchParams(window.location.search);
+  const businessId = params.get("negocio");
+  const contenedor = document.getElementById("contenedor");
+  const HORA_INICIO = 9, HORA_FIN = 19, PASO_MIN = 30;
+
+  function pantallaMensaje(titulo, texto){
+    contenedor.innerHTML = `<div class="pantalla-msg"><h2>${titulo}</h2><p>${texto}</p></div>`;
+  }
+
+  async function iniciar(){
+    if (!businessId){
+      pantallaMensaje("Falta el link completo", "A este link le falta la parte que identifica al negocio. Pedile al negocio el link completo del catálogo.");
+      return;
+    }
+
+    const negocioSnap = await getDoc(doc(db, "businesses", businessId));
+    if (!negocioSnap.exists()){
+      pantallaMensaje("No encontramos este negocio", "Puede que el link esté mal escrito.");
+      return;
+    }
+    const negocio = negocioSnap.data();
+    document.getElementById("nombre-negocio").textContent = negocio.nombreComercio || "Reservar turno";
+
+    const vencimiento = negocio.fechaVencimiento?.toDate ? negocio.fechaVencimiento.toDate() : null;
+    const vencido = negocio.plan === "gratis" && vencimiento && vencimiento < new Date();
+    if (vencido){
+      pantallaMensaje("No disponible por el momento", "Este negocio no está tomando turnos por acá ahora mismo. Contactalo directamente.");
+      return;
+    }
+
+    const serviciosSnap = await getDocs(collection(db, "businesses", businessId, "servicios"));
+    if (serviciosSnap.empty){
+      pantallaMensaje("Todavía no hay servicios cargados", "Volvé a intentarlo más tarde.");
+      return;
+    }
+    const servicios = serviciosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    let servicioElegido = null;
+
+    contenedor.innerHTML = `<div id="lista-servicios"></div><div id="zona-form"></div>`;
+    const listaServicios = document.getElementById("lista-servicios");
+
+    servicios.forEach(s => {
+      const card = document.createElement("div");
+      card.className = "servicio-card";
+      card.innerHTML = `
+        <div>
+          <div class="servicio-nombre">${s.nombre}</div>
+          <div class="servicio-detalle">${s.duracionMin || 30} min</div>
+          ${s.oferta ? `<div class="oferta-tag">${s.oferta}</div>` : ""}
+        </div>
+        <div class="servicio-precio">$${s.precio || 0}</div>
+      `;
+      card.addEventListener("click", () => {
+        listaServicios.querySelectorAll(".servicio-card").forEach(c => c.classList.remove("elegido"));
+        card.classList.add("elegido");
+        servicioElegido = s;
+        mostrarFormulario(s);
+      });
+      listaServicios.appendChild(card);
+    });
+
+    function mostrarFormulario(servicio){
+      const zona = document.getElementById("zona-form");
+      const hoy = new Date().toISOString().slice(0, 10);
+      zona.innerHTML = `
+        <div class="card-form">
+          <div class="campo"><label>Tu nombre</label><input type="text" id="c-nombre"></div>
+          <div class="campo"><label>Tu WhatsApp (con código de país, ej: 5493751...)</label><input type="text" id="c-whatsapp"></div>
+          <div class="campo"><label>Día</label><input type="date" id="c-fecha" min="${hoy}" value="${hoy}"></div>
+          <div class="campo"><label>Horario disponible</label><div class="slots-grid" id="c-slots"></div></div>
+          <div class="msg" id="c-msg"></div>
+          <button class="submit" id="c-pedir">Pedir turno</button>
+        </div>
+      `;
+      let slotElegido = null;
+      const cFecha = document.getElementById("c-fecha");
+      const cSlots = document.getElementById("c-slots");
+
+      async function refrescarSlots(){
+        slotElegido = null;
+        cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">Cargando…</span>`;
+        const inicioDia = new Date(cFecha.value + "T00:00:00");
+        const finDia = new Date(cFecha.value + "T23:59:59");
+        const turnosSnap = await getDocs(query(collection(db, "businesses", businessId, "turnos"), orderBy("fechaHora", "asc")));
+        const ocupados = turnosSnap.docs.map(d => d.data())
+          .filter(t => { const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null; return f && f >= inicioDia && f <= finDia && !t.reabierto; })
+          .map(t => t.fechaHora.toDate().getHours() * 60 + t.fechaHora.toDate().getMinutes());
+
+        const duracion = servicio.duracionMin || 30;
+        cSlots.innerHTML = "";
+        for (let m = HORA_INICIO * 60; m + duracion <= HORA_FIN * 60; m += PASO_MIN){
+          if (ocupados.includes(m)) continue;
+          const h = String(Math.floor(m / 60)).padStart(2, "0");
+          const mm = String(m % 60).padStart(2, "0");
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "slot-btn";
+          btn.textContent = `${h}:${mm}`;
+          btn.addEventListener("click", () => {
+            cSlots.querySelectorAll(".slot-btn").forEach(b => b.classList.remove("elegido"));
+            btn.classList.add("elegido");
+            slotElegido = m;
+          });
+          cSlots.appendChild(btn);
+        }
+        if (!cSlots.children.length) cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No hay horarios libres ese día.</span>`;
+      }
+      cFecha.addEventListener("change", refrescarSlots);
+      refrescarSlots();
+
+      document.getElementById("c-pedir").addEventListener("click", async () => {
+        const msg = document.getElementById("c-msg");
+        const nombre = document.getElementById("c-nombre").value.trim();
+        const whatsapp = document.getElementById("c-whatsapp").value.trim();
+        if (!nombre){ msg.className = "msg show error"; msg.textContent = "Falta tu nombre."; return; }
+        if (slotElegido === null){ msg.className = "msg show error"; msg.textContent = "Elegí un horario."; return; }
+
+        const fecha = new Date(cFecha.value + "T00:00:00");
+        fecha.setMinutes(slotElegido);
+
+        try {
+          await addDoc(collection(db, "businesses", businessId, "turnos"), {
+            clienteNombre: nombre,
+            clienteWhatsapp: whatsapp || null,
+            servicioId: servicio.id,
+            servicioNombre: servicio.nombre,
+            fechaHora: Timestamp.fromDate(fecha),
+            estado: "Reservado",
+            reabierto: false,
+          });
+          pantallaMensaje("¡Listo!", "Tu pedido de turno quedó enviado. El negocio lo va a confirmar a la brevedad.");
+        } catch (err) {
+          msg.className = "msg show error";
+          msg.textContent = "No pudimos enviar el pedido. Probá de nuevo en un momento.";
+        }
+      });
+    }
+  }
+
+  iniciar();
+</script>
+
+</body>
+</html>
