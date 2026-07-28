@@ -18,4 +18,4 @@ export const soporte = {
 };
 
 // Duración del período gratuito, en días, para el chequeo de vencimiento.
-export const DIAS_PLAN_GRATIS = 182; // ~6 meses
+export const DIAS_PLAN_GRATIS = 90; // ~3 meses

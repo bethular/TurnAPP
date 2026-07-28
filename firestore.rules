@@ -14,20 +14,27 @@ service cloud.firestore {
       allow read, update, delete: if request.auth != null && request.auth.uid == businessId;
     }
 
-    // Clientes y caja: privados, solo el dueño del negocio
+    // Clientes: privados, solo el dueño del negocio
     match /businesses/{businessId}/clientes/{id} {
       allow read, write: if request.auth != null && request.auth.uid == businessId;
     }
+
+    // Caja: en plan gratis se puede ver y borrar, pero no crear ni modificar
+    // movimientos (para generar el deseo de pasar a Pro sin dejarla inservible).
     match /businesses/{businessId}/caja/{id} {
-      allow read, write: if request.auth != null && request.auth.uid == businessId;
+      allow read, delete: if request.auth != null && request.auth.uid == businessId;
+      allow create, update: if request.auth != null && request.auth.uid == businessId &&
+        get(/databases/$(database)/documents/businesses/$(businessId)).data.plan == "pro";
     }
 
     // Datos del negocio (nombre, tema, plan, vencimiento): lectura pública
-    // (la necesita el catálogo para saber si el negocio está activo),
-    // escritura solo del dueño.
+    // (la necesita el catálogo para saber si el negocio está activo, y el panel
+    // admin para listar vencimientos), escritura del dueño o del administrador
+    // (Sebas, para bonificar plazos).
     match /businesses/{businessId} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == businessId;
+      allow write: if request.auth != null &&
+        (request.auth.uid == businessId || request.auth.uid == "eYcLh69WczLsEa0f612k5hbyULq2");
     }
 
     // Todo lo demás (consultorios, profesionales, etc.): solo el dueño

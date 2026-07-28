@@ -91,6 +91,13 @@
       <tbody id="tabla-codigos"><tr><td colspan="3">Cargando…</td></tr></tbody>
     </table>
   </div>
+  <div class="card" style="max-width:640px;">
+    <p style="margin-top:0; font-weight:600; font-size:14px;">Negocios — plan y vencimiento</p>
+    <table>
+      <thead><tr><th>Negocio</th><th>Plan</th><th>Vence</th><th>Estado</th><th></th></tr></thead>
+      <tbody id="tabla-negocios"><tr><td colspan="5">Cargando…</td></tr></tbody>
+    </table>
+  </div>
 </div>
 
 <script type="module">
@@ -98,7 +105,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, doc, setDoc, collection, getDocs, orderBy, query
+    getFirestore, doc, setDoc, updateDoc, collection, getDocs, orderBy, query
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const ADMIN_UID = "eYcLh69WczLsEa0f612k5hbyULq2";
@@ -128,6 +135,7 @@
       loginGate.style.display = "none";
       panel.style.display = "block";
       cargarCodigos();
+      cargarNegocios();
     } else {
       loginGate.style.display = "block";
       panel.style.display = "none";
@@ -190,6 +198,51 @@
         <td class="${c.usado ? "estado-usado" : "estado-libre"}">${c.usado ? "Usado" : "Libre"}</td>
       `;
       tabla.appendChild(fila);
+    });
+  }
+
+  async function cargarNegocios(){
+    const tabla = document.getElementById("tabla-negocios");
+    tabla.innerHTML = `<tr><td colspan="5">Cargando…</td></tr>`;
+    const snap = await getDocs(collection(db, "businesses"));
+    if (snap.empty){
+      tabla.innerHTML = `<tr><td colspan="5">Todavía no hay negocios registrados.</td></tr>`;
+      return;
+    }
+    tabla.innerHTML = "";
+    const ahora = new Date();
+    snap.forEach((d) => {
+      const n = d.data();
+      const venc = n.fechaVencimiento?.toDate ? n.fechaVencimiento.toDate() : null;
+      let estado = "—";
+      if (n.plan === "pro") estado = '<span class="estado-libre">Pro</span>';
+      else if (venc && venc < ahora) estado = '<span class="estado-usado">Vencido</span>';
+      else if (venc) estado = '<span style="color:var(--gold); font-weight:600;">Activo (gratis)</span>';
+
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
+        <td>${n.nombreComercio || "(sin nombre)"}</td>
+        <td>${n.plan || "gratis"}</td>
+        <td>${venc ? venc.toLocaleDateString("es-AR") : "—"}</td>
+        <td>${estado}</td>
+        <td><button class="btn-secondary btn-bonificar" data-id="${d.id}" style="padding:6px 10px; font-size:12px;">+ Bonificar</button></td>
+      `;
+      tabla.appendChild(fila);
+    });
+
+    tabla.querySelectorAll(".btn-bonificar").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const dias = prompt("¿Cuántos días querés sumarle al plazo de este negocio?", "30");
+        if (!dias || isNaN(dias)) return;
+        const negocioRef = doc(db, "businesses", btn.dataset.id);
+        const snap = await getDocs(query(collection(db, "businesses")));
+        const actual = snap.docs.find(x => x.id === btn.dataset.id)?.data();
+        const base = actual?.fechaVencimiento?.toDate ? actual.fechaVencimiento.toDate() : new Date();
+        const nuevaFecha = new Date(Math.max(base.getTime(), Date.now()));
+        nuevaFecha.setDate(nuevaFecha.getDate() + parseInt(dias, 10));
+        await updateDoc(negocioRef, { fechaVencimiento: nuevaFecha });
+        cargarNegocios();
+      });
     });
   }
 </script>
