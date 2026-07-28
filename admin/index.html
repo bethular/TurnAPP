@@ -91,19 +91,6 @@
       <tbody id="tabla-codigos"><tr><td colspan="3">Cargando…</td></tr></tbody>
     </table>
   </div>
-  <div class="card" style="max-width:640px;">
-    <p style="margin-top:0; font-weight:600; font-size:14px;">Negocios — plan y vencimiento</p>
-    <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; font-size:13px;">
-      <label for="input-dias-aviso">Avisarme cuando falten</label>
-      <input type="number" id="input-dias-aviso" min="1" value="7" style="width:60px; margin:0;">
-      <span>días para vencer</span>
-      <button class="btn-secondary" id="btn-guardar-aviso" style="padding:6px 12px; font-size:12px;">Guardar</button>
-    </div>
-    <table>
-      <thead><tr><th>Negocio</th><th>Plan</th><th>Vence</th><th>Estado</th><th></th></tr></thead>
-      <tbody id="tabla-negocios"><tr><td colspan="5">Cargando…</td></tr></tbody>
-    </table>
-  </div>
 </div>
 
 <script type="module">
@@ -111,7 +98,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, orderBy, query
+    getFirestore, doc, setDoc, collection, getDocs, orderBy, query
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const ADMIN_UID = "eYcLh69WczLsEa0f612k5hbyULq2";
@@ -136,17 +123,11 @@
     }
   });
 
-  let diasAviso = 7;
-
-  onAuthStateChanged(auth, async (user) => {
+  onAuthStateChanged(auth, (user) => {
     if (user && user.uid === ADMIN_UID) {
       loginGate.style.display = "none";
       panel.style.display = "block";
-      const configSnap = await getDoc(doc(db, "configuracion", "admin"));
-      diasAviso = configSnap.exists() ? (configSnap.data().diasAviso || 7) : 7;
-      document.getElementById("input-dias-aviso").value = diasAviso;
       cargarCodigos();
-      cargarNegocios();
     } else {
       loginGate.style.display = "block";
       panel.style.display = "none";
@@ -155,12 +136,6 @@
         loginMsg.textContent = "Esta cuenta no tiene permiso de administrador.";
       }
     }
-  });
-
-  document.getElementById("btn-guardar-aviso").addEventListener("click", async () => {
-    diasAviso = parseInt(document.getElementById("input-dias-aviso").value, 10) || 7;
-    await setDoc(doc(db, "configuracion", "admin"), { diasAviso });
-    cargarNegocios();
   });
 
   function generarCodigoAlAzar(){
@@ -215,58 +190,6 @@
         <td class="${c.usado ? "estado-usado" : "estado-libre"}">${c.usado ? "Usado" : "Libre"}</td>
       `;
       tabla.appendChild(fila);
-    });
-  }
-
-  async function cargarNegocios(){
-    const tabla = document.getElementById("tabla-negocios");
-    tabla.innerHTML = `<tr><td colspan="5">Cargando…</td></tr>`;
-    const snap = await getDocs(collection(db, "businesses"));
-    if (snap.empty){
-      tabla.innerHTML = `<tr><td colspan="5">Todavía no hay negocios registrados.</td></tr>`;
-      return;
-    }
-    tabla.innerHTML = "";
-    const ahora = new Date();
-    snap.forEach((d) => {
-      const n = d.data();
-      const venc = n.fechaVencimiento?.toDate ? n.fechaVencimiento.toDate() : null;
-      let estado = "—";
-      if (n.plan === "pro") {
-        estado = '<span class="estado-libre">Pro</span>';
-      } else if (venc && venc < ahora) {
-        estado = '<span class="estado-usado">Vencido</span>';
-      } else if (venc) {
-        const diasRestantes = Math.ceil((venc - ahora) / (1000 * 60 * 60 * 24));
-        estado = diasRestantes <= diasAviso
-          ? `<span class="estado-usado">Vence en ${diasRestantes} día${diasRestantes === 1 ? "" : "s"}</span>`
-          : `<span style="color:var(--gold); font-weight:600;">Activo (${diasRestantes} días)</span>`;
-      }
-
-      const fila = document.createElement("tr");
-      fila.innerHTML = `
-        <td>${n.nombreComercio || "(sin nombre)"}</td>
-        <td>${n.plan || "gratis"}</td>
-        <td>${venc ? venc.toLocaleDateString("es-AR") : "—"}</td>
-        <td>${estado}</td>
-        <td><button class="btn-secondary btn-bonificar" data-id="${d.id}" style="padding:6px 10px; font-size:12px;">+ Bonificar</button></td>
-      `;
-      tabla.appendChild(fila);
-    });
-
-    tabla.querySelectorAll(".btn-bonificar").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const dias = prompt("¿Cuántos días querés sumarle al plazo de este negocio?", "30");
-        if (!dias || isNaN(dias)) return;
-        const negocioRef = doc(db, "businesses", btn.dataset.id);
-        const snap = await getDocs(query(collection(db, "businesses")));
-        const actual = snap.docs.find(x => x.id === btn.dataset.id)?.data();
-        const base = actual?.fechaVencimiento?.toDate ? actual.fechaVencimiento.toDate() : new Date();
-        const nuevaFecha = new Date(Math.max(base.getTime(), Date.now()));
-        nuevaFecha.setDate(nuevaFecha.getDate() + parseInt(dias, 10));
-        await updateDoc(negocioRef, { fechaVencimiento: nuevaFecha });
-        cargarNegocios();
-      });
     });
   }
 </script>
