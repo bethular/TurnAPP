@@ -25,14 +25,20 @@
 
   .servicio-card{
     background:#fff; border:1px solid var(--line); border-radius:12px;
-    padding:14px 16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:12px;
     cursor:pointer;
   }
   .servicio-card.elegido{ border-color:var(--gold); background:rgba(184,134,46,0.06); }
+  .servicio-card input{ width:auto; margin:0; flex-shrink:0; }
+  .servicio-info{ flex:1; }
   .servicio-nombre{ font-weight:600; font-size:14.5px; }
   .servicio-detalle{ font-size:12.5px; color:rgba(38,42,32,0.55); margin-top:2px; }
   .servicio-precio{ font-family:'Fraunces', serif; font-weight:600; color:var(--forest); font-size:16px; white-space:nowrap; }
   .oferta-tag{ display:inline-block; background:rgba(184,134,46,0.15); color:var(--gold); font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; margin-top:4px; }
+
+  .duracion-total{
+    font-size:13px; color:rgba(38,42,32,0.6); margin:2px 0 18px; min-height:18px;
+  }
 
   .card-form{
     background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px; margin-top:18px;
@@ -48,7 +54,6 @@
     padding:8px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream);
     font-family:inherit; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer;
   }
-  .slot-btn.ocupado{ display:none; }
   .slot-btn.elegido{ background:var(--forest); color:var(--cream); border-color:var(--forest); }
 
   .submit{
@@ -71,7 +76,7 @@
 <div id="raiz">
   <header>
     <h1 id="nombre-negocio">Cargando…</h1>
-    <p>Elegí un servicio y pedí tu turno</p>
+    <p>Elegí uno o más servicios y pedí tu turno</p>
   </header>
   <div class="contenedor" id="contenedor"></div>
 </div>
@@ -89,7 +94,11 @@
   const params = new URLSearchParams(window.location.search);
   const businessId = params.get("negocio");
   const contenedor = document.getElementById("contenedor");
-  const HORA_INICIO = 9, HORA_FIN = 19, PASO_MIN = 30;
+  const HORA_INICIO = 9, HORA_FIN = 19, PASO_MIN = 30; // debe coincidir con la grilla que usa el profesional en Disponibilidad
+
+  // --- datos del cliente: se guardan en este dispositivo para no tener que cargarlos cada vez ---
+  const LS_NOMBRE = "turnapp_cliente_nombre";
+  const LS_WHATSAPP = "turnapp_cliente_whatsapp";
 
   function pantallaMensaje(titulo, texto){
     contenedor.innerHTML = `<div class="pantalla-msg"><h2>${titulo}</h2><p>${texto}</p></div>`;
@@ -123,62 +132,130 @@
     }
     const servicios = serviciosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    let servicioElegido = null;
+    let serviciosElegidos = []; // ids tildados
 
-    contenedor.innerHTML = `<div id="lista-servicios"></div><div id="zona-form"></div>`;
+    contenedor.innerHTML = `
+      <div id="lista-servicios"></div>
+      <div class="duracion-total" id="duracion-total"></div>
+      <div id="zona-form"></div>
+    `;
     const listaServicios = document.getElementById("lista-servicios");
+    const duracionTotalEl = document.getElementById("duracion-total");
+
+    function duracionElegida(){
+      if (!serviciosElegidos.length) return 0;
+      return serviciosElegidos.reduce((total, id) => {
+        const s = servicios.find(sv => sv.id === id);
+        return total + (s?.duracionMin || 30);
+      }, 0);
+    }
+
+    function actualizarResumen(){
+      const dur = duracionElegida();
+      if (!serviciosElegidos.length){
+        duracionTotalEl.textContent = "";
+        mostrarFormulario(null);
+        return;
+      }
+      const nombres = serviciosElegidos
+        .map(id => servicios.find(s => s.id === id)?.nombre)
+        .filter(Boolean)
+        .join(" + ");
+      duracionTotalEl.textContent = `${nombres} — ${dur} min en total`;
+      mostrarFormulario(dur);
+    }
 
     servicios.forEach(s => {
       const card = document.createElement("div");
       card.className = "servicio-card";
       card.innerHTML = `
-        <div>
+        <input type="checkbox" value="${s.id}">
+        <div class="servicio-info">
           <div class="servicio-nombre">${s.nombre}</div>
           <div class="servicio-detalle">${s.duracionMin || 30} min</div>
           ${s.oferta ? `<div class="oferta-tag">${s.oferta}</div>` : ""}
         </div>
         <div class="servicio-precio">$${s.precio || 0}</div>
       `;
-      card.addEventListener("click", () => {
-        listaServicios.querySelectorAll(".servicio-card").forEach(c => c.classList.remove("elegido"));
-        card.classList.add("elegido");
-        servicioElegido = s;
-        mostrarFormulario(s);
+      const input = card.querySelector("input");
+      card.addEventListener("click", (e) => {
+        if (e.target !== input) input.checked = !input.checked;
+        card.classList.toggle("elegido", input.checked);
+        serviciosElegidos = input.checked
+          ? [...serviciosElegidos, s.id]
+          : serviciosElegidos.filter(id => id !== s.id);
+        actualizarResumen();
       });
       listaServicios.appendChild(card);
     });
 
-    function mostrarFormulario(servicio){
+    let slotElegido = null;
+    let servicioNombreActual = "";
+
+    function mostrarFormulario(duracion){
       const zona = document.getElementById("zona-form");
+      if (!duracion){
+        zona.innerHTML = "";
+        return;
+      }
+      servicioNombreActual = serviciosElegidos
+        .map(id => servicios.find(s => s.id === id)?.nombre)
+        .filter(Boolean)
+        .join(" + ");
+
       const hoy = new Date().toISOString().slice(0, 10);
+      const nombreGuardado = localStorage.getItem(LS_NOMBRE) || "";
+      const whatsappGuardado = localStorage.getItem(LS_WHATSAPP) || "";
       zona.innerHTML = `
         <div class="card-form">
-          <div class="campo"><label>Tu nombre</label><input type="text" id="c-nombre"></div>
-          <div class="campo"><label>Tu WhatsApp (con código de país, ej: 5493751...)</label><input type="text" id="c-whatsapp"></div>
+          <div class="campo"><label>Tu nombre</label><input type="text" id="c-nombre" value="${nombreGuardado}"></div>
+          <div class="campo"><label>Tu WhatsApp (con código de país, ej: 5493751...)</label><input type="text" id="c-whatsapp" value="${whatsappGuardado}"></div>
           <div class="campo"><label>Día</label><input type="date" id="c-fecha" min="${hoy}" value="${hoy}"></div>
           <div class="campo"><label>Horario disponible</label><div class="slots-grid" id="c-slots"></div></div>
           <div class="msg" id="c-msg"></div>
           <button class="submit" id="c-pedir">Pedir turno</button>
         </div>
       `;
-      let slotElegido = null;
+      slotElegido = null;
       const cFecha = document.getElementById("c-fecha");
       const cSlots = document.getElementById("c-slots");
 
       async function refrescarSlots(){
         slotElegido = null;
         cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">Cargando…</span>`;
+
+        // 1) horarios que el profesional dejó habilitados ese día
+        const dispSnap = await getDoc(doc(db, "businesses", businessId, "disponibilidad", cFecha.value));
+        const disponibles = new Set(dispSnap.exists() ? (dispSnap.data().slots || []) : []);
+        if (!disponibles.size){
+          cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No hay horarios cargados para ese día. Probá con otra fecha.</span>`;
+          return;
+        }
+
+        // 2) turnos ya confirmados ese día, para no ofrecer horarios que se pisen
         const inicioDia = new Date(cFecha.value + "T00:00:00");
         const finDia = new Date(cFecha.value + "T23:59:59");
         const turnosSnap = await getDocs(query(collection(db, "businesses", businessId, "turnos"), orderBy("fechaHora", "asc")));
-        const ocupados = turnosSnap.docs.map(d => d.data())
+        const turnosDelDia = turnosSnap.docs.map(d => d.data())
           .filter(t => { const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null; return f && f >= inicioDia && f <= finDia && !t.reabierto; })
-          .map(t => t.fechaHora.toDate().getHours() * 60 + t.fechaHora.toDate().getMinutes());
+          .map(t => {
+            const f = t.fechaHora.toDate();
+            const inicio = f.getHours() * 60 + f.getMinutes();
+            return { inicio, fin: inicio + (t.duracionTotal || 30) };
+          });
 
-        const duracion = servicio.duracionMin || 30;
+        function bloqueLibre(inicioSlot, finSlot){
+          // cada media hora del bloque tiene que estar habilitada por el profesional...
+          for (let m = inicioSlot; m < finSlot; m += PASO_MIN){
+            if (!disponibles.has(m)) return false;
+          }
+          // ...y no chocar con ningún turno ya confirmado
+          return !turnosDelDia.some(t => inicioSlot < t.fin && finSlot > t.inicio);
+        }
+
         cSlots.innerHTML = "";
         for (let m = HORA_INICIO * 60; m + duracion <= HORA_FIN * 60; m += PASO_MIN){
-          if (ocupados.includes(m)) continue;
+          if (!bloqueLibre(m, m + duracion)) continue;
           const h = String(Math.floor(m / 60)).padStart(2, "0");
           const mm = String(m % 60).padStart(2, "0");
           const btn = document.createElement("button");
@@ -192,7 +269,7 @@
           });
           cSlots.appendChild(btn);
         }
-        if (!cSlots.children.length) cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No hay horarios libres ese día.</span>`;
+        if (!cSlots.children.length) cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No hay horarios libres ese día para lo que elegiste.</span>`;
       }
       cFecha.addEventListener("change", refrescarSlots);
       refrescarSlots();
@@ -202,22 +279,29 @@
         const nombre = document.getElementById("c-nombre").value.trim();
         const whatsapp = document.getElementById("c-whatsapp").value.trim();
         if (!nombre){ msg.className = "msg show error"; msg.textContent = "Falta tu nombre."; return; }
+        if (!whatsapp){ msg.className = "msg show error"; msg.textContent = "Falta tu WhatsApp — lo necesitamos para avisarte cuando se confirme."; return; }
         if (slotElegido === null){ msg.className = "msg show error"; msg.textContent = "Elegí un horario."; return; }
 
         const fecha = new Date(cFecha.value + "T00:00:00");
         fecha.setMinutes(slotElegido);
 
         try {
-          await addDoc(collection(db, "businesses", businessId, "turnos"), {
+          await addDoc(collection(db, "businesses", businessId, "solicitudes"), {
             clienteNombre: nombre,
-            clienteWhatsapp: whatsapp || null,
-            servicioId: servicio.id,
-            servicioNombre: servicio.nombre,
+            clienteWhatsapp: whatsapp,
+            servicios: serviciosElegidos.map(id => {
+              const s = servicios.find(sv => sv.id === id);
+              return { id, nombre: s?.nombre || "", duracionMin: s?.duracionMin || 30 };
+            }),
+            servicioNombre: servicioNombreActual,
+            duracionTotal: duracion,
             fechaHora: Timestamp.fromDate(fecha),
-            estado: "Reservado",
-            reabierto: false,
+            estado: "Pendiente",
+            creadoEl: Timestamp.now(),
           });
-          pantallaMensaje("¡Listo!", "Tu pedido de turno quedó enviado. El negocio lo va a confirmar a la brevedad.");
+          localStorage.setItem(LS_NOMBRE, nombre);
+          localStorage.setItem(LS_WHATSAPP, whatsapp);
+          pantallaMensaje("¡Listo!", "Tu pedido de turno quedó enviado. El negocio lo va a revisar y te confirma por WhatsApp.");
         } catch (err) {
           msg.className = "msg show error";
           msg.textContent = "No pudimos enviar el pedido. Probá de nuevo en un momento.";

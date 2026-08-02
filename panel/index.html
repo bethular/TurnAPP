@@ -100,35 +100,14 @@
   .menu-dropdown a:hover, .menu-dropdown button:hover{ background:var(--cream); }
   .menu-dropdown hr{ border:none; border-top:1px solid var(--line); margin:6px 4px; }
   .menu-dropdown .soporte{ color:var(--gold); font-weight:600; }
+  .badge-count{
+    display:inline-block; background:var(--rose-deep); color:#fff; font-size:10.5px; font-weight:700;
+    padding:1px 7px; border-radius:999px; margin-left:6px;
+  }
 
   /* ---------- layout ---------- */
-  .layout{ display:flex; min-height:calc(100vh - 61px); }
-
-  nav.tabs{
-    width:200px;
-    flex-shrink:0;
-    border-right:1px solid var(--line);
-    padding:20px 12px;
-    display:flex;
-    flex-direction:column;
-    gap:4px;
-  }
-  nav.tabs button{
-    text-align:left;
-    padding:10px 12px;
-    border-radius:9px;
-    border:none;
-    background:none;
-    font-family:inherit;
-    font-size:14px;
-    font-weight:500;
-    color:rgba(38,42,32,0.62);
-    cursor:pointer;
-  }
-  nav.tabs button.active{ background:var(--forest); color:var(--cream); font-weight:600; }
-  nav.tabs button:not(.active):hover{ background:var(--cream-deep); }
-  nav.tabs button[disabled]{ opacity:0.4; cursor:not-allowed; }
-  nav.tabs .pro-tag{
+  .layout{ display:flex; min-height:calc(100vh - 61px); justify-content:center; }
+  .menu-dropdown .pro-tag{
     font-size:10px;
     font-weight:700;
     letter-spacing:.03em;
@@ -136,7 +115,29 @@
     margin-left:6px;
   }
 
-  main.content{ flex:1; padding:26px 30px 60px; max-width:900px; }
+  main.content{ flex:1; padding:26px 24px 100px; max-width:640px; position:relative; }
+
+  .fab{
+    position:fixed;
+    right:22px;
+    bottom:24px;
+    width:56px;
+    height:56px;
+    border-radius:50%;
+    background:var(--forest);
+    color:var(--cream);
+    border:none;
+    font-size:28px;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    box-shadow:0 10px 24px -8px rgba(38,42,32,0.5);
+    z-index:15;
+  }
+  .fab:hover{ background:var(--forest-soft); }
+  .fab.hidden{ display:none; }
 
   .view{ display:none; }
   .view.active{ display:block; }
@@ -152,6 +153,12 @@
 
   /* ---------- turnos ---------- */
   .turnos-list{ display:flex; flex-direction:column; gap:10px; }
+  .turnos-list.recuadros{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    gap:12px;
+  }
+  .turnos-list.recuadros .turno-card{ flex-direction:column; align-items:flex-start; gap:8px; }
   .turno-card{
     background:#fff;
     border:1px solid var(--line);
@@ -264,6 +271,53 @@
     max-width:380px;
     text-align:center;
   }
+
+  /* ---------- modal genérico (nuevo turno) ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(38,42,32,0.5);
+    display:none; align-items:flex-end; justify-content:center; z-index:90; padding:0;
+  }
+  .modal-overlay.show{ display:flex; }
+  @media (min-width: 640px){
+    .modal-overlay{ align-items:center; padding:20px; }
+  }
+  .modal-card{
+    background:#fff; width:100%; max-width:460px; max-height:92vh; overflow-y:auto;
+    border-radius:18px 18px 0 0; padding:22px 22px 28px;
+  }
+  @media (min-width: 640px){
+    .modal-card{ border-radius:16px; }
+  }
+  .modal-card h2{
+    font-family:'Fraunces', serif; font-weight:500; font-size:20px; color:var(--forest); margin:0 0 16px;
+  }
+  .modal-field{ margin-bottom:14px; }
+  .modal-field label{ font-size:12.5px; font-weight:600; color:rgba(38,42,32,0.6); display:block; margin-bottom:5px; }
+  .modal-field input, .modal-field select{
+    width:100%; padding:11px 12px; border-radius:9px; border:1px solid var(--line);
+    background:var(--cream); font-family:inherit; font-size:14.5px; color:var(--ink);
+  }
+  .servicios-check{ display:flex; flex-direction:column; gap:6px; }
+  .servicio-check-item{
+    display:flex; align-items:center; gap:8px; padding:9px 10px; border-radius:8px;
+    border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:13.5px;
+    color:var(--ink); cursor:pointer;
+  }
+  .servicio-check-item input{ width:auto; margin:0; }
+  .servicio-check-item.marcado{ border-color:var(--forest); background:rgba(47,64,51,0.07); }
+  .slots-grid{ display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+  .slot-btn{
+    padding:8px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream);
+    font-family:inherit; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer;
+  }
+  .slot-btn.ocupado{ opacity:0.55; border-style:dashed; border-color:var(--rose-deep); color:var(--rose-deep); }
+  .slot-btn.elegido{ background:var(--forest); color:var(--cream); border-color:var(--forest); }
+  .modal-actions{ display:flex; gap:10px; margin-top:18px; }
+  .modal-actions button{ flex:1; }
+  .btn-cancelar{
+    background:var(--cream-deep); color:var(--ink); border:none; border-radius:9px;
+    padding:12px 0; font-family:inherit; font-weight:600; font-size:14.5px; cursor:pointer;
+  }
   .venc-card h2{
     font-family:'Fraunces', serif;
     font-weight:500;
@@ -282,6 +336,11 @@
     font-size:14px;
     text-decoration:none;
   }
+
+  .msg{ font-size:13px; padding:10px 12px; border-radius:8px; margin-top:10px; display:none; }
+  .msg.show{ display:block; }
+  .msg.error{ background:rgba(196,66,66,0.1); color:#9C3B3B; }
+  .msg.ok{ background:rgba(63,80,68,0.1); color:var(--forest); }
 </style>
 </head>
 <body>
@@ -294,9 +353,11 @@
     </button>
     <div class="menu-dropdown" id="menu-dropdown">
       <a href="#" data-view="turnos">Turnos</a>
+      <a href="#" data-view="solicitudes">Solicitudes <span class="badge-count" id="badge-solicitudes" style="display:none;"></span></a>
+      <a href="#" data-view="disponibilidad">Disponibilidad</a>
       <a href="#" data-view="servicios">Servicios / Catálogo</a>
       <a href="#" data-view="clientes">Clientes</a>
-      <a href="#" data-view="caja">Caja</a>
+      <a href="#" data-view="caja">Caja <span class="pro-tag">PRO</span></a>
       <a href="#" data-view="config">Configuración</a>
       <hr>
       <button id="btn-logout">Cerrar sesión</button>
@@ -307,14 +368,6 @@
 </div>
 
 <div class="layout">
-  <nav class="tabs">
-    <button class="tab-btn active" data-view="turnos">Turnos</button>
-    <button class="tab-btn" data-view="servicios">Servicios</button>
-    <button class="tab-btn" data-view="clientes">Clientes</button>
-    <button class="tab-btn" data-view="caja">Caja <span class="pro-tag">PRO</span></button>
-    <button class="tab-btn" data-view="config">Configuración</button>
-  </nav>
-
   <main class="content">
 
     <section class="view active" id="view-turnos">
@@ -328,19 +381,28 @@
     <section class="view" id="view-servicios">
       <h1 class="view-title">Servicios / Catálogo</h1>
       <p class="view-sub">Precios, duración y ofertas de lo que ve el cliente en tu catálogo público.</p>
-      <div class="stub">Todavía no armamos esta sección.</div>
+      <div class="turnos-list" id="servicios-list">
+        <div class="empty-state">Cargando servicios…</div>
+      </div>
     </section>
 
     <section class="view" id="view-clientes">
       <h1 class="view-title">Clientes</h1>
-      <p class="view-sub">En el plan gratis solo se ve la última fecha de turno de cada cliente.</p>
-      <div class="stub">Todavía no armamos esta sección.</div>
+      <p class="view-sub" id="clientes-sub">En el plan gratis solo se ve la última fecha de turno de cada cliente.</p>
+      <div class="turnos-list" id="clientes-list">
+        <div class="empty-state">Cargando clientes…</div>
+      </div>
     </section>
 
     <section class="view" id="view-caja">
       <h1 class="view-title">Caja</h1>
-      <p class="view-sub">Ingresos, gastos y resumen por período — función de la versión Pro.</p>
-      <div class="stub">Disponible en la versión Pro.</div>
+      <p class="view-sub" id="caja-sub">Ingresos, gastos y resumen por período.</p>
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:4px; margin-bottom:14px;">
+        <strong id="caja-resumen">Ingresos: $0 · Gastos: $0 · Saldo: $0</strong>
+      </div>
+      <div class="turnos-list" id="caja-list">
+        <div class="empty-state">Cargando caja…</div>
+      </div>
     </section>
 
     <section class="view" id="view-config">
@@ -359,6 +421,39 @@
         <div class="msg" id="msg-canje"></div>
       </div>
 
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:12px; margin-bottom:16px;">
+        <strong>Cómo se ven las listas</strong>
+        <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:13.5px;">
+          <label>Formato:
+            <select id="pref-formato" class="estado-select">
+              <option value="detallado">Detallado</option>
+              <option value="recuadros">Recuadros</option>
+            </select>
+          </label>
+          <label>Ordenar por:
+            <select id="pref-orden" class="estado-select">
+              <option value="horario">Horario</option>
+              <option value="nombre">Nombre</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:16px;">
+        <strong>Tu catálogo público</strong>
+        <p class="turno-servicio" style="margin:0;">Compartí este link con tus clientes para que pidan turno solos.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="link-catalogo" readonly style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:13px;">
+          <button class="submit" id="btn-copiar-catalogo" style="width:auto; padding:10px 18px;">Copiar</button>
+        </div>
+      </div>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:16px;">
+        <strong>Respaldo de tus datos</strong>
+        <p class="turno-servicio" style="margin:0;">Descargá un archivo con todos tus turnos, clientes, servicios y caja — útil si en algún momento decidís dejar de usar TurnApp.</p>
+        <button class="submit" id="btn-exportar" style="width:auto; max-width:220px;">Descargar mis datos</button>
+      </div>
+
       <div class="stub" style="text-align:left; padding:24px;">
         <p style="margin-top:0;">Todavía no armamos la edición de estos datos. Mientras tanto, podés cargar datos de ejemplo para ver la app funcionando:</p>
         <button class="submit" id="btn-seed" style="max-width:260px;">Cargar datos de ejemplo</button>
@@ -366,7 +461,111 @@
       </div>
     </section>
 
+    <section class="view" id="view-solicitudes">
+      <h1 class="view-title">Solicitudes de turno</h1>
+      <p class="view-sub">Pedidos que llegaron desde tu catálogo público. Confirmalos, modificalos o rechazalos.</p>
+      <div class="turnos-list" id="solicitudes-list">
+        <div class="empty-state">Cargando…</div>
+      </div>
+    </section>
+
+    <section class="view" id="view-disponibilidad">
+      <h1 class="view-title">Disponibilidad</h1>
+      <p class="view-sub">Elegí un día y tildá los horarios en los que vas a poder atender. Lo que no tildes no va a aparecer en tu catálogo.</p>
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:14px; max-width:520px;">
+        <input type="date" id="disp-fecha">
+        <div class="slots-grid" id="disp-slots"></div>
+        <button class="submit" id="disp-guardar" style="width:auto; max-width:220px;">Guardar disponibilidad</button>
+        <div class="msg" id="disp-msg"></div>
+      </div>
+    </section>
+
+    <button class="fab" id="fab-agregar" title="Agregar">+</button>
+
   </main>
+</div>
+
+<div class="modal-overlay" id="modal-turno">
+  <div class="modal-card">
+    <h2 id="modal-turno-title">Nuevo turno</h2>
+
+    <div class="modal-field">
+      <label for="mt-cliente">Nombre del cliente</label>
+      <input type="text" id="mt-cliente">
+    </div>
+    <div class="modal-field">
+      <label for="mt-whatsapp">WhatsApp del cliente (opcional, con código de país, ej: 5493751...)</label>
+      <input type="text" id="mt-whatsapp">
+    </div>
+    <div class="modal-field">
+      <label>Servicios (podés elegir más de uno)</label>
+      <div class="servicios-check" id="mt-servicios-check"><span style="font-size:13px; color:rgba(38,42,32,0.5);">Cargando servicios…</span></div>
+      <div style="font-size:12.5px; color:rgba(38,42,32,0.6); margin-top:8px;" id="mt-duracion-total"></div>
+    </div>
+    <div class="modal-field">
+      <label for="mt-fecha">Día</label>
+      <input type="date" id="mt-fecha">
+    </div>
+    <div class="modal-field">
+      <label>Horario disponible</label>
+      <div class="slots-grid" id="mt-slots"><span style="font-size:13px; color:rgba(38,42,32,0.5);">Elegí un día para ver los horarios</span></div>
+    </div>
+    <div class="msg" id="mt-msg"></div>
+
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="mt-cancelar">Cancelar</button>
+      <button class="submit" id="mt-guardar">Guardar turno</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-servicio">
+  <div class="modal-card">
+    <h2>Nuevo servicio</h2>
+    <div class="modal-field"><label for="ms-nombre">Nombre</label><input type="text" id="ms-nombre"></div>
+    <div class="modal-field"><label for="ms-precio">Precio</label><input type="number" id="ms-precio" min="0"></div>
+    <div class="modal-field"><label for="ms-duracion">Duración (minutos)</label><input type="number" id="ms-duracion" min="5" step="5" value="30"></div>
+    <div class="modal-field"><label for="ms-oferta">Oferta o promoción (opcional)</label><input type="text" id="ms-oferta" placeholder="Ej: 20% off los martes"></div>
+    <div class="msg" id="ms-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="ms-cancelar">Cancelar</button>
+      <button class="submit" id="ms-guardar">Guardar servicio</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-caja">
+  <div class="modal-card">
+    <h2>Nuevo movimiento de caja</h2>
+    <div class="modal-field">
+      <label for="mc-tipo">Tipo</label>
+      <select id="mc-tipo"><option value="ingreso">Ingreso</option><option value="gasto">Gasto</option></select>
+    </div>
+    <div class="modal-field"><label for="mc-monto">Monto</label><input type="number" id="mc-monto" min="0"></div>
+    <div class="modal-field"><label for="mc-categoria">Categoría</label><input type="text" id="mc-categoria" placeholder="Ej: Corte, Insumos, Alquiler"></div>
+    <div class="modal-field">
+      <label for="mc-mediopago">Medio de pago</label>
+      <select id="mc-mediopago"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Otro</option></select>
+    </div>
+    <div class="msg" id="mc-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="mc-cancelar">Cancelar</button>
+      <button class="submit" id="mc-guardar">Guardar movimiento</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-cambio-turno">
+  <div class="modal-card">
+    <h2>Cambiar día y horario</h2>
+    <div class="modal-field"><label for="ct-fecha">Nuevo día</label><input type="date" id="ct-fecha"></div>
+    <div class="modal-field"><label for="ct-hora">Nuevo horario</label><input type="time" id="ct-hora"></div>
+    <div class="msg" id="ct-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="ct-cancelar">Cancelar</button>
+      <button class="submit" id="ct-guardar">Guardar cambio</button>
+    </div>
+  </div>
 </div>
 
 <div id="overlay-vencido">
@@ -382,7 +581,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, collection, query, orderBy, onSnapshot, updateDoc, addDoc, Timestamp, runTransaction
+    getFirestore, doc, getDoc, getDocs, setDoc, collection, query, orderBy, onSnapshot, updateDoc, addDoc, deleteDoc, Timestamp, runTransaction
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const app = initializeApp(firebaseConfig);
@@ -391,17 +590,33 @@
 
   const ESTADOS = ["Reservado", "Confirmado", "Atendido", "Ausente", "Cambio de turno"];
 
-  // --- menú de correo prearmado ---
+  // --- menú de correo prearmado (con respaldo de copiar, por si no hay app de correo) ---
   const linkSoporte = document.getElementById("link-soporte");
   const linkPro = document.getElementById("link-pro");
   function armarMailto(asunto, cuerpo){
     return `mailto:${soporte.email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
   }
-  linkSoporte.href = armarMailto(
+  function conectarSoporte(el, asunto, cuerpo){
+    el.href = armarMailto(asunto, cuerpo);
+    el.addEventListener("click", (e) => {
+      // Damos un instante para que el navegador intente abrir la app de correo;
+      // si no hay ninguna configurada, no pasa nada visible — por eso copiamos
+      // el correo igual, como respaldo silencioso.
+      navigator.clipboard?.writeText(soporte.email).catch(() => {});
+      setTimeout(() => {
+        if (!document.hidden) {
+          alert("Si no se abrió tu app de correo, ya copiamos la dirección: " + soporte.email + "\nPodés escribir directo a ese correo desde donde prefieras.");
+        }
+      }, 600);
+    });
+  }
+  conectarSoporte(
+    linkSoporte,
     "Asistencia técnica - TurnApp",
     "Hola, necesito ayuda con mi cuenta de TurnApp.\nNegocio: \nDescriba brevemente el problema: "
   );
-  linkPro.href = armarMailto(
+  conectarSoporte(
+    linkPro,
     "Quiero pasar a TurnApp Pro",
     "Hola, mi período gratuito venció y quiero activar la versión Pro.\nNegocio: \nNúmero de teléfono: \n\nNos comunicaremos con usted a la brevedad."
   );
@@ -416,16 +631,232 @@
     }
   });
 
-  // --- navegación entre vistas (sidebar + menú) ---
-  const tabBtns = document.querySelectorAll(".tab-btn");
+  // --- navegación entre vistas (solo menú, sin sidebar) ---
   const menuLinks = document.querySelectorAll(".menu-dropdown a[data-view]");
+  const fab = document.getElementById("fab-agregar");
+  const VISTAS_CON_FAB = { turnos: true, servicios: true, clientes: true, caja: true };
+
   function showView(id){
     document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + id));
-    tabBtns.forEach(b => b.classList.toggle("active", b.dataset.view === id));
     menuDropdown.classList.remove("open");
+    fab.classList.toggle("hidden", !VISTAS_CON_FAB[id] || (id === "caja" && planActual !== "pro"));
+    vistaActual = id;
   }
-  tabBtns.forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
+  let vistaActual = "turnos";
   menuLinks.forEach(a => a.addEventListener("click", (e) => { e.preventDefault(); showView(a.dataset.view); }));
+
+  fab.addEventListener("click", () => {
+    if (vistaActual === "turnos") abrirModalTurno();
+    else if (vistaActual === "servicios") abrirModalServicio();
+    else if (vistaActual === "clientes") alert("Los clientes se cargan solos a partir de los turnos que vas guardando — no hace falta agregarlos a mano.");
+    else if (vistaActual === "caja") abrirModalCaja();
+  });
+
+  // --- modal: nuevo turno, con calendario y horarios disponibles ---
+  const HORA_INICIO = 9, HORA_FIN = 19, PASO_MIN = 30; // agenda base: 9 a 19hs, cada 30 min
+
+  const modalTurno = document.getElementById("modal-turno");
+  const mtCliente = document.getElementById("mt-cliente");
+  const mtWhatsapp = document.getElementById("mt-whatsapp");
+  const mtServiciosCheck = document.getElementById("mt-servicios-check");
+  const mtDuracionTotal = document.getElementById("mt-duracion-total");
+  const mtFecha = document.getElementById("mt-fecha");
+  const mtSlots = document.getElementById("mt-slots");
+  const mtMsg = document.getElementById("mt-msg");
+  let slotElegido = null;
+  let serviciosCache = [];
+  let serviciosElegidos = []; // ids de los servicios tildados para este turno
+  let modoSolicitudId = null; // si no es null, estamos confirmando/modificando esta solicitud
+
+  // opts.modoSolicitud: id de la solicitud a confirmar/modificar (si aplica)
+  // opts.datos: datos precargados de esa solicitud (cliente, servicios, fecha, whatsapp)
+  async function abrirModalTurno(opts){
+    opts = opts || {};
+    modoSolicitudId = opts.modoSolicitud || null;
+    if (!modoSolicitudId && planVencido){ alert("Tu período gratuito venció — no se pueden guardar turnos nuevos."); return; }
+
+    document.getElementById("modal-turno-title").textContent = modoSolicitudId ? "Confirmar / modificar solicitud" : "Nuevo turno";
+
+    const datos = opts.datos || {};
+    mtCliente.value = datos.clienteNombre || "";
+    mtWhatsapp.value = datos.clienteWhatsapp || "";
+    slotElegido = null; mtMsg.className = "msg";
+    const hoy = new Date();
+    const fechaBase = datos.fechaHora?.toDate ? datos.fechaHora.toDate() : hoy;
+    mtFecha.value = fechaBase.toISOString().slice(0, 10);
+    mtFecha.min = hoy.toISOString().slice(0, 10);
+
+    const snap = await getDocs(collection(db, "businesses", businessId, "servicios"));
+    serviciosCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    serviciosElegidos = (datos.servicios || []).map(s => s.id).filter(id => serviciosCache.some(sc => sc.id === id));
+    renderServiciosCheck();
+    actualizarDuracionTotal();
+
+    await actualizarSlots();
+    modalTurno.classList.add("show");
+  }
+
+  // --- checkboxes de servicios: se puede tildar más de uno, la duración se suma ---
+  function renderServiciosCheck(){
+    if (!serviciosCache.length){
+      mtServiciosCheck.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">Sin servicios cargados — se usa 30 min por defecto</span>`;
+      return;
+    }
+    mtServiciosCheck.innerHTML = "";
+    serviciosCache.forEach(s => {
+      const marcado = serviciosElegidos.includes(s.id);
+      const label = document.createElement("label");
+      label.className = "servicio-check-item" + (marcado ? " marcado" : "");
+      label.innerHTML = `<input type="checkbox" value="${s.id}" ${marcado ? "checked" : ""}> ${s.nombre} (${s.duracionMin || 30} min)`;
+      const input = label.querySelector("input");
+      input.addEventListener("change", () => {
+        label.classList.toggle("marcado", input.checked);
+        serviciosElegidos = input.checked
+          ? [...serviciosElegidos, s.id]
+          : serviciosElegidos.filter(id => id !== s.id);
+        actualizarDuracionTotal();
+        actualizarSlots();
+      });
+      mtServiciosCheck.appendChild(label);
+    });
+  }
+
+  function duracionSeleccionada(){
+    if (!serviciosElegidos.length) return 30;
+    return serviciosElegidos.reduce((total, id) => {
+      const s = serviciosCache.find(sv => sv.id === id);
+      return total + (s?.duracionMin || 30);
+    }, 0);
+  }
+
+  function actualizarDuracionTotal(){
+    const dur = duracionSeleccionada();
+    if (!serviciosElegidos.length){
+      mtDuracionTotal.textContent = serviciosCache.length ? "Elegí al menos un servicio (se usan 30 min por defecto si no elegís ninguno)." : "";
+      return;
+    }
+    const nombres = serviciosElegidos
+      .map(id => serviciosCache.find(s => s.id === id)?.nombre)
+      .filter(Boolean)
+      .join(" + ");
+    mtDuracionTotal.textContent = `${nombres}: ${dur} min en total.`;
+  }
+
+  mtFecha.addEventListener("change", actualizarSlots);
+
+  // --- horarios: ahora chequea el bloque completo de cada turno (inicio a inicio+duración), ---
+  // --- no solo el minuto exacto de inicio, y avisa con qué turno se superpone si tocás uno ocupado ---
+  async function actualizarSlots(){
+    slotElegido = null;
+    mtSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">Cargando…</span>`;
+    if (!mtFecha.value){ mtSlots.innerHTML = ""; return; }
+
+    const duracion = duracionSeleccionada();
+
+    const inicioDia = new Date(mtFecha.value + "T00:00:00");
+    const finDia = new Date(mtFecha.value + "T23:59:59");
+    const turnosSnap = await getDocs(query(
+      collection(db, "businesses", businessId, "turnos"),
+      orderBy("fechaHora", "asc")
+    ));
+    const turnosDelDia = turnosSnap.docs
+      .map(d => d.data())
+      .filter(t => {
+        const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
+        return f && f >= inicioDia && f <= finDia && !t.reabierto;
+      })
+      .map(t => {
+        const f = t.fechaHora.toDate();
+        const inicio = f.getHours() * 60 + f.getMinutes();
+        return {
+          inicio,
+          fin: inicio + (t.duracionTotal || 30),
+          servicioNombre: t.servicioNombre || "un servicio",
+          clienteNombre: t.clienteNombre || "un cliente",
+        };
+      });
+
+    function turnosQueChocan(inicioSlot, finSlot){
+      return turnosDelDia.filter(t => inicioSlot < t.fin && finSlot > t.inicio);
+    }
+
+    const slots = [];
+    for (let m = HORA_INICIO * 60; m + duracion <= HORA_FIN * 60; m += PASO_MIN){
+      const h = String(Math.floor(m / 60)).padStart(2, "0");
+      const mm = String(m % 60).padStart(2, "0");
+      slots.push({ minutos: m, texto: `${h}:${mm}`, choques: turnosQueChocan(m, m + duracion) });
+    }
+
+    mtSlots.innerHTML = "";
+    if (!slots.length){
+      mtSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">Ese servicio no entra en el horario de agenda (9 a 19hs).</span>`;
+      return;
+    }
+    slots.forEach(s => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "slot-btn" + (s.choques.length ? " ocupado" : "");
+      btn.textContent = s.texto;
+      btn.addEventListener("click", () => {
+        if (s.choques.length){
+          const detalle = s.choques.map(c => `${c.clienteNombre} (${c.servicioNombre})`).join(", ");
+          if (!confirm(`Ese horario se superpone con: ${detalle}. ¿Igual querés asignar este turno ahí?`)) return;
+        }
+        mtSlots.querySelectorAll(".slot-btn").forEach(b => b.classList.remove("elegido"));
+        btn.classList.add("elegido");
+        slotElegido = s.minutos;
+      });
+      mtSlots.appendChild(btn);
+    });
+  }
+
+  document.getElementById("mt-cancelar").addEventListener("click", () => modalTurno.classList.remove("show"));
+
+  function armarLinkConfirmacion(nombre, whatsapp, servicioTexto, fecha){
+    const fechaTexto = fecha.toLocaleDateString("es-AR") + " a las " + fecha.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+    const texto = `¡Hola ${nombre}! Tu turno de ${servicioTexto} quedó confirmado para el ${fechaTexto}. ¡Te esperamos!`;
+    return `https://wa.me/${whatsapp}?text=${encodeURIComponent(texto)}`;
+  }
+
+  document.getElementById("mt-guardar").addEventListener("click", async () => {
+    mtMsg.className = "msg";
+    if (!mtCliente.value.trim()){ mtMsg.className = "msg show error"; mtMsg.textContent = "Falta el nombre del cliente."; return; }
+    if (slotElegido === null){ mtMsg.className = "msg show error"; mtMsg.textContent = "Elegí un horario."; return; }
+
+    const serviciosSel = serviciosElegidos
+      .map(id => serviciosCache.find(s => s.id === id))
+      .filter(Boolean);
+    const nombreServicios = serviciosSel.length
+      ? serviciosSel.map(s => s.nombre).join(" + ")
+      : "Servicio sin especificar";
+    const duracionTotal = duracionSeleccionada();
+    const clienteNombre = mtCliente.value.trim();
+    const clienteWhatsapp = mtWhatsapp.value.trim() || null;
+
+    const fecha = new Date(mtFecha.value + "T00:00:00");
+    fecha.setMinutes(slotElegido);
+
+    const datosTurno = {
+      clienteNombre,
+      clienteWhatsapp,
+      servicios: serviciosSel.map(s => ({ id: s.id, nombre: s.nombre, duracionMin: s.duracionMin || 30 })),
+      servicioNombre: nombreServicios,
+      duracionTotal,
+      fechaHora: Timestamp.fromDate(fecha),
+      reabierto: false,
+    };
+
+    if (modoSolicitudId){
+      await addDoc(collection(db, "businesses", businessId, "turnos"), { ...datosTurno, estado: "Confirmado" });
+      await deleteDoc(doc(db, "businesses", businessId, "solicitudes", modoSolicitudId));
+      if (clienteWhatsapp){
+        window.open(armarLinkConfirmacion(clienteNombre, clienteWhatsapp, nombreServicios, fecha), "_blank");
+      }
+    } else {
+      await addDoc(collection(db, "businesses", businessId, "turnos"), { ...datosTurno, estado: "Reservado" });
+    }
+    modalTurno.classList.remove("show");
+  });
 
   document.getElementById("btn-logout").addEventListener("click", async () => {
     await signOut(auth);
@@ -454,6 +885,9 @@
     }
   }
 
+  let prefFormato = "detallado";
+  let prefOrden = "horario";
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = "../index.html";
@@ -471,7 +905,68 @@
     document.getElementById("overlay-vencido").classList.toggle("show", !!planVencido);
     pintarPlan(negocio);
 
+    document.getElementById("caja-sub").textContent = planActual === "pro"
+      ? "Ingresos, gastos y resumen por período."
+      : "En el plan gratis podés ver y borrar movimientos, pero no cargar ni editar — eso es de la versión Pro.";
+    fab.classList.toggle("hidden", vistaActual === "caja" && planActual !== "pro");
+
+    prefFormato = negocio.vistaLista || "detallado";
+    prefOrden = negocio.ordenLista || "horario";
+    document.getElementById("pref-formato").value = prefFormato;
+    document.getElementById("pref-orden").value = prefOrden;
+    document.getElementById("turnos-list").classList.toggle("recuadros", prefFormato === "recuadros");
+
+    const urlCatalogo = new URL("../catalogo/index.html", window.location.href).href + "?negocio=" + businessId;
+    document.getElementById("link-catalogo").value = urlCatalogo;
+
     escucharTurnos();
+    escucharServicios();
+    escucharCaja();
+    escucharSolicitudes();
+
+    const hoyStr = new Date().toISOString().slice(0, 10);
+    dispFecha.value = hoyStr;
+    dispFecha.min = hoyStr;
+    cargarDisponibilidad();
+  });
+
+  document.getElementById("btn-copiar-catalogo").addEventListener("click", () => {
+    const input = document.getElementById("link-catalogo");
+    navigator.clipboard.writeText(input.value);
+    const btn = document.getElementById("btn-copiar-catalogo");
+    btn.textContent = "¡Copiado!";
+    setTimeout(() => { btn.textContent = "Copiar"; }, 1500);
+  });
+
+  async function guardarPreferencia(campo, valor){
+    await updateDoc(doc(db, "businesses", businessId), { [campo]: valor });
+  }
+  document.getElementById("pref-formato").addEventListener("change", (e) => {
+    prefFormato = e.target.value;
+    document.getElementById("turnos-list").classList.toggle("recuadros", prefFormato === "recuadros");
+    guardarPreferencia("vistaLista", prefFormato);
+  });
+  document.getElementById("pref-orden").addEventListener("change", (e) => {
+    prefOrden = e.target.value;
+    guardarPreferencia("ordenLista", prefOrden);
+    escucharTurnos();
+  });
+
+  // --- respaldo / exportar datos ---
+  document.getElementById("btn-exportar").addEventListener("click", async () => {
+    const colecciones = ["servicios", "turnos", "clientes", "caja"];
+    const datos = {};
+    for (const c of colecciones){
+      const snap = await getDocs(collection(db, "businesses", businessId, c));
+      datos[c] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    const blob = new Blob([JSON.stringify(datos, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "turnapp-respaldo.json";
+    a.click();
+    URL.revokeObjectURL(url);
   });
 
   // --- canje de código Pro ---
@@ -531,17 +1026,178 @@
     );
     onSnapshot(turnosRef, (snap) => {
       const lista = document.getElementById("turnos-list");
+      const todosLosTurnos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
       if (snap.empty){
         lista.innerHTML = `<div class="empty-state">Todavía no tenés turnos reservados.</div>`;
+      } else {
+        let turnos = todosLosTurnos;
+        if (prefOrden === "nombre"){
+          turnos = [...turnos].sort((a, b) => (a.clienteNombre || "").localeCompare(b.clienteNombre || ""));
+        }
+        lista.innerHTML = "";
+        turnos.forEach((t) => lista.appendChild(renderTurno(t.id, t)));
+      }
+
+      renderClientes(todosLosTurnos);
+    });
+  }
+
+  // --- clientes: se arman solos a partir de los turnos, agrupando por nombre ---
+  function renderClientes(turnos){
+    const lista = document.getElementById("clientes-list");
+    document.getElementById("clientes-sub").textContent = planActual === "pro"
+      ? "Historial completo de turnos por cliente."
+      : "En el plan gratis solo se ve la última fecha de turno de cada cliente.";
+
+    if (!turnos.length){
+      lista.innerHTML = `<div class="empty-state">Todavía no tenés clientes — se arman solos a medida que cargás turnos.</div>`;
+      return;
+    }
+    const porCliente = {};
+    turnos.forEach(t => {
+      const nombre = t.clienteNombre || "Sin nombre";
+      if (!porCliente[nombre]) porCliente[nombre] = { whatsapp: t.clienteWhatsapp, turnos: [] };
+      porCliente[nombre].turnos.push(t);
+    });
+
+    lista.innerHTML = "";
+    Object.entries(porCliente)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .forEach(([nombre, info]) => {
+        const ordenados = info.turnos.sort((a, b) => (b.fechaHora?.toMillis?.() || 0) - (a.fechaHora?.toMillis?.() || 0));
+        const ultima = ordenados[0]?.fechaHora?.toDate ? ordenados[0].fechaHora.toDate() : null;
+        const card = document.createElement("div");
+        card.className = "turno-card";
+        let detalleHtml = `<div class="turno-servicio">Último turno: ${ultima ? ultima.toLocaleDateString("es-AR") : "—"}</div>`;
+        if (planActual === "pro" && ordenados.length > 1){
+          detalleHtml += `<div class="turno-servicio">Historial: ${ordenados.map(t => (t.fechaHora?.toDate ? t.fechaHora.toDate().toLocaleDateString("es-AR") : "") + " — " + (t.servicioNombre || "")).join(" · ")}</div>`;
+        }
+        card.innerHTML = `
+          <div class="turno-info">
+            <strong>${nombre}</strong>
+            ${detalleHtml}
+          </div>
+          <button class="turno-reabrir" style="border-style:solid; border-color:var(--rose-deep); color:var(--rose-deep);">Borrar</button>
+        `;
+        card.querySelector("button").addEventListener("click", async () => {
+          if (confirm(`¿Borrar a ${nombre} y todos sus turnos (${ordenados.length})?`)) {
+            for (const t of ordenados){
+              await deleteDoc(doc(db, "businesses", businessId, "turnos", t.id));
+            }
+          }
+        });
+        lista.appendChild(card);
+      });
+  }
+
+  // --- servicios ---
+  function escucharServicios(){
+    const ref = collection(db, "businesses", businessId, "servicios");
+    onSnapshot(ref, (snap) => {
+      const lista = document.getElementById("servicios-list");
+      if (snap.empty){
+        lista.innerHTML = `<div class="empty-state">Todavía no cargaste servicios.</div>`;
         return;
       }
       lista.innerHTML = "";
       snap.forEach((docSnap) => {
-        const t = docSnap.data();
-        lista.appendChild(renderTurno(docSnap.id, t));
+        const s = docSnap.data();
+        const card = document.createElement("div");
+        card.className = "turno-card";
+        card.innerHTML = `
+          <div class="turno-info">
+            <strong>${s.nombre}</strong>
+            <div class="turno-servicio">$${s.precio || 0} · ${s.duracionMin || 30} min${s.oferta ? " · Oferta: " + s.oferta : ""}</div>
+          </div>
+          <button class="turno-reabrir" data-id="${docSnap.id}">Borrar</button>
+        `;
+        card.querySelector("button").addEventListener("click", async () => {
+          if (confirm("¿Borrar este servicio?")) await deleteDoc(doc(db, "businesses", businessId, "servicios", docSnap.id));
+        });
+        lista.appendChild(card);
       });
     });
   }
+
+  const modalServicio = document.getElementById("modal-servicio");
+  function abrirModalServicio(){
+    document.getElementById("ms-nombre").value = "";
+    document.getElementById("ms-precio").value = "";
+    document.getElementById("ms-duracion").value = "30";
+    document.getElementById("ms-oferta").value = "";
+    document.getElementById("ms-msg").className = "msg";
+    modalServicio.classList.add("show");
+  }
+  document.getElementById("ms-cancelar").addEventListener("click", () => modalServicio.classList.remove("show"));
+  document.getElementById("ms-guardar").addEventListener("click", async () => {
+    const msg = document.getElementById("ms-msg");
+    const nombre = document.getElementById("ms-nombre").value.trim();
+    const precio = Number(document.getElementById("ms-precio").value) || 0;
+    const duracionMin = Number(document.getElementById("ms-duracion").value) || 30;
+    const oferta = document.getElementById("ms-oferta").value.trim() || null;
+    if (!nombre){ msg.className = "msg show error"; msg.textContent = "Falta el nombre del servicio."; return; }
+
+    await addDoc(collection(db, "businesses", businessId, "servicios"), { nombre, precio, duracionMin, oferta });
+    modalServicio.classList.remove("show");
+  });
+
+  // --- caja ---
+  function escucharCaja(){
+    const ref = query(collection(db, "businesses", businessId, "caja"), orderBy("fecha", "desc"));
+    onSnapshot(ref, (snap) => {
+      const lista = document.getElementById("caja-list");
+      let ingresos = 0, gastos = 0;
+      if (snap.empty){
+        lista.innerHTML = `<div class="empty-state">Todavía no cargaste movimientos.</div>`;
+      } else {
+        lista.innerHTML = "";
+        snap.forEach((docSnap) => {
+          const m = docSnap.data();
+          if (m.tipo === "ingreso") ingresos += m.monto || 0; else gastos += m.monto || 0;
+          const fecha = m.fecha?.toDate ? m.fecha.toDate().toLocaleDateString("es-AR") : "";
+          const card = document.createElement("div");
+          card.className = "turno-card";
+          card.innerHTML = `
+            <div class="turno-info">
+              <strong style="color:${m.tipo === "ingreso" ? "#3D6B4A" : "#9C3B3B"}">${m.tipo === "ingreso" ? "+" : "-"}$${m.monto}</strong>
+              <div class="turno-servicio">${m.categoria || ""} · ${m.medioPago || ""} · ${fecha}</div>
+            </div>
+            <button class="turno-reabrir" data-id="${docSnap.id}">Borrar</button>
+          `;
+          card.querySelector("button").addEventListener("click", async () => {
+            if (confirm("¿Borrar este movimiento?")) await deleteDoc(doc(db, "businesses", businessId, "caja", docSnap.id));
+          });
+          lista.appendChild(card);
+        });
+      }
+      document.getElementById("caja-resumen").textContent =
+        `Ingresos: $${ingresos} · Gastos: $${gastos} · Saldo: $${ingresos - gastos}`;
+    });
+  }
+
+  const modalCaja = document.getElementById("modal-caja");
+  function abrirModalCaja(){
+    if (planActual !== "pro"){ alert("Cargar movimientos de Caja es una función de la versión Pro. En gratis podés ver y borrar."); return; }
+    document.getElementById("mc-tipo").value = "ingreso";
+    document.getElementById("mc-monto").value = "";
+    document.getElementById("mc-categoria").value = "";
+    document.getElementById("mc-mediopago").value = "Efectivo";
+    document.getElementById("mc-msg").className = "msg";
+    modalCaja.classList.add("show");
+  }
+  document.getElementById("mc-cancelar").addEventListener("click", () => modalCaja.classList.remove("show"));
+  document.getElementById("mc-guardar").addEventListener("click", async () => {
+    const msg = document.getElementById("mc-msg");
+    const tipo = document.getElementById("mc-tipo").value;
+    const monto = Number(document.getElementById("mc-monto").value) || 0;
+    const categoria = document.getElementById("mc-categoria").value.trim();
+    const medioPago = document.getElementById("mc-mediopago").value;
+    if (!monto){ msg.className = "msg show error"; msg.textContent = "Falta el monto."; return; }
+
+    await addDoc(collection(db, "businesses", businessId, "caja"), { tipo, monto, categoria, medioPago, fecha: Timestamp.now() });
+    modalCaja.classList.remove("show");
+  });
 
   // --- datos de ejemplo para mostrar la app funcionando ---
   const SERVICIOS_EJEMPLO = [
@@ -586,8 +1242,9 @@
         await addDoc(turnosRef, {
           clienteNombre: cliente.nombre,
           clienteWhatsapp: cliente.whatsapp,
-          servicioId: servicio.id,
+          servicios: [{ id: servicio.id, nombre: servicio.nombre, duracionMin: servicio.duracionMin || 30 }],
           servicioNombre: servicio.nombre,
+          duracionTotal: servicio.duracionMin || 30,
           fechaHora: Timestamp.fromDate(fecha),
           estado: ESTADOS_EJEMPLO[i],
           reabierto: i === 2,
@@ -598,6 +1255,8 @@
       await addDoc(cajaRef, { tipo: "ingreso", monto: 6500, categoria: "Corte de pelo", medioPago: "Efectivo", fecha: Timestamp.now() });
       await addDoc(cajaRef, { tipo: "ingreso", monto: 14000, categoria: "Tintura", medioPago: "Transferencia", fecha: Timestamp.now() });
       await addDoc(cajaRef, { tipo: "gasto", monto: 3200, categoria: "Insumos", medioPago: "Efectivo", fecha: Timestamp.now() });
+      await addDoc(cajaRef, { tipo: "ingreso", monto: 12000, categoria: "Masaje relajante", medioPago: "Efectivo", fecha: Timestamp.now() });
+      await addDoc(cajaRef, { tipo: "gasto", monto: 4500, categoria: "Alquiler", medioPago: "Transferencia", fecha: Timestamp.now() });
 
       seedMsg.textContent = "Listo — 5 servicios, 5 clientes, 5 turnos y movimientos de caja cargados.";
     } catch (err) {
@@ -620,13 +1279,14 @@
       <div class="turno-hora">${horaTexto}</div>
       <div class="turno-info">
         <button class="turno-cliente" ${whatsappHref ? "" : "disabled"}>${t.clienteNombre || "Sin nombre"}</button>
-        <div class="turno-servicio">${t.servicioNombre || "Servicio sin especificar"}</div>
+        <div class="turno-servicio">${t.servicioNombre || "Servicio sin especificar"} · ${t.duracionTotal || 30} min</div>
       </div>
       <span class="turno-badge badge-${t.estado || "Reservado"}">${t.estado || "Reservado"}</span>
       <select class="estado-select" ${planVencido ? "disabled" : ""}></select>
       <button class="turno-reabrir ${planVencido ? "locked" : ""}" ${planVencido ? "disabled" : ""}>
         ${t.reabierto ? "Reabierto" : "Reabrir hueco"}
       </button>
+      <button class="turno-reabrir" style="border-style:solid; border-color:var(--rose-deep); color:var(--rose-deep);" data-borrar>Borrar</button>
     `;
 
     const select = card.querySelector(".estado-select");
@@ -640,14 +1300,8 @@
     select.addEventListener("change", async () => {
       const nuevoEstado = select.value;
       if (nuevoEstado === "Cambio de turno"){
-        const nuevaFechaTexto = prompt("Nuevo día y horario del turno (ej: 2026-08-02 15:30):");
-        if (!nuevaFechaTexto) { select.value = t.estado; return; }
-        const nuevaFecha = new Date(nuevaFechaTexto);
-        if (isNaN(nuevaFecha)) { alert("No entendí esa fecha."); select.value = t.estado; return; }
-        await updateDoc(doc(db, "businesses", businessId, "turnos", id), {
-          estado: "Reservado",
-          fechaHora: nuevaFecha,
-        });
+        abrirModalCambioTurno(id, t.estado);
+        select.value = t.estado; // el modal decide el estado real al confirmar
         return;
       }
       await updateDoc(doc(db, "businesses", businessId, "turnos", id), { estado: nuevoEstado });
@@ -658,14 +1312,151 @@
       btnCliente.addEventListener("click", () => window.open(whatsappHref, "_blank"));
     }
 
-    const btnReabrir = card.querySelector(".turno-reabrir");
+    const btnReabrir = card.querySelector(".turno-reabrir:not([data-borrar])");
     btnReabrir.addEventListener("click", async () => {
       if (planVencido) return;
       await updateDoc(doc(db, "businesses", businessId, "turnos", id), { reabierto: !t.reabierto });
     });
 
+    card.querySelector("[data-borrar]").addEventListener("click", async () => {
+      if (confirm(`¿Borrar el turno de ${t.clienteNombre || "este cliente"}?`)) {
+        await deleteDoc(doc(db, "businesses", businessId, "turnos", id));
+      }
+    });
+
     return card;
   }
+
+  // --- modal: cambio de turno (nuevo día/horario) ---
+  const modalCambio = document.getElementById("modal-cambio-turno");
+  let cambioTurnoId = null;
+  function abrirModalCambioTurno(id, estadoOriginal){
+    cambioTurnoId = id;
+    const hoy = new Date().toISOString().slice(0, 10);
+    document.getElementById("ct-fecha").value = hoy;
+    document.getElementById("ct-fecha").min = hoy;
+    document.getElementById("ct-hora").value = "10:00";
+    document.getElementById("ct-msg").className = "msg";
+    modalCambio.classList.add("show");
+  }
+  document.getElementById("ct-cancelar").addEventListener("click", () => modalCambio.classList.remove("show"));
+  document.getElementById("ct-guardar").addEventListener("click", async () => {
+    const msg = document.getElementById("ct-msg");
+    const fechaVal = document.getElementById("ct-fecha").value;
+    const horaVal = document.getElementById("ct-hora").value;
+    if (!fechaVal || !horaVal){ msg.className = "msg show error"; msg.textContent = "Completá día y horario."; return; }
+    const nuevaFecha = new Date(fechaVal + "T" + horaVal + ":00");
+    await updateDoc(doc(db, "businesses", businessId, "turnos", cambioTurnoId), {
+      estado: "Reservado",
+      fechaHora: Timestamp.fromDate(nuevaFecha),
+    });
+    modalCambio.classList.remove("show");
+  });
+
+  // --- solicitudes pendientes (llegan del catálogo público, esperando confirmación) ---
+  function escucharSolicitudes(){
+    const ref = query(collection(db, "businesses", businessId, "solicitudes"), orderBy("fechaHora", "asc"));
+    onSnapshot(ref, (snap) => {
+      const badge = document.getElementById("badge-solicitudes");
+      badge.style.display = snap.size ? "inline-block" : "none";
+      badge.textContent = snap.size;
+
+      const lista = document.getElementById("solicitudes-list");
+      if (snap.empty){
+        lista.innerHTML = `<div class="empty-state">No tenés solicitudes pendientes.</div>`;
+        return;
+      }
+      lista.innerHTML = "";
+      snap.forEach(docSnap => lista.appendChild(renderSolicitud(docSnap.id, docSnap.data())));
+    });
+  }
+
+  function renderSolicitud(id, s){
+    const hora = s.fechaHora?.toDate ? s.fechaHora.toDate() : null;
+    const fechaTexto = hora
+      ? hora.toLocaleDateString("es-AR") + " · " + hora.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
+      : "--";
+    const card = document.createElement("div");
+    card.className = "turno-card";
+    card.innerHTML = `
+      <div class="turno-info">
+        <strong>${s.clienteNombre || "Sin nombre"}</strong>
+        <div class="turno-servicio">${s.servicioNombre || "Servicio sin especificar"} · ${s.duracionTotal || 30} min</div>
+        <div class="turno-servicio">${fechaTexto}${s.clienteWhatsapp ? " · " + s.clienteWhatsapp : ""}</div>
+      </div>
+      <button class="submit" style="width:auto; padding:9px 14px;" data-aceptar>Confirmar</button>
+      <button class="btn-secondary" style="padding:9px 14px;" data-modificar>Modificar</button>
+      <button class="turno-reabrir" style="border-style:solid; border-color:var(--rose-deep); color:var(--rose-deep);" data-rechazar>Rechazar</button>
+    `;
+    card.querySelector("[data-aceptar]").addEventListener("click", () => confirmarSolicitud(id, s));
+    card.querySelector("[data-modificar]").addEventListener("click", () => abrirModalTurno({ modoSolicitud: id, datos: s }));
+    card.querySelector("[data-rechazar]").addEventListener("click", async () => {
+      if (confirm(`¿Rechazar el pedido de ${s.clienteNombre || "este cliente"}?`)) {
+        await deleteDoc(doc(db, "businesses", businessId, "solicitudes", id));
+      }
+    });
+    return card;
+  }
+
+  async function confirmarSolicitud(id, s){
+    const fecha = s.fechaHora?.toDate ? s.fechaHora.toDate() : new Date();
+    await addDoc(collection(db, "businesses", businessId, "turnos"), {
+      clienteNombre: s.clienteNombre || "Sin nombre",
+      clienteWhatsapp: s.clienteWhatsapp || null,
+      servicios: s.servicios || [],
+      servicioNombre: s.servicioNombre || "Servicio sin especificar",
+      duracionTotal: s.duracionTotal || 30,
+      fechaHora: s.fechaHora || Timestamp.fromDate(fecha),
+      estado: "Confirmado",
+      reabierto: false,
+    });
+    await deleteDoc(doc(db, "businesses", businessId, "solicitudes", id));
+    if (s.clienteWhatsapp){
+      window.open(armarLinkConfirmacion(s.clienteNombre || "", s.clienteWhatsapp, s.servicioNombre || "tu servicio", fecha), "_blank");
+    }
+  }
+
+  // --- disponibilidad: el profesional tilda libremente los horarios en los que atiende cada día ---
+  const DISP_HORA_INICIO = 9, DISP_HORA_FIN = 19, DISP_PASO = 30;
+  const dispFecha = document.getElementById("disp-fecha");
+  const dispSlots = document.getElementById("disp-slots");
+  let dispSeleccion = new Set();
+
+  function renderDispSlots(){
+    dispSlots.innerHTML = "";
+    for (let m = DISP_HORA_INICIO * 60; m < DISP_HORA_FIN * 60; m += DISP_PASO){
+      const h = String(Math.floor(m / 60)).padStart(2, "0");
+      const mm = String(m % 60).padStart(2, "0");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "slot-btn" + (dispSeleccion.has(m) ? " elegido" : "");
+      btn.textContent = `${h}:${mm}`;
+      btn.addEventListener("click", () => {
+        if (dispSeleccion.has(m)) dispSeleccion.delete(m); else dispSeleccion.add(m);
+        btn.classList.toggle("elegido");
+      });
+      dispSlots.appendChild(btn);
+    }
+  }
+
+  async function cargarDisponibilidad(){
+    if (!dispFecha.value) return;
+    const snap = await getDoc(doc(db, "businesses", businessId, "disponibilidad", dispFecha.value));
+    dispSeleccion = new Set(snap.exists() ? (snap.data().slots || []) : []);
+    renderDispSlots();
+  }
+  dispFecha.addEventListener("change", cargarDisponibilidad);
+
+  document.getElementById("disp-guardar").addEventListener("click", async () => {
+    if (!dispFecha.value) return;
+    await setDoc(doc(db, "businesses", businessId, "disponibilidad", dispFecha.value), {
+      slots: Array.from(dispSeleccion).sort((a, b) => a - b),
+    });
+    const msg = document.getElementById("disp-msg");
+    msg.className = "msg show ok";
+    msg.textContent = "Disponibilidad guardada.";
+    setTimeout(() => { msg.className = "msg"; }, 2000);
+  });
 </script>
 
 </body>
