@@ -96,6 +96,12 @@
   const contenedor = document.getElementById("contenedor");
   const HORA_INICIO = 9, HORA_FIN = 19, PASO_MIN = 30; // debe coincidir con la grilla que usa el profesional en Disponibilidad
 
+  function formatearHora(m){
+    const h = String(Math.floor(m / 60)).padStart(2, "0");
+    const mm = String(m % 60).padStart(2, "0");
+    return `${h}:${mm}`;
+  }
+
   // --- datos del cliente: se guardan en este dispositivo para no tener que cargarlos cada vez ---
   const LS_NOMBRE = "turnapp_cliente_nombre";
   const LS_WHATSAPP = "turnapp_cliente_whatsapp";
@@ -224,52 +230,57 @@
         slotElegido = null;
         cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">Cargando…</span>`;
 
-        // 1) horarios que el profesional dejó habilitados ese día
-        const dispSnap = await getDoc(doc(db, "businesses", businessId, "disponibilidad", cFecha.value));
-        const disponibles = new Set(dispSnap.exists() ? (dispSnap.data().slots || []) : []);
-        if (!disponibles.size){
-          cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No hay horarios cargados para ese día. Probá con otra fecha.</span>`;
-          return;
-        }
-
-        // 2) turnos ya confirmados ese día, para no ofrecer horarios que se pisen
-        const inicioDia = new Date(cFecha.value + "T00:00:00");
-        const finDia = new Date(cFecha.value + "T23:59:59");
-        const turnosSnap = await getDocs(query(collection(db, "businesses", businessId, "turnos"), orderBy("fechaHora", "asc")));
-        const turnosDelDia = turnosSnap.docs.map(d => d.data())
-          .filter(t => { const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null; return f && f >= inicioDia && f <= finDia && !t.reabierto; })
-          .map(t => {
-            const f = t.fechaHora.toDate();
-            const inicio = f.getHours() * 60 + f.getMinutes();
-            return { inicio, fin: inicio + (t.duracionTotal || 30) };
-          });
-
-        function bloqueLibre(inicioSlot, finSlot){
-          // cada media hora del bloque tiene que estar habilitada por el profesional...
-          for (let m = inicioSlot; m < finSlot; m += PASO_MIN){
-            if (!disponibles.has(m)) return false;
+        try {
+          // 1) horarios que el profesional dejó habilitados ese día
+          const dispSnap = await getDoc(doc(db, "businesses", businessId, "disponibilidad", cFecha.value));
+          const disponibles = new Set(dispSnap.exists() ? (dispSnap.data().slots || []) : []);
+          if (!disponibles.size){
+            cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No hay horarios cargados para ese día. Probá con otra fecha.</span>`;
+            return;
           }
-          // ...y no chocar con ningún turno ya confirmado
-          return !turnosDelDia.some(t => inicioSlot < t.fin && finSlot > t.inicio);
-        }
 
-        cSlots.innerHTML = "";
-        for (let m = HORA_INICIO * 60; m + duracion <= HORA_FIN * 60; m += PASO_MIN){
-          if (!bloqueLibre(m, m + duracion)) continue;
-          const h = String(Math.floor(m / 60)).padStart(2, "0");
-          const mm = String(m % 60).padStart(2, "0");
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "slot-btn";
-          btn.textContent = `${h}:${mm}`;
-          btn.addEventListener("click", () => {
-            cSlots.querySelectorAll(".slot-btn").forEach(b => b.classList.remove("elegido"));
-            btn.classList.add("elegido");
-            slotElegido = m;
-          });
-          cSlots.appendChild(btn);
+          // 2) turnos ya confirmados ese día, restando solo las franjas que siguen ocupadas
+          // (un turno puede tener partes reabiertas a mano por el profesional)
+          const inicioDia = new Date(cFecha.value + "T00:00:00");
+          const finDia = new Date(cFecha.value + "T23:59:59");
+          const turnosSnap = await getDocs(query(collection(db, "businesses", businessId, "turnos"), orderBy("fechaHora", "asc")));
+          const bloqueadosPorTurnos = new Set();
+          turnosSnap.docs.map(d => d.data())
+            .filter(t => { const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null; return f && f >= inicioDia && f <= finDia; })
+            .forEach(t => {
+              const f = t.fechaHora.toDate();
+              const inicio = f.getHours() * 60 + f.getMinutes();
+              const fin = inicio + (t.duracionTotal || 30);
+              const libres = new Set(t.huecosReabiertos || []);
+              for (let m = inicio; m < fin; m += PASO_MIN) if (!libres.has(m)) bloqueadosPorTurnos.add(m);
+            });
+
+          function bloqueLibre(inicioSlot, finSlot){
+            for (let m = inicioSlot; m < finSlot; m += PASO_MIN){
+              if (!disponibles.has(m)) return false; // el profesional no habilitó esa media hora
+              if (bloqueadosPorTurnos.has(m)) return false; // ya hay un turno confirmado ahí
+            }
+            return true;
+          }
+
+          cSlots.innerHTML = "";
+          for (let m = HORA_INICIO * 60; m + duracion <= HORA_FIN * 60; m += PASO_MIN){
+            if (!bloqueLibre(m, m + duracion)) continue;
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "slot-btn";
+            btn.textContent = formatearHora(m);
+            btn.addEventListener("click", () => {
+              cSlots.querySelectorAll(".slot-btn").forEach(b => b.classList.remove("elegido"));
+              btn.classList.add("elegido");
+              slotElegido = m;
+            });
+            cSlots.appendChild(btn);
+          }
+          if (!cSlots.children.length) cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No hay horarios libres ese día para lo que elegiste.</span>`;
+        } catch (err) {
+          cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No pudimos cargar los horarios. Volvé a intentar en un momento.</span>`;
         }
-        if (!cSlots.children.length) cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No hay horarios libres ese día para lo que elegiste.</span>`;
       }
       cFecha.addEventListener("change", refrescarSlots);
       refrescarSlots();

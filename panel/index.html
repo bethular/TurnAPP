@@ -218,6 +218,17 @@
     color:var(--ink);
     flex-shrink:0;
   }
+  select.estado-select.estado-Reservado{ background:rgba(184,134,46,0.12); border-color:rgba(184,134,46,0.4); color:var(--gold); }
+  select.estado-select.estado-Confirmado{ background:rgba(47,64,51,0.1); border-color:rgba(47,64,51,0.35); color:var(--forest); }
+  select.estado-select.estado-Atendido{ background:rgba(76,124,89,0.12); border-color:rgba(76,124,89,0.4); color:#3D6B4A; }
+  select.estado-select.estado-Ausente{ background:rgba(156,59,59,0.1); border-color:rgba(156,59,59,0.35); color:var(--rose-deep); }
+
+  .plan-badge{
+    display:inline-block; font-size:10px; font-weight:700; letter-spacing:.03em;
+    padding:2px 8px; border-radius:999px; margin-left:8px; vertical-align:middle;
+  }
+  .plan-badge.pro{ background:rgba(184,134,46,0.15); color:var(--gold); }
+  .plan-badge.gratis{ background:rgba(47,64,51,0.12); color:var(--forest); }
 
   .turno-reabrir{
     font-size:11.5px;
@@ -346,7 +357,7 @@
 <body>
 
 <div class="topbar">
-  <div class="brand">TurnApp <span id="nombre-negocio-header"></span></div>
+  <div class="brand">TurnApp <span id="nombre-negocio-header"></span><span class="plan-badge" id="badge-plan" style="display:none;"></span></div>
   <div class="menu-wrap">
     <button class="menu-btn" id="menu-btn">
       Menú ▾
@@ -440,6 +451,15 @@
       </div>
 
       <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:16px;">
+        <strong>Tu WhatsApp de contacto</strong>
+        <p class="turno-servicio" style="margin:0;">Lo usamos para completar automáticamente tus mensajes de soporte y de pedido de Pro.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="input-whatsapp-negocio" placeholder="Ej: 5493751..." style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:14px;">
+          <button class="submit" id="btn-guardar-whatsapp" style="width:auto; padding:10px 18px;">Guardar</button>
+        </div>
+      </div>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:16px;">
         <strong>Tu catálogo público</strong>
         <p class="turno-servicio" style="margin:0;">Compartí este link con tus clientes para que pidan turno solos.</p>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -478,6 +498,12 @@
         <button class="submit" id="disp-guardar" style="width:auto; max-width:220px;">Guardar disponibilidad</button>
         <div class="msg" id="disp-msg"></div>
       </div>
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; max-width:520px; margin-top:16px;">
+        <strong>Días con disponibilidad cargada</strong>
+        <div class="turnos-list" id="disp-resumen-list">
+          <div class="empty-state">Cargando…</div>
+        </div>
+      </div>
     </section>
 
     <button class="fab" id="fab-agregar" title="Agregar">+</button>
@@ -491,7 +517,8 @@
 
     <div class="modal-field">
       <label for="mt-cliente">Nombre del cliente</label>
-      <input type="text" id="mt-cliente">
+      <input type="text" id="mt-cliente" list="lista-clientes-conocidos" autocomplete="off">
+      <datalist id="lista-clientes-conocidos"></datalist>
     </div>
     <div class="modal-field">
       <label for="mt-whatsapp">WhatsApp del cliente (opcional, con código de país, ej: 5493751...)</label>
@@ -521,7 +548,7 @@
 
 <div class="modal-overlay" id="modal-servicio">
   <div class="modal-card">
-    <h2>Nuevo servicio</h2>
+    <h2 id="modal-servicio-title">Nuevo servicio</h2>
     <div class="modal-field"><label for="ms-nombre">Nombre</label><input type="text" id="ms-nombre"></div>
     <div class="modal-field"><label for="ms-precio">Precio</label><input type="number" id="ms-precio" min="0"></div>
     <div class="modal-field"><label for="ms-duracion">Duración (minutos)</label><input type="number" id="ms-duracion" min="5" step="5" value="30"></div>
@@ -568,6 +595,40 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-huecos">
+  <div class="modal-card" style="max-width:400px;">
+    <h2>Editar horario ocupado</h2>
+    <p style="font-size:13px; color:rgba(38,42,32,0.6); margin:-8px 0 14px;" id="huecos-cliente"></p>
+    <div class="slots-grid" id="huecos-slots"></div>
+    <p style="font-size:12px; color:rgba(38,42,32,0.5); margin-top:10px; line-height:1.5;">Tocá una franja para dejarla libre (por ejemplo, mientras el cliente espera una tintura) y poder superponer otro turno ahí. Volvé a tocarla para dejarla ocupada de nuevo.</p>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="huecos-cancelar">Cancelar</button>
+      <button class="submit" id="huecos-guardar">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-confirmar">
+  <div class="modal-card" style="max-width:360px;">
+    <h2>TurnApp dice:</h2>
+    <p id="confirmar-texto" style="font-size:14px; color:rgba(38,42,32,0.75); line-height:1.5; margin:0;"></p>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="confirmar-cancelar">Cancelar</button>
+      <button class="submit" id="confirmar-aceptar" style="background:var(--rose-deep);">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-aviso">
+  <div class="modal-card" style="max-width:360px;">
+    <h2>TurnApp dice:</h2>
+    <p id="aviso-texto" style="font-size:14px; color:rgba(38,42,32,0.75); line-height:1.5; margin:0;"></p>
+    <div class="modal-actions">
+      <button class="submit" id="aviso-ok">Entendido</button>
+    </div>
+  </div>
+</div>
+
 <div id="overlay-vencido">
   <div class="venc-card">
     <h2>Tu período gratuito terminó</h2>
@@ -581,7 +642,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, getDocs, setDoc, collection, query, orderBy, onSnapshot, updateDoc, addDoc, deleteDoc, Timestamp, runTransaction
+    getFirestore, doc, getDoc, getDocs, setDoc, collection, query, orderBy, documentId, onSnapshot, updateDoc, addDoc, deleteDoc, Timestamp, runTransaction
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const app = initializeApp(firebaseConfig);
@@ -589,6 +650,50 @@
   const db = getFirestore(app);
 
   const ESTADOS = ["Reservado", "Confirmado", "Atendido", "Ausente", "Cambio de turno"];
+
+  // --- diálogos propios de TurnApp, en vez de los confirm()/alert() nativos del navegador ---
+  // (esos siempre muestran el nombre del sitio, no se puede cambiar; por eso los reemplazamos)
+  const modalConfirmar = document.getElementById("modal-confirmar");
+  const confirmarTexto = document.getElementById("confirmar-texto");
+  function confirmarAccion(mensaje){
+    return new Promise((resolve) => {
+      confirmarTexto.textContent = mensaje;
+      modalConfirmar.classList.add("show");
+      const btnSi = document.getElementById("confirmar-aceptar");
+      const btnNo = document.getElementById("confirmar-cancelar");
+      function limpiar(){
+        modalConfirmar.classList.remove("show");
+        btnSi.removeEventListener("click", onSi);
+        btnNo.removeEventListener("click", onNo);
+      }
+      function onSi(){ limpiar(); resolve(true); }
+      function onNo(){ limpiar(); resolve(false); }
+      btnSi.addEventListener("click", onSi);
+      btnNo.addEventListener("click", onNo);
+    });
+  }
+
+  const modalAviso = document.getElementById("modal-aviso");
+  const avisoTexto = document.getElementById("aviso-texto");
+  function avisar(mensaje){
+    return new Promise((resolve) => {
+      avisoTexto.textContent = mensaje;
+      modalAviso.classList.add("show");
+      const btnOk = document.getElementById("aviso-ok");
+      function onOk(){
+        modalAviso.classList.remove("show");
+        btnOk.removeEventListener("click", onOk);
+        resolve();
+      }
+      btnOk.addEventListener("click", onOk);
+    });
+  }
+
+  function formatearHora(m){
+    const h = String(Math.floor(m / 60)).padStart(2, "0");
+    const mm = String(m % 60).padStart(2, "0");
+    return `${h}:${mm}`;
+  }
 
   // --- menú de correo prearmado (con respaldo de copiar, por si no hay app de correo) ---
   const linkSoporte = document.getElementById("link-soporte");
@@ -598,28 +703,31 @@
   }
   function conectarSoporte(el, asunto, cuerpo){
     el.href = armarMailto(asunto, cuerpo);
-    el.addEventListener("click", (e) => {
+    el.onclick = () => {
       // Damos un instante para que el navegador intente abrir la app de correo;
       // si no hay ninguna configurada, no pasa nada visible — por eso copiamos
       // el correo igual, como respaldo silencioso.
       navigator.clipboard?.writeText(soporte.email).catch(() => {});
       setTimeout(() => {
         if (!document.hidden) {
-          alert("Si no se abrió tu app de correo, ya copiamos la dirección: " + soporte.email + "\nPodés escribir directo a ese correo desde donde prefieras.");
+          avisar("Si no se abrió tu app de correo, ya copiamos la dirección: " + soporte.email + ". Podés escribir directo a ese correo desde donde prefieras.");
         }
       }, 600);
-    });
+    };
   }
-  conectarSoporte(
-    linkSoporte,
-    "Asistencia técnica - TurnApp",
-    "Hola, necesito ayuda con mi cuenta de TurnApp.\nNegocio: \nDescriba brevemente el problema: "
-  );
-  conectarSoporte(
-    linkPro,
-    "Quiero pasar a TurnApp Pro",
-    "Hola, mi período gratuito venció y quiero activar la versión Pro.\nNegocio: \nNúmero de teléfono: \n\nNos comunicaremos con usted a la brevedad."
-  );
+  // Los mensajes se arman con los datos reales del negocio una vez que se cargan (ver onAuthStateChanged).
+  function refrescarLinksSoporte(negocio){
+    conectarSoporte(
+      linkSoporte,
+      "Asistencia técnica - TurnApp",
+      `Hola, necesito ayuda con mi cuenta de TurnApp.\nNegocio: ${negocio.nombreComercio || "(sin nombre cargado)"}\nMi WhatsApp de contacto: ${negocio.whatsappNegocio || "(no cargado)"}\nDescriba brevemente el problema: `
+    );
+    conectarSoporte(
+      linkPro,
+      "Quiero pasar a TurnApp Pro",
+      `Hola, mi período gratuito venció y quiero activar la versión Pro.\nNegocio: ${negocio.nombreComercio || "(sin nombre cargado)"}\nMi WhatsApp de contacto: ${negocio.whatsappNegocio || "(no cargado)"}\n\nNos comunicaremos con usted a la brevedad.`
+    );
+  }
 
   // --- menú desplegable ---
   const menuBtn = document.getElementById("menu-btn");
@@ -648,7 +756,7 @@
   fab.addEventListener("click", () => {
     if (vistaActual === "turnos") abrirModalTurno();
     else if (vistaActual === "servicios") abrirModalServicio();
-    else if (vistaActual === "clientes") alert("Los clientes se cargan solos a partir de los turnos que vas guardando — no hace falta agregarlos a mano.");
+    else if (vistaActual === "clientes") avisar("Los clientes se cargan solos a partir de los turnos que vas guardando — no hace falta agregarlos a mano.");
     else if (vistaActual === "caja") abrirModalCaja();
   });
 
@@ -673,7 +781,7 @@
   async function abrirModalTurno(opts){
     opts = opts || {};
     modoSolicitudId = opts.modoSolicitud || null;
-    if (!modoSolicitudId && planVencido){ alert("Tu período gratuito venció — no se pueden guardar turnos nuevos."); return; }
+    if (!modoSolicitudId && planVencido){ await avisar("Tu período gratuito venció — no se pueden guardar turnos nuevos."); return; }
 
     document.getElementById("modal-turno-title").textContent = modoSolicitudId ? "Confirmar / modificar solicitud" : "Nuevo turno";
 
@@ -744,8 +852,8 @@
 
   mtFecha.addEventListener("change", actualizarSlots);
 
-  // --- horarios: ahora chequea el bloque completo de cada turno (inicio a inicio+duración), ---
-  // --- no solo el minuto exacto de inicio, y avisa con qué turno se superpone si tocás uno ocupado ---
+  // --- horarios: chequea, minuto a minuto, qué franjas de cada turno siguen ocupadas ---
+  // --- (un turno puede tener partes reabiertas a mano — ver "Editar horario") ---
   async function actualizarSlots(){
     slotElegido = null;
     mtSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">Cargando…</span>`;
@@ -761,30 +869,24 @@
     ));
     const turnosDelDia = turnosSnap.docs
       .map(d => d.data())
-      .filter(t => {
-        const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
-        return f && f >= inicioDia && f <= finDia && !t.reabierto;
-      })
+      .filter(t => { const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null; return f && f >= inicioDia && f <= finDia; })
       .map(t => {
         const f = t.fechaHora.toDate();
         const inicio = f.getHours() * 60 + f.getMinutes();
-        return {
-          inicio,
-          fin: inicio + (t.duracionTotal || 30),
-          servicioNombre: t.servicioNombre || "un servicio",
-          clienteNombre: t.clienteNombre || "un cliente",
-        };
+        const fin = inicio + (t.duracionTotal || 30);
+        const libres = new Set(t.huecosReabiertos || []);
+        const bloqueados = [];
+        for (let m = inicio; m < fin; m += PASO_MIN) if (!libres.has(m)) bloqueados.push(m);
+        return { bloqueados, servicioNombre: t.servicioNombre || "un servicio", clienteNombre: t.clienteNombre || "un cliente" };
       });
 
     function turnosQueChocan(inicioSlot, finSlot){
-      return turnosDelDia.filter(t => inicioSlot < t.fin && finSlot > t.inicio);
+      return turnosDelDia.filter(t => t.bloqueados.some(m => m >= inicioSlot && m < finSlot));
     }
 
     const slots = [];
     for (let m = HORA_INICIO * 60; m + duracion <= HORA_FIN * 60; m += PASO_MIN){
-      const h = String(Math.floor(m / 60)).padStart(2, "0");
-      const mm = String(m % 60).padStart(2, "0");
-      slots.push({ minutos: m, texto: `${h}:${mm}`, choques: turnosQueChocan(m, m + duracion) });
+      slots.push({ minutos: m, texto: formatearHora(m), choques: turnosQueChocan(m, m + duracion) });
     }
 
     mtSlots.innerHTML = "";
@@ -797,10 +899,11 @@
       btn.type = "button";
       btn.className = "slot-btn" + (s.choques.length ? " ocupado" : "");
       btn.textContent = s.texto;
-      btn.addEventListener("click", () => {
+      btn.addEventListener("click", async () => {
         if (s.choques.length){
           const detalle = s.choques.map(c => `${c.clienteNombre} (${c.servicioNombre})`).join(", ");
-          if (!confirm(`Ese horario se superpone con: ${detalle}. ¿Igual querés asignar este turno ahí?`)) return;
+          const ok = await confirmarAccion(`Ese horario se superpone con: ${detalle}. ¿Igual querés asignar este turno ahí?`);
+          if (!ok) return;
         }
         mtSlots.querySelectorAll(".slot-btn").forEach(b => b.classList.remove("elegido"));
         btn.classList.add("elegido");
@@ -811,6 +914,23 @@
   }
 
   document.getElementById("mt-cancelar").addEventListener("click", () => modalTurno.classList.remove("show"));
+
+  // --- autocompletar: sugiere clientes ya cargados mientras se escribe el nombre ---
+  let clientesConocidos = {}; // nombre exacto -> whatsapp
+  function actualizarListaClientesConocidos(turnos){
+    clientesConocidos = {};
+    turnos.forEach(t => {
+      if (t.clienteNombre) clientesConocidos[t.clienteNombre] = t.clienteWhatsapp || "";
+    });
+    const datalist = document.getElementById("lista-clientes-conocidos");
+    datalist.innerHTML = Object.keys(clientesConocidos).sort().map(n => `<option value="${n}"></option>`).join("");
+  }
+  mtCliente.addEventListener("input", () => {
+    const coincide = clientesConocidos[mtCliente.value];
+    if (coincide !== undefined && !mtWhatsapp.value.trim()){
+      mtWhatsapp.value = coincide;
+    }
+  });
 
   function armarLinkConfirmacion(nombre, whatsapp, servicioTexto, fecha){
     const fechaTexto = fecha.toLocaleDateString("es-AR") + " a las " + fecha.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
@@ -843,7 +963,7 @@
       servicioNombre: nombreServicios,
       duracionTotal,
       fechaHora: Timestamp.fromDate(fecha),
-      reabierto: false,
+      huecosReabiertos: [],
     };
 
     if (modoSolicitudId){
@@ -888,6 +1008,13 @@
   let prefFormato = "detallado";
   let prefOrden = "horario";
 
+  function pintarBadgePlan(){
+    const b = document.getElementById("badge-plan");
+    b.textContent = planActual === "pro" ? "PRO" : "GRATIS";
+    b.className = "plan-badge " + planActual;
+    b.style.display = "inline-block";
+  }
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = "../index.html";
@@ -898,10 +1025,13 @@
     const negocioSnap = await getDoc(doc(db, "businesses", businessId));
     const negocio = negocioSnap.exists() ? negocioSnap.data() : {};
     document.getElementById("nombre-negocio-header").textContent = negocio.nombreComercio ? "· " + negocio.nombreComercio : "";
+    document.getElementById("input-whatsapp-negocio").value = negocio.whatsappNegocio || "";
+    refrescarLinksSoporte(negocio);
 
     const vencimiento = negocio.fechaVencimiento?.toDate ? negocio.fechaVencimiento.toDate() : null;
     planVencido = negocio.plan === "gratis" && vencimiento && vencimiento < new Date();
     planActual = negocio.plan || "gratis";
+    pintarBadgePlan();
     document.getElementById("overlay-vencido").classList.toggle("show", !!planVencido);
     pintarPlan(negocio);
 
@@ -923,11 +1053,20 @@
     escucharServicios();
     escucharCaja();
     escucharSolicitudes();
+    escucharResumenDisponibilidad();
 
     const hoyStr = new Date().toISOString().slice(0, 10);
     dispFecha.value = hoyStr;
     dispFecha.min = hoyStr;
     cargarDisponibilidad();
+  });
+
+  document.getElementById("btn-guardar-whatsapp").addEventListener("click", async () => {
+    const val = document.getElementById("input-whatsapp-negocio").value.trim();
+    await updateDoc(doc(db, "businesses", businessId), { whatsappNegocio: val });
+    const negocioSnap = await getDoc(doc(db, "businesses", businessId));
+    refrescarLinksSoporte(negocioSnap.exists() ? negocioSnap.data() : { whatsappNegocio: val });
+    await avisar("WhatsApp de contacto guardado.");
   });
 
   document.getElementById("btn-copiar-catalogo").addEventListener("click", () => {
@@ -1010,6 +1149,8 @@
       msgCanje.textContent = "¡Listo! Tu negocio ya está en la versión Pro.";
       const negocioSnap = await getDoc(negocioRef);
       pintarPlan(negocioSnap.data());
+      planActual = "pro";
+      pintarBadgePlan();
       planVencido = false;
       document.getElementById("overlay-vencido").classList.remove("show");
     } catch (err) {
@@ -1039,6 +1180,7 @@
         turnos.forEach((t) => lista.appendChild(renderTurno(t.id, t)));
       }
 
+      actualizarListaClientesConocidos(todosLosTurnos);
       renderClientes(todosLosTurnos);
     });
   }
@@ -1070,8 +1212,8 @@
         const card = document.createElement("div");
         card.className = "turno-card";
         let detalleHtml = `<div class="turno-servicio">Último turno: ${ultima ? ultima.toLocaleDateString("es-AR") : "—"}</div>`;
-        if (planActual === "pro" && ordenados.length > 1){
-          detalleHtml += `<div class="turno-servicio">Historial: ${ordenados.map(t => (t.fechaHora?.toDate ? t.fechaHora.toDate().toLocaleDateString("es-AR") : "") + " — " + (t.servicioNombre || "")).join(" · ")}</div>`;
+        if (planActual === "pro"){
+          detalleHtml += `<div class="turno-servicio">Historial (${ordenados.length}): ${ordenados.map(t => (t.fechaHora?.toDate ? t.fechaHora.toDate().toLocaleDateString("es-AR") : "") + " — " + (t.servicioNombre || "")).join(" · ")}</div>`;
         }
         card.innerHTML = `
           <div class="turno-info">
@@ -1081,7 +1223,7 @@
           <button class="turno-reabrir" style="border-style:solid; border-color:var(--rose-deep); color:var(--rose-deep);">Borrar</button>
         `;
         card.querySelector("button").addEventListener("click", async () => {
-          if (confirm(`¿Borrar a ${nombre} y todos sus turnos (${ordenados.length})?`)) {
+          if (await confirmarAccion(`¿Borrar a ${nombre} y todos sus turnos (${ordenados.length})?`)) {
             for (const t of ordenados){
               await deleteDoc(doc(db, "businesses", businessId, "turnos", t.id));
             }
@@ -1110,10 +1252,12 @@
             <strong>${s.nombre}</strong>
             <div class="turno-servicio">$${s.precio || 0} · ${s.duracionMin || 30} min${s.oferta ? " · Oferta: " + s.oferta : ""}</div>
           </div>
-          <button class="turno-reabrir" data-id="${docSnap.id}">Borrar</button>
+          <button class="btn-secondary" style="padding:9px 14px;" data-editar>Editar</button>
+          <button class="turno-reabrir" style="border-style:solid; border-color:var(--rose-deep); color:var(--rose-deep);" data-borrar>Borrar</button>
         `;
-        card.querySelector("button").addEventListener("click", async () => {
-          if (confirm("¿Borrar este servicio?")) await deleteDoc(doc(db, "businesses", businessId, "servicios", docSnap.id));
+        card.querySelector("[data-editar]").addEventListener("click", () => abrirModalServicio(s, docSnap.id));
+        card.querySelector("[data-borrar]").addEventListener("click", async () => {
+          if (await confirmarAccion("¿Borrar este servicio?")) await deleteDoc(doc(db, "businesses", businessId, "servicios", docSnap.id));
         });
         lista.appendChild(card);
       });
@@ -1121,11 +1265,14 @@
   }
 
   const modalServicio = document.getElementById("modal-servicio");
-  function abrirModalServicio(){
-    document.getElementById("ms-nombre").value = "";
-    document.getElementById("ms-precio").value = "";
-    document.getElementById("ms-duracion").value = "30";
-    document.getElementById("ms-oferta").value = "";
+  let editandoServicioId = null;
+  function abrirModalServicio(datos, id){
+    editandoServicioId = id || null;
+    document.getElementById("modal-servicio-title").textContent = editandoServicioId ? "Editar servicio" : "Nuevo servicio";
+    document.getElementById("ms-nombre").value = datos?.nombre || "";
+    document.getElementById("ms-precio").value = datos?.precio ?? "";
+    document.getElementById("ms-duracion").value = datos?.duracionMin || "30";
+    document.getElementById("ms-oferta").value = datos?.oferta || "";
     document.getElementById("ms-msg").className = "msg";
     modalServicio.classList.add("show");
   }
@@ -1138,7 +1285,11 @@
     const oferta = document.getElementById("ms-oferta").value.trim() || null;
     if (!nombre){ msg.className = "msg show error"; msg.textContent = "Falta el nombre del servicio."; return; }
 
-    await addDoc(collection(db, "businesses", businessId, "servicios"), { nombre, precio, duracionMin, oferta });
+    if (editandoServicioId){
+      await updateDoc(doc(db, "businesses", businessId, "servicios", editandoServicioId), { nombre, precio, duracionMin, oferta });
+    } else {
+      await addDoc(collection(db, "businesses", businessId, "servicios"), { nombre, precio, duracionMin, oferta });
+    }
     modalServicio.classList.remove("show");
   });
 
@@ -1166,7 +1317,7 @@
             <button class="turno-reabrir" data-id="${docSnap.id}">Borrar</button>
           `;
           card.querySelector("button").addEventListener("click", async () => {
-            if (confirm("¿Borrar este movimiento?")) await deleteDoc(doc(db, "businesses", businessId, "caja", docSnap.id));
+            if (await confirmarAccion("¿Borrar este movimiento?")) await deleteDoc(doc(db, "businesses", businessId, "caja", docSnap.id));
           });
           lista.appendChild(card);
         });
@@ -1178,7 +1329,7 @@
 
   const modalCaja = document.getElementById("modal-caja");
   function abrirModalCaja(){
-    if (planActual !== "pro"){ alert("Cargar movimientos de Caja es una función de la versión Pro. En gratis podés ver y borrar."); return; }
+    if (planActual !== "pro"){ avisar("Cargar movimientos de Caja es una función de la versión Pro. En gratis podés ver y borrar."); return; }
     document.getElementById("mc-tipo").value = "ingreso";
     document.getElementById("mc-monto").value = "";
     document.getElementById("mc-categoria").value = "";
@@ -1247,7 +1398,7 @@
           duracionTotal: servicio.duracionMin || 30,
           fechaHora: Timestamp.fromDate(fecha),
           estado: ESTADOS_EJEMPLO[i],
-          reabierto: i === 2,
+          huecosReabiertos: [],
         });
       }
 
@@ -1267,6 +1418,10 @@
   function renderTurno(id, t){
     const hora = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
     const horaTexto = hora ? hora.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }) : "--:--";
+    const duracion = t.duracionTotal || 30;
+    const horaFinTexto = hora
+      ? new Date(hora.getTime() + duracion * 60000).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
+      : "--:--";
 
     const card = document.createElement("div");
     card.className = "turno-card";
@@ -1279,13 +1434,10 @@
       <div class="turno-hora">${horaTexto}</div>
       <div class="turno-info">
         <button class="turno-cliente" ${whatsappHref ? "" : "disabled"}>${t.clienteNombre || "Sin nombre"}</button>
-        <div class="turno-servicio">${t.servicioNombre || "Servicio sin especificar"} · ${t.duracionTotal || 30} min</div>
+        <div class="turno-servicio">${t.servicioNombre || "Servicio sin especificar"} · ${horaTexto}–${horaFinTexto} (${duracion} min)</div>
       </div>
-      <span class="turno-badge badge-${t.estado || "Reservado"}">${t.estado || "Reservado"}</span>
-      <select class="estado-select" ${planVencido ? "disabled" : ""}></select>
-      <button class="turno-reabrir ${planVencido ? "locked" : ""}" ${planVencido ? "disabled" : ""}>
-        ${t.reabierto ? "Reabierto" : "Reabrir hueco"}
-      </button>
+      <select class="estado-select estado-${t.estado || "Reservado"}" ${planVencido ? "disabled" : ""}></select>
+      <button class="turno-reabrir ${planVencido ? "locked" : ""}" ${planVencido ? "disabled" : ""} data-editar-horario>Editar horario</button>
       <button class="turno-reabrir" style="border-style:solid; border-color:var(--rose-deep); color:var(--rose-deep);" data-borrar>Borrar</button>
     `;
 
@@ -1304,6 +1456,7 @@
         select.value = t.estado; // el modal decide el estado real al confirmar
         return;
       }
+      select.className = "estado-select estado-" + nuevoEstado;
       await updateDoc(doc(db, "businesses", businessId, "turnos", id), { estado: nuevoEstado });
     });
 
@@ -1312,20 +1465,56 @@
       btnCliente.addEventListener("click", () => window.open(whatsappHref, "_blank"));
     }
 
-    const btnReabrir = card.querySelector(".turno-reabrir:not([data-borrar])");
-    btnReabrir.addEventListener("click", async () => {
+    card.querySelector("[data-editar-horario]").addEventListener("click", () => {
       if (planVencido) return;
-      await updateDoc(doc(db, "businesses", businessId, "turnos", id), { reabierto: !t.reabierto });
+      abrirModalHuecos(id, t);
     });
 
     card.querySelector("[data-borrar]").addEventListener("click", async () => {
-      if (confirm(`¿Borrar el turno de ${t.clienteNombre || "este cliente"}?`)) {
+      if (await confirmarAccion(`¿Borrar el turno de ${t.clienteNombre || "este cliente"}?`)) {
         await deleteDoc(doc(db, "businesses", businessId, "turnos", id));
       }
     });
 
     return card;
   }
+
+  // --- editar horario ocupado: permite liberar solo una parte del bloque de un turno combinado ---
+  const modalHuecos = document.getElementById("modal-huecos");
+  const huecosSlots = document.getElementById("huecos-slots");
+  let huecosTurnoId = null;
+  let huecosSeleccion = new Set(); // minutos que quedan libres dentro del bloque del turno
+
+  function abrirModalHuecos(id, t){
+    huecosTurnoId = id;
+    const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : new Date();
+    const inicio = f.getHours() * 60 + f.getMinutes();
+    const fin = inicio + (t.duracionTotal || 30);
+    huecosSeleccion = new Set(t.huecosReabiertos || []);
+    document.getElementById("huecos-cliente").textContent =
+      `${t.clienteNombre || "Cliente"} · ${formatearHora(inicio)} a ${formatearHora(fin)}`;
+    huecosSlots.innerHTML = "";
+    for (let m = inicio; m < fin; m += PASO_MIN){
+      const libre = huecosSeleccion.has(m);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "slot-btn" + (libre ? "" : " ocupado");
+      btn.textContent = `${formatearHora(m)}–${formatearHora(m + PASO_MIN)}`;
+      btn.addEventListener("click", () => {
+        if (huecosSeleccion.has(m)) huecosSeleccion.delete(m); else huecosSeleccion.add(m);
+        btn.classList.toggle("ocupado", !huecosSeleccion.has(m));
+      });
+      huecosSlots.appendChild(btn);
+    }
+    modalHuecos.classList.add("show");
+  }
+  document.getElementById("huecos-cancelar").addEventListener("click", () => modalHuecos.classList.remove("show"));
+  document.getElementById("huecos-guardar").addEventListener("click", async () => {
+    await updateDoc(doc(db, "businesses", businessId, "turnos", huecosTurnoId), {
+      huecosReabiertos: Array.from(huecosSeleccion),
+    });
+    modalHuecos.classList.remove("show");
+  });
 
   // --- modal: cambio de turno (nuevo día/horario) ---
   const modalCambio = document.getElementById("modal-cambio-turno");
@@ -1391,7 +1580,7 @@
     card.querySelector("[data-aceptar]").addEventListener("click", () => confirmarSolicitud(id, s));
     card.querySelector("[data-modificar]").addEventListener("click", () => abrirModalTurno({ modoSolicitud: id, datos: s }));
     card.querySelector("[data-rechazar]").addEventListener("click", async () => {
-      if (confirm(`¿Rechazar el pedido de ${s.clienteNombre || "este cliente"}?`)) {
+      if (await confirmarAccion(`¿Rechazar el pedido de ${s.clienteNombre || "este cliente"}?`)) {
         await deleteDoc(doc(db, "businesses", businessId, "solicitudes", id));
       }
     });
@@ -1408,7 +1597,7 @@
       duracionTotal: s.duracionTotal || 30,
       fechaHora: s.fechaHora || Timestamp.fromDate(fecha),
       estado: "Confirmado",
-      reabierto: false,
+      huecosReabiertos: [],
     });
     await deleteDoc(doc(db, "businesses", businessId, "solicitudes", id));
     if (s.clienteWhatsapp){
@@ -1457,6 +1646,52 @@
     msg.textContent = "Disponibilidad guardada.";
     setTimeout(() => { msg.className = "msg"; }, 2000);
   });
+
+  function formatearRangosDisponibilidad(slots){
+    const ordenado = [...slots].sort((a, b) => a - b);
+    const rangos = [];
+    let inicio = null, anterior = null;
+    ordenado.forEach(m => {
+      if (inicio === null){ inicio = m; anterior = m; return; }
+      if (m === anterior + DISP_PASO){ anterior = m; return; }
+      rangos.push([inicio, anterior + DISP_PASO]);
+      inicio = m; anterior = m;
+    });
+    if (inicio !== null) rangos.push([inicio, anterior + DISP_PASO]);
+    return rangos.map(([i, f]) => formatearHora(i) + "–" + formatearHora(f)).join(", ");
+  }
+
+  function escucharResumenDisponibilidad(){
+    const ref = query(collection(db, "businesses", businessId, "disponibilidad"), orderBy(documentId()));
+    onSnapshot(ref, (snap) => {
+      const lista = document.getElementById("disp-resumen-list");
+      const conHorarios = snap.docs.filter(d => (d.data().slots || []).length);
+      if (!conHorarios.length){
+        lista.innerHTML = `<div class="empty-state">Todavía no cargaste disponibilidad para ningún día.</div>`;
+        return;
+      }
+      lista.innerHTML = "";
+      conHorarios.forEach(docSnap => {
+        const slots = docSnap.data().slots || [];
+        const fechaObj = new Date(docSnap.id + "T00:00:00");
+        const card = document.createElement("div");
+        card.className = "turno-card";
+        card.innerHTML = `
+          <div class="turno-info">
+            <strong>${fechaObj.toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "2-digit" })}</strong>
+            <div class="turno-servicio">${formatearRangosDisponibilidad(slots)}</div>
+          </div>
+          <button class="turno-reabrir" data-editar>Editar</button>
+        `;
+        card.querySelector("[data-editar]").addEventListener("click", () => {
+          dispFecha.value = docSnap.id;
+          cargarDisponibilidad();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+        lista.appendChild(card);
+      });
+    });
+  }
 </script>
 
 </body>
