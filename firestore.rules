@@ -1,19 +1,33 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
     // Catálogo de servicios: lectura pública, escritura solo del dueño del negocio
     match /businesses/{businessId}/servicios/{id} {
       allow read: if true;
       allow write: if request.auth != null && request.auth.uid == businessId;
     }
-
-    // Turnos: cualquiera puede crear una solicitud, solo el dueño lee/gestiona
+    // Turnos ya confirmados: solo el dueño del negocio los crea (directo desde el
+    // panel, o al confirmar una solicitud que llegó del catálogo) y solo él los lee
+    // o gestiona. El cliente ya no escribe acá directo — primero pasa por
+    // "solicitudes".
     match /businesses/{businessId}/turnos/{id} {
+      allow read, write: if request.auth != null && request.auth.uid == businessId;
+    }
+    // Solicitudes: pedidos de turno que llegan desde el catálogo público, antes de
+    // ser confirmados. Cualquiera puede crear una solicitud (el cliente, sin login);
+    // solo el dueño del negocio puede leerlas, modificarlas o borrarlas — es lo que
+    // usa el panel para aceptar, modificar o rechazar.
+    match /businesses/{businessId}/solicitudes/{id} {
       allow create: if true;
       allow read, update, delete: if request.auth != null && request.auth.uid == businessId;
     }
-
+    // Disponibilidad: los horarios que el profesional habilita para cada día.
+    // Lectura pública (la necesita el catálogo para armar los horarios que ofrece),
+    // escritura solo del dueño del negocio.
+    match /businesses/{businessId}/disponibilidad/{fecha} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.uid == businessId;
+    }
     // Clientes y caja: privados, solo el dueño del negocio
     match /businesses/{businessId}/clientes/{id} {
       allow read, write: if request.auth != null && request.auth.uid == businessId;
@@ -21,7 +35,6 @@ service cloud.firestore {
     match /businesses/{businessId}/caja/{id} {
       allow read, write: if request.auth != null && request.auth.uid == businessId;
     }
-
     // Datos del negocio (nombre, tema, plan, vencimiento): lectura pública
     // (la necesita el catálogo para saber si el negocio está activo),
     // escritura solo del dueño.
@@ -29,12 +42,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null && request.auth.uid == businessId;
     }
-
     // Todo lo demás (consultorios, profesionales, etc.): solo el dueño
     match /businesses/{businessId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == businessId;
     }
-
     // Códigos de canje para pasar a la versión Pro.
     // Solo la cuenta de administrador (Sebas) puede crearlos y ver la lista completa,
     // desde el panel privado admin/index.html. Cualquier negocio autenticado puede
