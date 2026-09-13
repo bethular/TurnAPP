@@ -1,6 +1,12 @@
+// Archivo: sw.js (raíz)
 // sw.js — service worker mínimo, solo para que la PWA sea instalable.
 // El cacheo de datos lo maneja Firestore (persistencia offline propia);
 // acá no cacheamos nada crítico para no servir versiones viejas de la app.
+//
+// IMPORTANTE al publicar una actualización: subí el número de CACHE_NAME
+// (v1 -> v2 -> v3...). Eso es lo que dispara el aviso de "nueva versión"
+// en pantalla (ver registrarServiceWorker en config.js). Si no lo subís,
+// el navegador sigue viendo el mismo service worker y no detecta nada nuevo.
 
 const CACHE_NAME = "turnapp-shell-v1";
 const SHELL_FILES = ["./", "./index.html", "./config.js", "./manifest.json"];

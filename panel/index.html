@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Archivo: panel/index.html -->
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
@@ -6,17 +7,6 @@
 <title>Panel — TurnApp</title>
 <link rel="manifest" href="../manifest.json" />
 <meta name="theme-color" content="#3F5044" />
-<link rel="apple-touch-icon" href="../icons/icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="TurnApp">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => {});
-    });
-  }
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -33,6 +23,7 @@
     --rose-deep: #9C3B3B;
     --line: rgba(38,42,32,0.14);
     --radius: 14px;
+    --ui-scale: 1; /* tamaño de letra editable — ver select "Tamaño de letra" en Configuración */
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -57,12 +48,31 @@
     z-index:20;
   }
   .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Work Sans', sans-serif;
+    font-weight:700;
+    font-size:calc(12px * var(--ui-scale));
+    color:rgba(47,64,51,0.5);
+    letter-spacing:.01em;
+  }
+  .brand .logo-negocio{
+    width:34px;
+    height:34px;
+    border-radius:9px;
+    object-fit:cover;
+    display:none;
+  }
+  .brand .logo-negocio.show{ display:block; }
+  .brand span#nombre-negocio-header{
     font-family:'Fraunces', serif;
     font-weight:600;
-    font-size:19px;
+    font-style:normal;
+    font-size:calc(22px * var(--ui-scale));
     color:var(--forest);
+    margin-left:0;
   }
-  .brand span{ font-weight:400; font-style:italic; color:rgba(47,64,51,0.55); font-size:15px; margin-left:6px;}
 
   .menu-wrap{ position:relative; }
   .menu-btn{
@@ -74,7 +84,7 @@
     border:1px solid var(--line);
     background:var(--cream);
     font-family:inherit;
-    font-size:13.5px;
+    font-size:calc(13.5px * var(--ui-scale));
     font-weight:600;
     color:var(--ink);
     cursor:pointer;
@@ -103,7 +113,7 @@
     border:none;
     background:none;
     font-family:inherit;
-    font-size:13.5px;
+    font-size:calc(13.5px * var(--ui-scale));
     color:var(--ink);
     cursor:pointer;
     text-decoration:none;
@@ -112,14 +122,14 @@
   .menu-dropdown hr{ border:none; border-top:1px solid var(--line); margin:6px 4px; }
   .menu-dropdown .soporte{ color:var(--gold); font-weight:600; }
   .badge-count{
-    display:inline-block; background:var(--rose-deep); color:#fff; font-size:10.5px; font-weight:700;
+    display:inline-block; background:var(--rose-deep); color:#fff; font-size:calc(10.5px * var(--ui-scale)); font-weight:700;
     padding:1px 7px; border-radius:999px; margin-left:6px;
   }
 
   /* ---------- layout ---------- */
   .layout{ display:flex; min-height:calc(100vh - 61px); justify-content:center; }
   .menu-dropdown .pro-tag{
-    font-size:10px;
+    font-size:calc(10px * var(--ui-scale));
     font-weight:700;
     letter-spacing:.03em;
     color:var(--gold);
@@ -138,7 +148,7 @@
     background:var(--forest);
     color:var(--cream);
     border:none;
-    font-size:28px;
+    font-size:calc(28px * var(--ui-scale));
     line-height:1;
     display:flex;
     align-items:center;
@@ -156,34 +166,34 @@
   h1.view-title{
     font-family:'Fraunces', serif;
     font-weight:500;
-    font-size:26px;
+    font-size:calc(26px * var(--ui-scale));
     color:var(--forest);
     margin:0 0 4px;
   }
-  .view-sub{ font-size:13.5px; color:rgba(38,42,32,0.55); margin:0 0 22px; }
+  .view-sub{ font-size:calc(13.5px * var(--ui-scale)); color:rgba(38,42,32,0.55); margin:0 0 22px; }
 
   /* ---------- turnos ---------- */
   .turnos-list{ display:flex; flex-direction:column; gap:10px; }
   .turnos-list.recuadros{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
-    gap:12px;
+    grid-template-columns:repeat(auto-fill, minmax(170px, 1fr));
+    gap:9px;
   }
-  .turnos-list.recuadros .turno-card{ flex-direction:column; align-items:flex-start; gap:8px; }
+  .turnos-list.recuadros .turno-card{ flex-direction:column; align-items:flex-start; gap:6px; padding:10px 12px; }
   .turno-card{
     background:#fff;
     border:1px solid var(--line);
-    border-radius:12px;
-    padding:14px 16px;
+    border-radius:11px;
+    padding:10px 13px;
     display:flex;
     align-items:center;
-    gap:14px;
+    gap:11px;
     flex-wrap:wrap;
   }
   .turno-hora{
     font-family:'Fraunces', serif;
     font-weight:600;
-    font-size:17px;
+    font-size:calc(17px * var(--ui-scale));
     color:var(--forest);
     width:64px;
     flex-shrink:0;
@@ -191,7 +201,7 @@
   .turno-info{ flex:1; min-width:180px; }
   .turno-cliente{
     font-weight:600;
-    font-size:14.5px;
+    font-size:calc(14.5px * var(--ui-scale));
     background:none;
     border:none;
     padding:0;
@@ -202,10 +212,10 @@
     text-underline-offset:3px;
   }
   .turno-cliente:hover{ color:var(--forest); }
-  .turno-servicio{ font-size:12.5px; color:rgba(38,42,32,0.55); margin-top:2px; }
+  .turno-servicio{ font-size:calc(12.5px * var(--ui-scale)); color:rgba(38,42,32,0.55); margin-top:2px; }
 
   .turno-badge{
-    font-size:11px;
+    font-size:calc(11px * var(--ui-scale));
     font-weight:700;
     padding:4px 9px;
     border-radius:999px;
@@ -220,7 +230,7 @@
 
   select.estado-select{
     font-family:inherit;
-    font-size:12.5px;
+    font-size:calc(12.5px * var(--ui-scale));
     font-weight:600;
     padding:7px 9px;
     border-radius:8px;
@@ -235,14 +245,14 @@
   select.estado-select.estado-Ausente{ background:rgba(156,59,59,0.1); border-color:rgba(156,59,59,0.35); color:var(--rose-deep); }
 
   .plan-badge{
-    display:inline-block; font-size:10px; font-weight:700; letter-spacing:.03em;
+    display:inline-block; font-size:calc(10px * var(--ui-scale)); font-weight:700; letter-spacing:.03em;
     padding:2px 8px; border-radius:999px; margin-left:8px; vertical-align:middle;
   }
   .plan-badge.pro{ background:rgba(184,134,46,0.15); color:var(--gold); }
   .plan-badge.gratis{ background:rgba(47,64,51,0.12); color:var(--forest); }
 
   .turno-reabrir{
-    font-size:11.5px;
+    font-size:calc(11.5px * var(--ui-scale));
     font-weight:600;
     padding:6px 10px;
     border-radius:7px;
@@ -260,7 +270,7 @@
     text-align:center;
     padding:60px 20px;
     color:rgba(38,42,32,0.5);
-    font-size:14px;
+    font-size:calc(14px * var(--ui-scale));
   }
 
   /* ---------- placeholder de otras vistas ---------- */
@@ -271,7 +281,7 @@
     padding:40px 24px;
     text-align:center;
     color:rgba(38,42,32,0.5);
-    font-size:14px;
+    font-size:calc(14px * var(--ui-scale));
   }
 
   /* ---------- overlay de bloqueo ---------- */
@@ -311,18 +321,18 @@
     .modal-card{ border-radius:16px; }
   }
   .modal-card h2{
-    font-family:'Fraunces', serif; font-weight:500; font-size:20px; color:var(--forest); margin:0 0 16px;
+    font-family:'Fraunces', serif; font-weight:500; font-size:calc(20px * var(--ui-scale)); color:var(--forest); margin:0 0 16px;
   }
   .modal-field{ margin-bottom:14px; }
-  .modal-field label{ font-size:12.5px; font-weight:600; color:rgba(38,42,32,0.6); display:block; margin-bottom:5px; }
+  .modal-field label{ font-size:calc(12.5px * var(--ui-scale)); font-weight:600; color:rgba(38,42,32,0.6); display:block; margin-bottom:5px; }
   .modal-field input, .modal-field select{
     width:100%; padding:11px 12px; border-radius:9px; border:1px solid var(--line);
-    background:var(--cream); font-family:inherit; font-size:14.5px; color:var(--ink);
+    background:var(--cream); font-family:inherit; font-size:calc(14.5px * var(--ui-scale)); color:var(--ink);
   }
   .servicios-check{ display:flex; flex-direction:column; gap:6px; }
   .servicio-check-item{
     display:flex; align-items:center; gap:8px; padding:9px 10px; border-radius:8px;
-    border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:13.5px;
+    border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(13.5px * var(--ui-scale));
     color:var(--ink); cursor:pointer;
   }
   .servicio-check-item input{ width:auto; margin:0; }
@@ -330,7 +340,7 @@
   .slots-grid{ display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
   .slot-btn{
     padding:8px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream);
-    font-family:inherit; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer;
+    font-family:inherit; font-size:calc(13px * var(--ui-scale)); font-weight:600; color:var(--ink); cursor:pointer;
   }
   .slot-btn.ocupado{ opacity:0.55; border-style:dashed; border-color:var(--rose-deep); color:var(--rose-deep); }
   .slot-btn.elegido{ background:var(--forest); color:var(--cream); border-color:var(--forest); }
@@ -338,16 +348,16 @@
   .modal-actions button{ flex:1; }
   .btn-cancelar{
     background:var(--cream-deep); color:var(--ink); border:none; border-radius:9px;
-    padding:12px 0; font-family:inherit; font-weight:600; font-size:14.5px; cursor:pointer;
+    padding:12px 0; font-family:inherit; font-weight:600; font-size:calc(14.5px * var(--ui-scale)); cursor:pointer;
   }
   .venc-card h2{
     font-family:'Fraunces', serif;
     font-weight:500;
-    font-size:22px;
+    font-size:calc(22px * var(--ui-scale));
     color:var(--forest);
     margin:0 0 10px;
   }
-  .venc-card p{ font-size:14px; color:rgba(38,42,32,0.65); line-height:1.5; margin:0 0 22px; }
+  .venc-card p{ font-size:calc(14px * var(--ui-scale)); color:rgba(38,42,32,0.65); line-height:1.5; margin:0 0 22px; }
   .venc-btn{
     display:inline-block;
     padding:12px 22px;
@@ -355,32 +365,130 @@
     background:var(--gold);
     color:#fff;
     font-weight:600;
-    font-size:14px;
+    font-size:calc(14px * var(--ui-scale));
     text-decoration:none;
   }
 
-  .msg{ font-size:13px; padding:10px 12px; border-radius:8px; margin-top:10px; display:none; }
+  .msg{ font-size:calc(13px * var(--ui-scale)); padding:10px 12px; border-radius:8px; margin-top:10px; display:none; }
   .msg.show{ display:block; }
   .msg.error{ background:rgba(196,66,66,0.1); color:#9C3B3B; }
   .msg.ok{ background:rgba(63,80,68,0.1); color:var(--forest); }
+
+  /* ---------- sidebar de PC (#18) — en celular se mantiene el dropdown de siempre ---------- */
+  .sidebar{ display:none; }
+
+  /* ---------- calendario de turnos libres/ocupados (#10) ---------- */
+  .cal-toolbar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .cal-toolbar select, .cal-toolbar button{
+    font-family:inherit; font-size:calc(13px * var(--ui-scale)); font-weight:600; padding:8px 12px;
+    border-radius:8px; border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer;
+  }
+  .cal-toolbar .cal-titulo{ font-family:'Fraunces', serif; font-weight:600; font-size:calc(16px * var(--ui-scale)); color:var(--forest); flex:1; text-align:center; min-width:140px; }
+  .cal-grid-mes{ display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; }
+  .cal-dia-mes{
+    aspect-ratio:1; border-radius:9px; border:1px solid var(--line); background:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    font-size:calc(12.5px * var(--ui-scale)); font-weight:600; color:var(--ink); cursor:pointer;
+  }
+  .cal-dia-mes:hover{ box-shadow:0 6px 14px -8px rgba(38,42,32,0.35); }
+  .cal-dia-mes.fuera-de-mes{ opacity:0.3; cursor:default; }
+  .cal-dia-mes .cal-punto{ width:8px; height:8px; border-radius:50%; background:var(--line); }
+  .cal-dia-mes.libre .cal-punto{ background:#3D6B4A; }
+  .cal-dia-mes.parcial .cal-punto{ background:var(--gold); }
+  .cal-dia-mes.completo .cal-punto{ background:var(--rose-deep); }
+  .cal-dia-mes.hoy{ border-color:var(--forest); border-width:2px; }
+  .cal-grid-semana{ display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; }
+  .cal-dia-semana{
+    border-radius:9px; border:1px solid var(--line); background:#fff; padding:10px 6px;
+    text-align:center; cursor:pointer; display:flex; flex-direction:column; gap:6px; align-items:center;
+  }
+  .cal-dia-semana:hover{ box-shadow:0 6px 14px -8px rgba(38,42,32,0.35); }
+  .cal-dia-semana .cal-punto{ width:10px; height:10px; border-radius:50%; background:var(--line); }
+  .cal-dia-semana.libre .cal-punto{ background:#3D6B4A; }
+  .cal-dia-semana.parcial .cal-punto{ background:var(--gold); }
+  .cal-dia-semana.completo .cal-punto{ background:var(--rose-deep); }
+  .cal-dia-semana strong{ font-size:calc(12px * var(--ui-scale)); }
+  .cal-dia-semana span{ font-size:calc(10.5px * var(--ui-scale)); color:rgba(38,42,32,0.55); }
+  .cal-leyenda{ display:flex; gap:14px; flex-wrap:wrap; margin-top:12px; font-size:calc(12px * var(--ui-scale)); color:rgba(38,42,32,0.6); }
+  .cal-leyenda span{ display:inline-flex; align-items:center; gap:6px; }
+  .cal-leyenda .cal-punto{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+
+  /* ---------- cliente: preview simplificada + modal de historial (#6) ---------- */
+  .cliente-preview{ cursor:pointer; }
+  .cliente-preview:hover{ background:var(--cream-deep); }
+  .historial-entrada{
+    border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px; background:var(--cream);
+  }
+  .historial-entrada .he-top{ display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; align-items:center; }
+  .historial-entrada label{ font-size:calc(11.5px * var(--ui-scale)); font-weight:600; color:rgba(38,42,32,0.55); display:block; margin-top:8px; }
+  .historial-entrada textarea{
+    width:100%; margin-top:4px; padding:8px 10px; border-radius:7px; border:1px solid var(--line);
+    background:#fff; font-family:inherit; font-size:calc(12.5px * var(--ui-scale)); color:var(--ink); resize:vertical; min-height:38px;
+  }
+  .historial-acciones{ display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .historial-acciones button{
+    font-size:calc(11.5px * var(--ui-scale)); font-weight:600; padding:6px 10px; border-radius:7px;
+    border:1px dashed var(--line); background:transparent; color:var(--ink); cursor:pointer; font-family:inherit;
+  }
+
+  /* ---------- categorías de caja editables + balances por período (#11) ---------- */
+  .categoria-chip{
+    display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
+    background:var(--cream); border:1px solid var(--line); font-size:calc(12.5px * var(--ui-scale)); font-weight:600;
+  }
+  .categoria-chip button{
+    border:none; background:none; color:var(--rose-deep); font-weight:700; cursor:pointer; font-family:inherit; font-size:calc(13px * var(--ui-scale)); padding:0; line-height:1;
+  }
+  .caja-desglose-cat{ display:flex; justify-content:space-between; font-size:calc(12.5px * var(--ui-scale)); padding:4px 0; border-bottom:1px dashed var(--line); }
+  .caja-desglose-cat:last-child{ border-bottom:none; }
+
+  @media (min-width: 1024px){
+    .menu-wrap{ display:none; }
+    .sidebar{
+      display:flex; flex-direction:column; justify-content:space-between;
+      width:220px; flex-shrink:0; background:#fff; border-right:1px solid var(--line);
+      padding:20px 12px; position:sticky; top:61px; height:calc(100vh - 61px); align-self:flex-start;
+    }
+    .sidebar-links{ display:flex; flex-direction:column; gap:2px; }
+    .sidebar a, .sidebar button{
+      display:block; width:100%; text-align:left; padding:10px 12px; border-radius:8px; border:none;
+      background:none; font-family:inherit; font-size:calc(13.5px * var(--ui-scale)); color:var(--ink);
+      text-decoration:none; cursor:pointer;
+    }
+    .sidebar a:hover, .sidebar button:hover{ background:var(--cream); }
+    .sidebar a.active{ background:rgba(47,64,51,0.1); color:var(--forest); font-weight:700; }
+    .sidebar .pro-tag{ font-size:calc(9.5px * var(--ui-scale)); font-weight:700; color:var(--gold); margin-left:5px; }
+    .sidebar hr{ border:none; border-top:1px solid var(--line); margin:8px 4px; }
+    .sidebar .soporte{ color:var(--gold); font-weight:600; }
+    .layout{ justify-content:flex-start; }
+    main.content{ max-width:760px; margin:0 auto; padding:30px 30px 100px; }
+  }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="brand">TurnApp <span id="nombre-negocio-header"></span><span class="plan-badge" id="badge-plan" style="display:none;"></span></div>
+  <div class="brand">
+    <img class="logo-negocio" id="logo-negocio" alt="Logo del negocio">
+    <div>
+      <div><span id="nombre-negocio-header"></span><span class="plan-badge" id="badge-plan" style="display:none;"></span></div>
+      <div style="font-size:calc(11px * var(--ui-scale)); color:rgba(47,64,51,0.5); font-weight:600; letter-spacing:.02em;">TurnApp</div>
+    </div>
+  </div>
   <div class="menu-wrap">
     <button class="menu-btn" id="menu-btn">
       Menú ▾
     </button>
     <div class="menu-dropdown" id="menu-dropdown">
       <a href="#" data-view="turnos">Turnos</a>
+      <a href="#" data-view="calendario">Calendario</a>
       <a href="#" data-view="solicitudes">Solicitudes <span class="badge-count" id="badge-solicitudes" style="display:none;"></span></a>
       <a href="#" data-view="disponibilidad">Disponibilidad</a>
       <a href="#" data-view="servicios">Servicios / Catálogo</a>
       <a href="#" data-view="clientes">Clientes</a>
       <a href="#" data-view="caja">Caja <span class="pro-tag">PRO</span></a>
       <a href="#" data-view="config">Configuración</a>
+      <a href="#" data-view="tusapp">TusApp</a>
       <hr>
       <button id="btn-logout">Cerrar sesión</button>
       <hr>
@@ -390,6 +498,24 @@
 </div>
 
 <div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-links">
+      <a href="#" data-view="turnos">Turnos</a>
+      <a href="#" data-view="calendario">Calendario</a>
+      <a href="#" data-view="solicitudes">Solicitudes <span class="badge-count" id="badge-solicitudes-sidebar" style="display:none;"></span></a>
+      <a href="#" data-view="disponibilidad">Disponibilidad</a>
+      <a href="#" data-view="servicios">Servicios / Catálogo</a>
+      <a href="#" data-view="clientes">Clientes</a>
+      <a href="#" data-view="caja">Caja <span class="pro-tag">PRO</span></a>
+      <a href="#" data-view="config">Configuración</a>
+      <a href="#" data-view="tusapp">TusApp</a>
+    </div>
+    <div class="sidebar-links">
+      <hr>
+      <button id="btn-logout-sidebar">Cerrar sesión</button>
+      <a class="soporte" id="link-soporte-sidebar" href="#">Asistencia técnica</a>
+    </div>
+  </nav>
   <main class="content">
 
     <section class="view active" id="view-turnos">
@@ -397,6 +523,28 @@
       <p class="view-sub">Nombre del cliente y servicio, para decidir de un vistazo si reabrís un hueco o das otro turno encima.</p>
       <div class="turnos-list" id="turnos-list">
         <div class="empty-state">Cargando turnos…</div>
+      </div>
+    </section>
+
+    <section class="view" id="view-calendario">
+      <h1 class="view-title">Calendario</h1>
+      <p class="view-sub">De un vistazo: verde es un día con casi todo libre, amarillo tiene turnos libres y ocupados mezclados, rojo está completo. Tocá un horario libre para reservar ahí mismo.</p>
+      <div class="cal-toolbar">
+        <button id="cal-anterior">◂</button>
+        <span class="cal-titulo" id="cal-titulo"></span>
+        <button id="cal-siguiente">▸</button>
+        <button id="cal-hoy">Hoy</button>
+        <select id="cal-modo">
+          <option value="dia">Día</option>
+          <option value="semana">Semana</option>
+          <option value="mes" selected>Mes</option>
+        </select>
+      </div>
+      <div id="cal-contenido"></div>
+      <div class="cal-leyenda">
+        <span><i class="cal-punto" style="background:#3D6B4A;"></i> Casi vacío</span>
+        <span><i class="cal-punto" style="background:var(--gold);"></i> Con libres y ocupados</span>
+        <span><i class="cal-punto" style="background:var(--rose-deep);"></i> Completo</span>
       </div>
     </section>
 
@@ -411,6 +559,7 @@
     <section class="view" id="view-clientes">
       <h1 class="view-title">Clientes</h1>
       <p class="view-sub" id="clientes-sub">En el plan gratis solo se ve la última fecha de turno de cada cliente.</p>
+      <input type="text" id="buscar-cliente" placeholder="Buscar por nombre o teléfono…" style="width:100%; max-width:360px; padding:10px 12px; border-radius:9px; border:1px solid var(--line); background:#fff; font-family:inherit; font-size:calc(14px * var(--ui-scale)); color:var(--ink); margin-bottom:14px;">
       <div class="turnos-list" id="clientes-list">
         <div class="empty-state">Cargando clientes…</div>
       </div>
@@ -419,8 +568,23 @@
     <section class="view" id="view-caja">
       <h1 class="view-title">Caja</h1>
       <p class="view-sub" id="caja-sub">Ingresos, gastos y resumen por período.</p>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:14px;">
+        <strong>Balance del período</strong>
+        <div class="cal-toolbar" style="margin-bottom:0;">
+          <select id="caja-periodo-tipo">
+            <option value="dia">Día</option>
+            <option value="mes" selected>Mes</option>
+            <option value="anio">Año</option>
+          </select>
+          <input type="date" id="caja-periodo-fecha" style="padding:8px 10px; border-radius:8px; border:1px solid var(--line); font-family:inherit; font-size:calc(13px * var(--ui-scale));">
+        </div>
+        <strong id="caja-resumen-periodo-total">Ingresos: $0 · Gastos: $0 · Saldo: $0</strong>
+        <div id="caja-resumen-periodo-categorias"></div>
+      </div>
+
       <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:4px; margin-bottom:14px;">
-        <strong id="caja-resumen">Ingresos: $0 · Gastos: $0 · Saldo: $0</strong>
+        <strong id="caja-resumen">Total histórico — Ingresos: $0 · Gastos: $0 · Saldo: $0</strong>
       </div>
       <div class="turnos-list" id="caja-list">
         <div class="empty-state">Cargando caja…</div>
@@ -437,15 +601,29 @@
           <div class="turno-servicio" id="plan-detalle"></div>
         </div>
         <div id="canje-form" style="display:flex; gap:8px; flex-wrap:wrap;">
-          <input type="text" id="input-codigo" placeholder="Código de la versión Pro" style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:14px;">
+          <input type="text" id="input-codigo" placeholder="Código de la versión Pro" style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(14px * var(--ui-scale));">
           <button class="submit" id="btn-canjear" style="width:auto; padding:10px 18px;">Canjear</button>
         </div>
         <div class="msg" id="msg-canje"></div>
       </div>
 
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:16px;">
+        <strong>Tu comercio</strong>
+        <p class="turno-servicio" style="margin:0;">Nombre y logo que se ven arriba de todo, en el panel y en tu catálogo.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="input-nombre-negocio" placeholder="Nombre del comercio" style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(14px * var(--ui-scale));">
+          <button class="submit" id="btn-guardar-nombre" style="width:auto; padding:10px 18px;">Guardar</button>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="input-logo-url" placeholder="Link a la imagen del logo (opcional)" style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(14px * var(--ui-scale));">
+          <button class="submit" id="btn-guardar-logo" style="width:auto; padding:10px 18px;">Guardar</button>
+        </div>
+        <div class="msg" id="msg-comercio"></div>
+      </div>
+
       <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:12px; margin-bottom:16px;">
         <strong>Cómo se ven las listas</strong>
-        <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:13.5px;">
+        <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:calc(13.5px * var(--ui-scale));">
           <label>Formato:
             <select id="pref-formato" class="estado-select">
               <option value="detallado">Detallado</option>
@@ -458,6 +636,14 @@
               <option value="nombre">Nombre</option>
             </select>
           </label>
+          <label>Tamaño de letra:
+            <select id="pref-tamano-letra" class="estado-select">
+              <option value="0.9">Chico</option>
+              <option value="1">Mediano</option>
+              <option value="1.15">Grande</option>
+              <option value="1.3">Muy grande</option>
+            </select>
+          </label>
         </div>
       </div>
 
@@ -465,7 +651,7 @@
         <strong>Tu WhatsApp de contacto</strong>
         <p class="turno-servicio" style="margin:0;">Lo usamos para completar automáticamente tus mensajes de soporte y de pedido de Pro.</p>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <input type="text" id="input-whatsapp-negocio" placeholder="Ej: 5493751..." style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:14px;">
+          <input type="text" id="input-whatsapp-negocio" placeholder="Ej: 5493751..." style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(14px * var(--ui-scale));">
           <button class="submit" id="btn-guardar-whatsapp" style="width:auto; padding:10px 18px;">Guardar</button>
         </div>
       </div>
@@ -474,7 +660,7 @@
         <strong>Tu catálogo público</strong>
         <p class="turno-servicio" style="margin:0;">Compartí este link con tus clientes para que pidan turno solos.</p>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <input type="text" id="link-catalogo" readonly style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:13px;">
+          <input type="text" id="link-catalogo" readonly style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(13px * var(--ui-scale));">
           <button class="submit" id="btn-copiar-catalogo" style="width:auto; padding:10px 18px;">Copiar</button>
         </div>
       </div>
@@ -485,10 +671,35 @@
         <button class="submit" id="btn-exportar" style="width:auto; max-width:220px;">Descargar mis datos</button>
       </div>
 
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:16px;">
+        <strong>Categorías de Caja</strong>
+        <p class="turno-servicio" style="margin:0;">Las categorías que vas a poder elegir al cargar un movimiento de Caja.</p>
+        <div id="lista-categorias-caja" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="input-nueva-categoria" placeholder="Nueva categoría (ej: Corte, Insumos, Alquiler)" style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(14px * var(--ui-scale));">
+          <button class="submit" id="btn-agregar-categoria" style="width:auto; padding:10px 18px;">Agregar</button>
+        </div>
+      </div>
+
       <div class="stub" style="text-align:left; padding:24px;">
         <p style="margin-top:0;">Todavía no armamos la edición de estos datos. Mientras tanto, podés cargar datos de ejemplo para ver la app funcionando:</p>
         <button class="submit" id="btn-seed" style="max-width:260px;">Cargar datos de ejemplo</button>
-        <p id="seed-msg" style="font-size:12.5px; color:rgba(38,42,32,0.55); margin-top:10px;"></p>
+        <p id="seed-msg" style="font-size:calc(12.5px * var(--ui-scale)); color:rgba(38,42,32,0.55); margin-top:10px;"></p>
+      </div>
+
+      <div class="turno-card" id="sobre-nosotros-config" style="flex-direction:column; align-items:stretch; gap:10px;">
+        <strong>Sobre nosotros</strong>
+        <!-- Sebas: acá va el HTML de TusApp para "sobre nosotros" (pediente de recibir el contenido) -->
+        <p class="turno-servicio" style="margin:0;">TurnApp es una app de TusApp.</p>
+      </div>
+    </section>
+
+    <section class="view" id="view-tusapp">
+      <h1 class="view-title">TusApp</h1>
+      <p class="view-sub">Otras apps y novedades de TusApp para tu negocio.</p>
+      <div class="turno-card" id="tusapp-publicidad" style="flex-direction:column; align-items:stretch; gap:10px;">
+        <!-- Sebas: acá va el HTML de publicidad de TusApp que ibas a pasar -->
+        <p class="turno-servicio" style="margin:0;">Muy pronto vas a ver acá novedades de TusApp.</p>
       </div>
     </section>
 
@@ -502,9 +713,19 @@
 
     <section class="view" id="view-disponibilidad">
       <h1 class="view-title">Disponibilidad</h1>
-      <p class="view-sub">Elegí un día y tildá los horarios en los que vas a poder atender. Lo que no tildes no va a aparecer en tu catálogo.</p>
+      <p class="view-sub">Elegí un día, el rango horario que quieras (mañana, noche, lo que sea) y tildá los horarios en los que vas a poder atender. Lo que no tildes no va a aparecer en tu catálogo.</p>
       <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:14px; max-width:520px;">
         <input type="date" id="disp-fecha">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:120px;">
+            <label style="font-size:calc(12px * var(--ui-scale)); font-weight:600; color:rgba(38,42,32,0.6); display:block; margin-bottom:4px;">Desde</label>
+            <input type="time" id="disp-desde" step="1800">
+          </div>
+          <div style="flex:1; min-width:120px;">
+            <label style="font-size:calc(12px * var(--ui-scale)); font-weight:600; color:rgba(38,42,32,0.6); display:block; margin-bottom:4px;">Hasta</label>
+            <input type="time" id="disp-hasta" step="1800">
+          </div>
+        </div>
         <div class="slots-grid" id="disp-slots"></div>
         <button class="submit" id="disp-guardar" style="width:auto; max-width:220px;">Guardar disponibilidad</button>
         <div class="msg" id="disp-msg"></div>
@@ -537,8 +758,8 @@
     </div>
     <div class="modal-field">
       <label>Servicios (podés elegir más de uno)</label>
-      <div class="servicios-check" id="mt-servicios-check"><span style="font-size:13px; color:rgba(38,42,32,0.5);">Cargando servicios…</span></div>
-      <div style="font-size:12.5px; color:rgba(38,42,32,0.6); margin-top:8px;" id="mt-duracion-total"></div>
+      <div class="servicios-check" id="mt-servicios-check"><span style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);">Cargando servicios…</span></div>
+      <div style="font-size:calc(12.5px * var(--ui-scale)); color:rgba(38,42,32,0.6); margin-top:8px;" id="mt-duracion-total"></div>
     </div>
     <div class="modal-field">
       <label for="mt-fecha">Día</label>
@@ -546,7 +767,7 @@
     </div>
     <div class="modal-field">
       <label>Horario disponible</label>
-      <div class="slots-grid" id="mt-slots"><span style="font-size:13px; color:rgba(38,42,32,0.5);">Elegí un día para ver los horarios</span></div>
+      <div class="slots-grid" id="mt-slots"><span style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);">Elegí un día para ver los horarios</span></div>
     </div>
     <div class="msg" id="mt-msg"></div>
 
@@ -580,15 +801,38 @@
       <select id="mc-tipo"><option value="ingreso">Ingreso</option><option value="gasto">Gasto</option></select>
     </div>
     <div class="modal-field"><label for="mc-monto">Monto</label><input type="number" id="mc-monto" min="0"></div>
-    <div class="modal-field"><label for="mc-categoria">Categoría</label><input type="text" id="mc-categoria" placeholder="Ej: Corte, Insumos, Alquiler"></div>
+    <div class="modal-field">
+      <label for="mc-categoria">Categoría</label>
+      <select id="mc-categoria"><option value="">Sin categoría</option></select>
+    </div>
     <div class="modal-field">
       <label for="mc-mediopago">Medio de pago</label>
-      <select id="mc-mediopago"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Otro</option></select>
+      <select id="mc-mediopago"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Cuenta corriente</option><option>Otro</option></select>
     </div>
     <div class="msg" id="mc-msg"></div>
     <div class="modal-actions">
       <button class="btn-cancelar" id="mc-cancelar">Cancelar</button>
       <button class="submit" id="mc-guardar">Guardar movimiento</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-cliente-detalle">
+  <div class="modal-card" style="max-width:480px;">
+    <h2 id="cd-nombre">Cliente</h2>
+    <p style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.6); margin:-10px 0 14px;" id="cd-whatsapp"></p>
+    <div class="modal-field">
+      <label for="cd-preferencia">Preferencia especial (se guarda para este cliente, no cambia por turno)</label>
+      <textarea id="cd-preferencia" rows="2" style="width:100%; padding:10px 12px; border-radius:9px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(13.5px * var(--ui-scale)); color:var(--ink); resize:vertical;"></textarea>
+      <button class="submit" id="cd-guardar-preferencia" style="width:auto; padding:9px 14px; margin-top:8px;">Guardar preferencia</button>
+      <span class="msg" id="cd-msg-preferencia"></span>
+    </div>
+    <div class="modal-field">
+      <label>Historial (trabajo realizado, servicio, fecha, comentarios)</label>
+      <div id="cd-historial-list"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="cd-cerrar">Cerrar</button>
     </div>
   </div>
 </div>
@@ -606,12 +850,29 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-cobro">
+  <div class="modal-card" style="max-width:400px;">
+    <h2>Cobro del turno</h2>
+    <p style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.6); margin:-8px 0 14px;" id="cobro-cliente"></p>
+    <div class="modal-field"><label for="cobro-monto">Monto cobrado</label><input type="number" id="cobro-monto" min="0"></div>
+    <div class="modal-field">
+      <label for="cobro-mediopago">Medio de pago</label>
+      <select id="cobro-mediopago"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Cuenta corriente</option><option>Otro</option></select>
+    </div>
+    <div class="msg" id="cobro-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="cobro-cancelar">Cancelar</button>
+      <button class="submit" id="cobro-guardar">Confirmar cobro</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-huecos">
   <div class="modal-card" style="max-width:400px;">
     <h2>Editar horario ocupado</h2>
-    <p style="font-size:13px; color:rgba(38,42,32,0.6); margin:-8px 0 14px;" id="huecos-cliente"></p>
+    <p style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.6); margin:-8px 0 14px;" id="huecos-cliente"></p>
     <div class="slots-grid" id="huecos-slots"></div>
-    <p style="font-size:12px; color:rgba(38,42,32,0.5); margin-top:10px; line-height:1.5;">Tocá una franja para dejarla libre (por ejemplo, mientras el cliente espera una tintura) y poder superponer otro turno ahí. Volvé a tocarla para dejarla ocupada de nuevo.</p>
+    <p style="font-size:calc(12px * var(--ui-scale)); color:rgba(38,42,32,0.5); margin-top:10px; line-height:1.5;">Tocá una franja para dejarla libre (por ejemplo, mientras el cliente espera una tintura) y poder superponer otro turno ahí. Volvé a tocarla para dejarla ocupada de nuevo.</p>
     <div class="modal-actions">
       <button class="btn-cancelar" id="huecos-cancelar">Cancelar</button>
       <button class="submit" id="huecos-guardar">Guardar</button>
@@ -622,7 +883,7 @@
 <div class="modal-overlay" id="modal-confirmar">
   <div class="modal-card" style="max-width:360px;">
     <h2>TurnApp dice:</h2>
-    <p id="confirmar-texto" style="font-size:14px; color:rgba(38,42,32,0.75); line-height:1.5; margin:0;"></p>
+    <p id="confirmar-texto" style="font-size:calc(14px * var(--ui-scale)); color:rgba(38,42,32,0.75); line-height:1.5; margin:0;"></p>
     <div class="modal-actions">
       <button class="btn-cancelar" id="confirmar-cancelar">Cancelar</button>
       <button class="submit" id="confirmar-aceptar" style="background:var(--rose-deep);">Confirmar</button>
@@ -633,7 +894,7 @@
 <div class="modal-overlay" id="modal-aviso">
   <div class="modal-card" style="max-width:360px;">
     <h2>TurnApp dice:</h2>
-    <p id="aviso-texto" style="font-size:14px; color:rgba(38,42,32,0.75); line-height:1.5; margin:0;"></p>
+    <p id="aviso-texto" style="font-size:calc(14px * var(--ui-scale)); color:rgba(38,42,32,0.75); line-height:1.5; margin:0;"></p>
     <div class="modal-actions">
       <button class="submit" id="aviso-ok">Entendido</button>
     </div>
@@ -649,7 +910,9 @@
 </div>
 
 <script type="module">
-  import { firebaseConfig, soporte } from "../config.js";
+  import { firebaseConfig, soporte, registrarServiceWorker, mostrarAvisoActualizacion } from "../config.js";
+
+  registrarServiceWorker(mostrarAvisoActualizacion);
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
@@ -706,8 +969,18 @@
     return `${h}:${mm}`;
   }
 
+  // --- normalización de nombre/teléfono, para no duplicar clientes por errores de tipeo ---
+  // (espacios de más, mayúsculas/minúsculas, o formatos distintos del mismo número).
+  function normalizarNombre(s){
+    return (s || "").trim().replace(/\s+/g, " ").toLowerCase();
+  }
+  function normalizarTelefono(s){
+    return (s || "").replace(/\D/g, ""); // solo dígitos
+  }
+
   // --- menú de correo prearmado (con respaldo de copiar, por si no hay app de correo) ---
   const linkSoporte = document.getElementById("link-soporte");
+  const linkSoporteSidebar = document.getElementById("link-soporte-sidebar");
   const linkPro = document.getElementById("link-pro");
   function armarMailto(asunto, cuerpo){
     return `mailto:${soporte.email}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
@@ -734,6 +1007,11 @@
       `Hola, necesito ayuda con mi cuenta de TurnApp.\nNegocio: ${negocio.nombreComercio || "(sin nombre cargado)"}\nMi WhatsApp de contacto: ${negocio.whatsappNegocio || "(no cargado)"}\nDescriba brevemente el problema: `
     );
     conectarSoporte(
+      linkSoporteSidebar,
+      "Asistencia técnica - TurnApp",
+      `Hola, necesito ayuda con mi cuenta de TurnApp.\nNegocio: ${negocio.nombreComercio || "(sin nombre cargado)"}\nMi WhatsApp de contacto: ${negocio.whatsappNegocio || "(no cargado)"}\nDescriba brevemente el problema: `
+    );
+    conectarSoporte(
       linkPro,
       "Quiero pasar a TurnApp Pro",
       `Hola, mi período gratuito venció y quiero activar la versión Pro.\nNegocio: ${negocio.nombreComercio || "(sin nombre cargado)"}\nMi WhatsApp de contacto: ${negocio.whatsappNegocio || "(no cargado)"}\n\nNos comunicaremos con usted a la brevedad.`
@@ -750,19 +1028,27 @@
     }
   });
 
-  // --- navegación entre vistas (solo menú, sin sidebar) ---
-  const menuLinks = document.querySelectorAll(".menu-dropdown a[data-view]");
+  // --- navegación entre vistas: menú desplegable (celular) + sidebar fijo (PC, #18) ---
+  // En celular solo existe el dropdown de siempre; en PC además aparece el sidebar,
+  // ambos con los mismos data-view y ambos disparan la misma showView().
+  const menuLinks = document.querySelectorAll(".menu-dropdown a[data-view], .sidebar a[data-view]");
   const fab = document.getElementById("fab-agregar");
   const VISTAS_CON_FAB = { turnos: true, servicios: true, clientes: true, caja: true };
 
   function showView(id){
     document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + id));
     menuDropdown.classList.remove("open");
+    document.querySelectorAll(".sidebar a[data-view]").forEach(a => a.classList.toggle("active", a.dataset.view === id));
     fab.classList.toggle("hidden", !VISTAS_CON_FAB[id] || (id === "caja" && planActual !== "pro"));
     vistaActual = id;
+    if (id === "calendario") renderCalendario();
   }
   let vistaActual = "turnos";
   menuLinks.forEach(a => a.addEventListener("click", (e) => { e.preventDefault(); showView(a.dataset.view); }));
+  document.getElementById("btn-logout-sidebar").addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "../index.html";
+  });
 
   fab.addEventListener("click", () => {
     if (vistaActual === "turnos") abrirModalTurno();
@@ -812,13 +1098,17 @@
     actualizarDuracionTotal();
 
     await actualizarSlots();
+    if (opts.horaPreset != null){
+      const btnSlot = Array.from(mtSlots.querySelectorAll(".slot-btn")).find(b => b.textContent === formatearHora(opts.horaPreset));
+      if (btnSlot && !btnSlot.classList.contains("ocupado")) btnSlot.click();
+    }
     modalTurno.classList.add("show");
   }
 
   // --- checkboxes de servicios: se puede tildar más de uno, la duración se suma ---
   function renderServiciosCheck(){
     if (!serviciosCache.length){
-      mtServiciosCheck.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">Sin servicios cargados — se usa 30 min por defecto</span>`;
+      mtServiciosCheck.innerHTML = `<span style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);">Sin servicios cargados — se usa 30 min por defecto</span>`;
       return;
     }
     mtServiciosCheck.innerHTML = "";
@@ -867,7 +1157,7 @@
   // --- (un turno puede tener partes reabiertas a mano — ver "Editar horario") ---
   async function actualizarSlots(){
     slotElegido = null;
-    mtSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">Cargando…</span>`;
+    mtSlots.innerHTML = `<span style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);">Cargando…</span>`;
     if (!mtFecha.value){ mtSlots.innerHTML = ""; return; }
 
     const duracion = duracionSeleccionada();
@@ -902,7 +1192,7 @@
 
     mtSlots.innerHTML = "";
     if (!slots.length){
-      mtSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">Ese servicio no entra en el horario de agenda (9 a 19hs).</span>`;
+      mtSlots.innerHTML = `<span style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);">Ese servicio no entra en el horario de agenda (9 a 19hs).</span>`;
       return;
     }
     slots.forEach(s => {
@@ -927,11 +1217,22 @@
   document.getElementById("mt-cancelar").addEventListener("click", () => modalTurno.classList.remove("show"));
 
   // --- autocompletar: sugiere clientes ya cargados mientras se escribe el nombre ---
-  let clientesConocidos = {}; // nombre exacto -> whatsapp
+  let clientesConocidos = {}; // nombre exacto (como se guardó) -> whatsapp
+  let clientesPorNombreNorm = {}; // nombre normalizado -> {nombre, whatsapp}
+  let clientesPorTelefono = {}; // teléfono normalizado -> {nombre, whatsapp}
   function actualizarListaClientesConocidos(turnos){
     clientesConocidos = {};
-    turnos.forEach(t => {
-      if (t.clienteNombre) clientesConocidos[t.clienteNombre] = t.clienteWhatsapp || "";
+    clientesPorNombreNorm = {};
+    clientesPorTelefono = {};
+    // Se recorren del más viejo al más nuevo para que, si hay variantes del mismo
+    // cliente, quede guardado el nombre más reciente como el "canónico".
+    [...turnos].sort((a, b) => (a.fechaHora?.toMillis?.() || 0) - (b.fechaHora?.toMillis?.() || 0)).forEach(t => {
+      if (!t.clienteNombre) return;
+      const nombre = t.clienteNombre;
+      const whatsapp = t.clienteWhatsapp || "";
+      clientesConocidos[nombre] = whatsapp;
+      clientesPorNombreNorm[normalizarNombre(nombre)] = { nombre, whatsapp };
+      if (whatsapp) clientesPorTelefono[normalizarTelefono(whatsapp)] = { nombre, whatsapp };
     });
     const datalist = document.getElementById("lista-clientes-conocidos");
     datalist.innerHTML = Object.keys(clientesConocidos).sort().map(n => `<option value="${n}"></option>`).join("");
@@ -940,6 +1241,29 @@
     const coincide = clientesConocidos[mtCliente.value];
     if (coincide !== undefined && !mtWhatsapp.value.trim()){
       mtWhatsapp.value = coincide;
+    }
+  });
+  // Al salir del campo, si lo que se tipeó "matchea" a un cliente ya cargado
+  // (mismo nombre salvo mayúsculas/espacios, o mismo teléfono con otro nombre),
+  // se ajusta a los datos existentes en vez de crear un cliente repetido.
+  mtCliente.addEventListener("blur", () => {
+    if (mtWhatsapp.value.trim()){
+      const porTelefono = clientesPorTelefono[normalizarTelefono(mtWhatsapp.value)];
+      if (porTelefono && normalizarNombre(porTelefono.nombre) !== normalizarNombre(mtCliente.value)){
+        mtCliente.value = porTelefono.nombre;
+        return;
+      }
+    }
+    const porNombre = clientesPorNombreNorm[normalizarNombre(mtCliente.value)];
+    if (porNombre){
+      mtCliente.value = porNombre.nombre;
+      if (!mtWhatsapp.value.trim() && porNombre.whatsapp) mtWhatsapp.value = porNombre.whatsapp;
+    }
+  });
+  mtWhatsapp.addEventListener("blur", () => {
+    const porTelefono = clientesPorTelefono[normalizarTelefono(mtWhatsapp.value)];
+    if (porTelefono && normalizarNombre(porTelefono.nombre) !== normalizarNombre(mtCliente.value)){
+      mtCliente.value = porTelefono.nombre;
     }
   });
 
@@ -961,8 +1285,8 @@
       ? serviciosSel.map(s => s.nombre).join(" + ")
       : "Servicio sin especificar";
     const duracionTotal = duracionSeleccionada();
-    const clienteNombre = mtCliente.value.trim();
-    const clienteWhatsapp = mtWhatsapp.value.trim() || null;
+    const clienteNombre = mtCliente.value.trim().replace(/\s+/g, " ");
+    const clienteWhatsapp = normalizarTelefono(mtWhatsapp.value) || null;
 
     const fecha = new Date(mtFecha.value + "T00:00:00");
     fecha.setMinutes(slotElegido);
@@ -1035,8 +1359,15 @@
 
     const negocioSnap = await getDoc(doc(db, "businesses", businessId));
     const negocio = negocioSnap.exists() ? negocioSnap.data() : {};
-    document.getElementById("nombre-negocio-header").textContent = negocio.nombreComercio ? "· " + negocio.nombreComercio : "";
+    document.getElementById("nombre-negocio-header").textContent = negocio.nombreComercio || "Mi negocio";
+    const logoImg = document.getElementById("logo-negocio");
+    if (negocio.logoUrl){ logoImg.src = negocio.logoUrl; logoImg.classList.add("show"); }
+    else { logoImg.classList.remove("show"); }
+    document.getElementById("input-nombre-negocio").value = negocio.nombreComercio || "";
+    document.getElementById("input-logo-url").value = negocio.logoUrl || "";
     document.getElementById("input-whatsapp-negocio").value = negocio.whatsappNegocio || "";
+    document.getElementById("pref-tamano-letra").value = negocio.tamanoLetra || "1";
+    document.documentElement.style.setProperty("--ui-scale", negocio.tamanoLetra || "1");
     refrescarLinksSoporte(negocio);
 
     const vencimiento = negocio.fechaVencimiento?.toDate ? negocio.fechaVencimiento.toDate() : null;
@@ -1063,6 +1394,7 @@
     escucharTurnos();
     escucharServicios();
     escucharCaja();
+    escucharCategoriasCaja();
     escucharSolicitudes();
     escucharResumenDisponibilidad();
 
@@ -1070,6 +1402,34 @@
     dispFecha.value = hoyStr;
     dispFecha.min = hoyStr;
     cargarDisponibilidad();
+  });
+
+  document.getElementById("btn-guardar-nombre").addEventListener("click", async () => {
+    const val = document.getElementById("input-nombre-negocio").value.trim();
+    await updateDoc(doc(db, "businesses", businessId), { nombreComercio: val });
+    document.getElementById("nombre-negocio-header").textContent = val || "Mi negocio";
+    const negocioSnap = await getDoc(doc(db, "businesses", businessId));
+    refrescarLinksSoporte(negocioSnap.exists() ? negocioSnap.data() : { nombreComercio: val });
+    const msg = document.getElementById("msg-comercio");
+    msg.className = "msg show ok"; msg.textContent = "Nombre guardado.";
+    setTimeout(() => { msg.className = "msg"; }, 2000);
+  });
+
+  document.getElementById("btn-guardar-logo").addEventListener("click", async () => {
+    const val = document.getElementById("input-logo-url").value.trim();
+    await updateDoc(doc(db, "businesses", businessId), { logoUrl: val || null });
+    const logoImg = document.getElementById("logo-negocio");
+    if (val){ logoImg.src = val; logoImg.classList.add("show"); }
+    else { logoImg.classList.remove("show"); }
+    const msg = document.getElementById("msg-comercio");
+    msg.className = "msg show ok"; msg.textContent = "Logo guardado.";
+    setTimeout(() => { msg.className = "msg"; }, 2000);
+  });
+
+  document.getElementById("pref-tamano-letra").addEventListener("change", (e) => {
+    const val = e.target.value;
+    document.documentElement.style.setProperty("--ui-scale", val);
+    guardarPreferencia("tamanoLetra", val);
   });
 
   document.getElementById("btn-guardar-whatsapp").addEventListener("click", async () => {
@@ -1193,11 +1553,20 @@
 
       actualizarListaClientesConocidos(todosLosTurnos);
       renderClientes(todosLosTurnos);
+
+      turnosCacheGlobal = todosLosTurnos;
+      if (vistaActual === "calendario") renderCalendario();
     });
   }
 
-  // --- clientes: se arman solos a partir de los turnos, agrupando por nombre ---
+  // --- clientes: se arman solos a partir de los turnos, agrupando por teléfono ---
+  // (se agrupa por teléfono en vez de por nombre exacto porque el nombre puede
+  // tipearse distinto de un turno a otro; el teléfono es un identificador más
+  // confiable. Si un turno no tiene teléfono cargado, se agrupa por nombre.)
+  let ultimosTurnosClientes = [];
+  let filtroClientes = "";
   function renderClientes(turnos){
+    ultimosTurnosClientes = turnos;
     const lista = document.getElementById("clientes-list");
     document.getElementById("clientes-sub").textContent = planActual === "pro"
       ? "Historial completo de turnos por cliente."
@@ -1210,30 +1579,62 @@
     const porCliente = {};
     turnos.forEach(t => {
       const nombre = t.clienteNombre || "Sin nombre";
-      if (!porCliente[nombre]) porCliente[nombre] = { whatsapp: t.clienteWhatsapp, turnos: [] };
-      porCliente[nombre].turnos.push(t);
+      const telefono = normalizarTelefono(t.clienteWhatsapp);
+      const clave = telefono || ("nombre:" + normalizarNombre(nombre));
+      if (!porCliente[clave]) porCliente[clave] = { turnos: [] };
+      porCliente[clave].turnos.push(t);
     });
 
+    const filtro = normalizarNombre(filtroClientes);
+    const filtroTel = normalizarTelefono(filtroClientes);
+
+    let grupos = Object.values(porCliente).map(info => {
+      const ordenados = info.turnos.sort((a, b) => (b.fechaHora?.toMillis?.() || 0) - (a.fechaHora?.toMillis?.() || 0));
+      const nombre = ordenados[0].clienteNombre || "Sin nombre"; // nombre más reciente del grupo
+      const whatsapp = ordenados[0].clienteWhatsapp || "";
+      return { nombre, whatsapp, ordenados };
+    });
+
+    if (filtro){
+      grupos = grupos.filter(g =>
+        normalizarNombre(g.nombre).includes(filtro) ||
+        (filtroTel && normalizarTelefono(g.whatsapp).includes(filtroTel))
+      );
+    }
+
+    if (!grupos.length){
+      lista.innerHTML = `<div class="empty-state">No encontramos clientes para "${filtroClientes}".</div>`;
+      return;
+    }
+
     lista.innerHTML = "";
-    Object.entries(porCliente)
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .forEach(([nombre, info]) => {
-        const ordenados = info.turnos.sort((a, b) => (b.fechaHora?.toMillis?.() || 0) - (a.fechaHora?.toMillis?.() || 0));
+    grupos
+      .sort((a, b) => a.nombre.localeCompare(b.nombre))
+      .forEach(({ nombre, whatsapp, ordenados }) => {
+        // #6: la vista previa queda simple (nombre + teléfono + mensaje); el historial
+        // completo (trabajo realizado, servicio, fecha, cobro, preferencia y comentarios)
+        // se ve en el modal aparte al tocar la tarjeta — ver abrirClienteDetalle().
         const ultima = ordenados[0]?.fechaHora?.toDate ? ordenados[0].fechaHora.toDate() : null;
         const card = document.createElement("div");
-        card.className = "turno-card";
-        let detalleHtml = `<div class="turno-servicio">Último turno: ${ultima ? ultima.toLocaleDateString("es-AR") : "—"}</div>`;
-        if (planActual === "pro"){
-          detalleHtml += `<div class="turno-servicio">Historial (${ordenados.length}): ${ordenados.map(t => (t.fechaHora?.toDate ? t.fechaHora.toDate().toLocaleDateString("es-AR") : "") + " — " + (t.servicioNombre || "")).join(" · ")}</div>`;
-        }
+        card.className = "turno-card cliente-preview";
         card.innerHTML = `
           <div class="turno-info">
             <strong>${nombre}</strong>
-            ${detalleHtml}
+            <div class="turno-servicio">${whatsapp ? whatsapp : "Sin WhatsApp"} · Último turno: ${ultima ? ultima.toLocaleDateString("es-AR") : "—"}</div>
           </div>
-          <button class="turno-reabrir" style="border-style:solid; border-color:var(--rose-deep); color:var(--rose-deep);">Borrar</button>
+          ${whatsapp ? `<button class="turno-reabrir" data-mensaje>Enviar mensaje</button>` : ""}
+          <button class="turno-reabrir" style="border-style:solid; border-color:var(--rose-deep); color:var(--rose-deep);" data-borrar>Borrar</button>
         `;
-        card.querySelector("button").addEventListener("click", async () => {
+        card.addEventListener("click", () => abrirClienteDetalle(nombre, whatsapp, ordenados));
+        const btnMensaje = card.querySelector("[data-mensaje]");
+        if (btnMensaje){
+          btnMensaje.addEventListener("click", (e) => {
+            e.stopPropagation();
+            window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent("Hola " + nombre + "!")}`, "_blank");
+          });
+        }
+        card.querySelector("[data-borrar]").addEventListener("click", async (e) => {
+          e.stopPropagation();
           if (await confirmarAccion(`¿Borrar a ${nombre} y todos sus turnos (${ordenados.length})?`)) {
             for (const t of ordenados){
               await deleteDoc(doc(db, "businesses", businessId, "turnos", t.id));
@@ -1244,10 +1645,97 @@
       });
   }
 
+  // --- modal de historial completo del cliente (#6) ---
+  // La preferencia especial queda guardada por cliente (no cambia turno a turno) en
+  // businesses/{id}/clientesInfo/{clave}; el comentario y lo cobrado son por turno.
+  const modalClienteDetalle = document.getElementById("modal-cliente-detalle");
+  let cdClaveActual = null;
+  function claveCliente(nombre, whatsapp){
+    const tel = normalizarTelefono(whatsapp);
+    return tel || ("nombre:" + normalizarNombre(nombre));
+  }
+  async function abrirClienteDetalle(nombre, whatsapp, turnosDelCliente){
+    cdClaveActual = claveCliente(nombre, whatsapp);
+    document.getElementById("cd-nombre").textContent = nombre;
+    document.getElementById("cd-whatsapp").textContent = whatsapp || "Sin WhatsApp cargado";
+
+    const prefMsg = document.getElementById("cd-msg-preferencia");
+    prefMsg.className = "msg";
+    if (planActual === "pro"){
+      const infoSnap = await getDoc(doc(db, "businesses", businessId, "clientesInfo", cdClaveActual));
+      document.getElementById("cd-preferencia").value = infoSnap.exists() ? (infoSnap.data().preferenciaEspecial || "") : "";
+      renderHistorialCliente(turnosDelCliente);
+    } else {
+      document.getElementById("cd-preferencia").value = "";
+      document.getElementById("cd-historial-list").innerHTML = `<div class="empty-state">Ver el historial completo (trabajo realizado, cobros, preferencias y comentarios) es una función de la versión Pro. En gratis solo se ve la última fecha de turno.</div>`;
+    }
+    modalClienteDetalle.classList.add("show");
+  }
+  document.getElementById("cd-cerrar").addEventListener("click", () => modalClienteDetalle.classList.remove("show"));
+  document.getElementById("cd-guardar-preferencia").addEventListener("click", async () => {
+    const msg = document.getElementById("cd-msg-preferencia");
+    const val = document.getElementById("cd-preferencia").value.trim();
+    await setDoc(doc(db, "businesses", businessId, "clientesInfo", cdClaveActual), { preferenciaEspecial: val }, { merge: true });
+    msg.className = "msg show ok"; msg.textContent = "Preferencia guardada.";
+    setTimeout(() => { msg.className = "msg"; }, 2000);
+  });
+
+  function renderHistorialCliente(turnos){
+    const cont = document.getElementById("cd-historial-list");
+    cont.innerHTML = "";
+    if (!turnos.length){
+      cont.innerHTML = `<div class="empty-state">Todavía no tiene turnos.</div>`;
+      return;
+    }
+    turnos.forEach(t => {
+      const fecha = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
+      const cobro = t.estado === "Atendido" && t.montoCobrado ? `Cobrado: $${t.montoCobrado} (${t.medioPago || "—"})` : "";
+      const entrada = document.createElement("div");
+      entrada.className = "historial-entrada";
+      entrada.innerHTML = `
+        <div class="he-top">
+          <strong>${fecha ? fecha.toLocaleDateString("es-AR") : "—"} · ${t.servicioNombre || "Servicio sin especificar"}</strong>
+          <span class="turno-badge badge-${t.estado || "Reservado"}">${t.estado || "Reservado"}</span>
+        </div>
+        ${cobro ? `<div class="turno-servicio">${cobro}</div>` : ""}
+        <label for="cd-comentario-${t.id}">Comentarios de este turno (trabajo realizado, detalles a tener en cuenta)</label>
+        <textarea id="cd-comentario-${t.id}" rows="2">${t.comentario || ""}</textarea>
+        <div class="historial-acciones">
+          <button data-guardar-comentario>Guardar comentario</button>
+          <button data-marcar-ausente>Marcar ausente</button>
+          <button data-cambiar-turno>Cambiar día/horario</button>
+        </div>
+      `;
+      entrada.querySelector("[data-guardar-comentario]").addEventListener("click", async (e) => {
+        const val = entrada.querySelector("textarea").value.trim();
+        await updateDoc(doc(db, "businesses", businessId, "turnos", t.id), { comentario: val });
+        e.target.textContent = "¡Guardado!";
+        setTimeout(() => { e.target.textContent = "Guardar comentario"; }, 1500);
+      });
+      entrada.querySelector("[data-marcar-ausente]").addEventListener("click", async () => {
+        if (await confirmarAccion(`¿Marcar como ausente el turno del ${fecha ? fecha.toLocaleDateString("es-AR") : ""}?`)){
+          await updateDoc(doc(db, "businesses", businessId, "turnos", t.id), { estado: "Ausente" });
+          modalClienteDetalle.classList.remove("show");
+        }
+      });
+      entrada.querySelector("[data-cambiar-turno]").addEventListener("click", () => {
+        modalClienteDetalle.classList.remove("show");
+        abrirModalCambioTurno(t.id, t.estado);
+      });
+      cont.appendChild(entrada);
+    });
+  }
+  document.getElementById("buscar-cliente").addEventListener("input", (e) => {
+    filtroClientes = e.target.value;
+    renderClientes(ultimosTurnosClientes);
+  });
+
   // --- servicios ---
+  let serviciosGlobal = []; // se mantiene actualizado para poder sugerir precio al cobrar un turno (ver abrirModalCobro)
   function escucharServicios(){
     const ref = collection(db, "businesses", businessId, "servicios");
     onSnapshot(ref, (snap) => {
+      serviciosGlobal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       const lista = document.getElementById("servicios-list");
       if (snap.empty){
         lista.innerHTML = `<div class="empty-state">Todavía no cargaste servicios.</div>`;
@@ -1305,11 +1793,15 @@
   });
 
   // --- caja ---
+  // #11: cajaCacheGlobal guarda TODOS los movimientos (no solo lo filtrado) para poder
+  // calcular el balance del período elegido (día/mes/año) sin volver a consultar Firestore.
+  let cajaCacheGlobal = [];
   function escucharCaja(){
     const ref = query(collection(db, "businesses", businessId, "caja"), orderBy("fecha", "desc"));
     onSnapshot(ref, (snap) => {
       const lista = document.getElementById("caja-list");
       let ingresos = 0, gastos = 0;
+      cajaCacheGlobal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       if (snap.empty){
         lista.innerHTML = `<div class="empty-state">Todavía no cargaste movimientos.</div>`;
       } else {
@@ -1334,9 +1826,98 @@
         });
       }
       document.getElementById("caja-resumen").textContent =
-        `Ingresos: $${ingresos} · Gastos: $${gastos} · Saldo: $${ingresos - gastos}`;
+        `Total histórico — Ingresos: $${ingresos} · Gastos: $${gastos} · Saldo: $${ingresos - gastos}`;
+      renderCajaResumenPeriodo();
     });
   }
+
+  // --- balance por período (día/mes/año) con desglose por categoría (#11) ---
+  function calcularRangoPeriodo(tipo, fechaRef){
+    const d = new Date(fechaRef);
+    if (tipo === "dia"){
+      return [new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0), new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59)];
+    }
+    if (tipo === "anio"){
+      return [new Date(d.getFullYear(), 0, 1, 0, 0, 0), new Date(d.getFullYear(), 11, 31, 23, 59, 59)];
+    }
+    return [new Date(d.getFullYear(), d.getMonth(), 1, 0, 0, 0), new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59)];
+  }
+
+  function renderCajaResumenPeriodo(){
+    const tipo = document.getElementById("caja-periodo-tipo").value;
+    const fechaInput = document.getElementById("caja-periodo-fecha").value;
+    const fechaRef = fechaInput ? new Date(fechaInput + "T00:00:00") : new Date();
+    const [ini, fin] = calcularRangoPeriodo(tipo, fechaRef);
+
+    const enPeriodo = cajaCacheGlobal.filter(m => {
+      const f = m.fecha?.toDate ? m.fecha.toDate() : null;
+      return f && f >= ini && f <= fin;
+    });
+
+    let ingresos = 0, gastos = 0;
+    const porCategoria = {};
+    enPeriodo.forEach(m => {
+      const cat = m.categoria || "Sin categoría";
+      if (!porCategoria[cat]) porCategoria[cat] = { ingresos: 0, gastos: 0 };
+      if (m.tipo === "ingreso"){ ingresos += m.monto || 0; porCategoria[cat].ingresos += m.monto || 0; }
+      else { gastos += m.monto || 0; porCategoria[cat].gastos += m.monto || 0; }
+    });
+
+    document.getElementById("caja-resumen-periodo-total").textContent =
+      `Ingresos: $${ingresos} · Gastos: $${gastos} · Saldo: $${ingresos - gastos}`;
+
+    const cont = document.getElementById("caja-resumen-periodo-categorias");
+    const categorias = Object.keys(porCategoria).sort();
+    if (!categorias.length){
+      cont.innerHTML = `<div class="empty-state" style="padding:16px;">Sin movimientos en este período.</div>`;
+      return;
+    }
+    cont.innerHTML = categorias.map(cat => {
+      const c = porCategoria[cat];
+      return `<div class="caja-desglose-cat"><span>${cat}</span><span>+$${c.ingresos} / -$${c.gastos}</span></div>`;
+    }).join("");
+  }
+
+  document.getElementById("caja-periodo-tipo").addEventListener("change", renderCajaResumenPeriodo);
+  document.getElementById("caja-periodo-fecha").addEventListener("change", renderCajaResumenPeriodo);
+  document.getElementById("caja-periodo-fecha").value = new Date().toISOString().slice(0, 10);
+
+  // --- categorías de caja, editables desde Configuración (#11) ---
+  let categoriasCajaCache = [];
+  function escucharCategoriasCaja(){
+    const ref = query(collection(db, "businesses", businessId, "categoriasCaja"), orderBy("nombre"));
+    onSnapshot(ref, (snap) => {
+      categoriasCajaCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      const select = document.getElementById("mc-categoria");
+      const valorPrevio = select.value;
+      select.innerHTML = `<option value="">Sin categoría</option>` + categoriasCajaCache.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join("");
+      select.value = categoriasCajaCache.some(c => c.nombre === valorPrevio) ? valorPrevio : "";
+
+      const lista = document.getElementById("lista-categorias-caja");
+      lista.innerHTML = categoriasCajaCache.length
+        ? categoriasCajaCache.map(c => `<span class="categoria-chip">${c.nombre} <button data-id="${c.id}" data-nombre="${c.nombre}">✕</button></span>`).join("")
+        : `<span style="font-size:calc(12.5px * var(--ui-scale)); color:rgba(38,42,32,0.5);">Todavía no cargaste categorías.</span>`;
+      lista.querySelectorAll("button[data-id]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (await confirmarAccion(`¿Borrar la categoría "${btn.dataset.nombre}"? Los movimientos ya cargados con esa categoría no cambian.`)){
+            await deleteDoc(doc(db, "businesses", businessId, "categoriasCaja", btn.dataset.id));
+          }
+        });
+      });
+    });
+  }
+  document.getElementById("btn-agregar-categoria").addEventListener("click", async () => {
+    const input = document.getElementById("input-nueva-categoria");
+    const nombre = input.value.trim();
+    if (!nombre) return;
+    if (categoriasCajaCache.some(c => normalizarNombre(c.nombre) === normalizarNombre(nombre))){
+      await avisar("Esa categoría ya existe.");
+      return;
+    }
+    await addDoc(collection(db, "businesses", businessId, "categoriasCaja"), { nombre });
+    input.value = "";
+  });
 
   const modalCaja = document.getElementById("modal-caja");
   function abrirModalCaja(){
@@ -1467,6 +2048,11 @@
         select.value = t.estado; // el modal decide el estado real al confirmar
         return;
       }
+      if (nuevoEstado === "Atendido" && t.estado !== "Atendido"){
+        abrirModalCobro(id, t);
+        select.value = t.estado; // el modal decide el estado real al confirmar el cobro
+        return;
+      }
       select.className = "estado-select estado-" + nuevoEstado;
       await updateDoc(doc(db, "businesses", businessId, "turnos", id), { estado: nuevoEstado });
     });
@@ -1489,6 +2075,53 @@
 
     return card;
   }
+
+  // --- modal: cobro al marcar un turno como Atendido ---
+  // (#2: guarda el monto y el medio de pago en el propio turno —queda en el historial del
+  // cliente— y además carga el movimiento en Caja, para no tener que cargarlo dos veces)
+  const modalCobro = document.getElementById("modal-cobro");
+  let cobroTurnoId = null;
+  let cobroTurnoDatos = null;
+  function abrirModalCobro(id, t){
+    cobroTurnoId = id;
+    cobroTurnoDatos = t;
+    document.getElementById("cobro-cliente").textContent = `${t.clienteNombre || "Cliente"} · ${t.servicioNombre || ""}`;
+    const precioSugerido = (t.servicios || []).reduce((total, s) => {
+      const enCatalogo = serviciosGlobal.find(sg => sg.id === s.id);
+      return total + (enCatalogo?.precio || 0);
+    }, 0);
+    document.getElementById("cobro-monto").value = precioSugerido || "";
+    document.getElementById("cobro-mediopago").value = "Efectivo";
+    document.getElementById("cobro-msg").className = "msg";
+    modalCobro.classList.add("show");
+  }
+  document.getElementById("cobro-cancelar").addEventListener("click", () => modalCobro.classList.remove("show"));
+  document.getElementById("cobro-guardar").addEventListener("click", async () => {
+    const msg = document.getElementById("cobro-msg");
+    const monto = Number(document.getElementById("cobro-monto").value) || 0;
+    const medioPago = document.getElementById("cobro-mediopago").value;
+    if (!monto){ msg.className = "msg show error"; msg.textContent = "Falta el monto cobrado."; return; }
+    try {
+      await updateDoc(doc(db, "businesses", businessId, "turnos", cobroTurnoId), {
+        estado: "Atendido",
+        montoCobrado: monto,
+        medioPago,
+      });
+      await addDoc(collection(db, "businesses", businessId, "caja"), {
+        tipo: "ingreso",
+        monto,
+        categoria: cobroTurnoDatos.servicioNombre || "Turno",
+        medioPago,
+        fecha: Timestamp.now(),
+        turnoId: cobroTurnoId,
+        clienteNombre: cobroTurnoDatos.clienteNombre || "",
+      });
+      modalCobro.classList.remove("show");
+    } catch (err) {
+      msg.className = "msg show error";
+      msg.textContent = "No pudimos guardar el cobro. Probá de nuevo en un momento.";
+    }
+  });
 
   // --- editar horario ocupado: permite liberar solo una parte del bloque de un turno combinado ---
   const modalHuecos = document.getElementById("modal-huecos");
@@ -1560,6 +2193,9 @@
       const badge = document.getElementById("badge-solicitudes");
       badge.style.display = snap.size ? "inline-block" : "none";
       badge.textContent = snap.size;
+      const badgeSidebar = document.getElementById("badge-solicitudes-sidebar");
+      badgeSidebar.style.display = snap.size ? "inline-block" : "none";
+      badgeSidebar.textContent = snap.size;
 
       const lista = document.getElementById("solicitudes-list");
       if (snap.empty){
@@ -1616,15 +2252,223 @@
     }
   }
 
+  // --- calendario de turnos libres/ocupados, con vistas día/semana/mes (#10) ---
+  // Usa la misma caché de turnos (turnosCacheGlobal, actualizada en escucharTurnos) y de
+  // disponibilidad (dispCacheGlobal, actualizada en escucharResumenDisponibilidad) para no
+  // hacer consultas nuevas a Firestore cada vez que se cambia de mes/semana/día.
+  let turnosCacheGlobal = [];
+  let dispCacheGlobal = {};
+  let calModo = "mes";
+  let calFechaBase = new Date();
+
+  function fechaAISO(d){
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function esMismoDia(a, b){ return fechaAISO(a) === fechaAISO(b); }
+
+  // slots de capacidad de un día: lo cargado en Disponibilidad si existe, si no el horario
+  // base de la agenda (HORA_INICIO a HORA_FIN, ver arriba en "modal: nuevo turno").
+  function slotsCapacidadDia(fechaISO){
+    const cargados = dispCacheGlobal[fechaISO];
+    if (cargados && cargados.length) return [...cargados].sort((a, b) => a - b);
+    const base = [];
+    for (let m = HORA_INICIO * 60; m < HORA_FIN * 60; m += PASO_MIN) base.push(m);
+    return base;
+  }
+
+  // minutos ocupados de un día, a partir de los turnos reservados ese día (respeta los
+  // huecos reabiertos a mano, igual que actualizarSlots() para el modal de nuevo turno).
+  function minutosOcupadosDia(fechaISO){
+    const ocupados = new Set();
+    turnosCacheGlobal.forEach(t => {
+      const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
+      if (!f || fechaAISO(f) !== fechaISO) return;
+      const inicio = f.getHours() * 60 + f.getMinutes();
+      const fin = inicio + (t.duracionTotal || 30);
+      const libres = new Set(t.huecosReabiertos || []);
+      for (let m = inicio; m < fin; m += PASO_MIN) if (!libres.has(m)) ocupados.add(m);
+    });
+    return ocupados;
+  }
+
+  // clase de color: verde (casi vacío), amarillo (mezcla de libres y ocupados), rojo (completo)
+  function estadoColorDia(fechaISO){
+    const capacidad = slotsCapacidadDia(fechaISO);
+    const ocupados = minutosOcupadosDia(fechaISO);
+    const ocupadosEnCapacidad = capacidad.filter(m => ocupados.has(m)).length;
+    if (ocupados.size === 0) return "libre";
+    if (ocupadosEnCapacidad >= capacidad.length) return "completo";
+    return "parcial";
+  }
+
+  function calTitulo(){
+    const t = document.getElementById("cal-titulo");
+    if (calModo === "mes"){
+      t.textContent = calFechaBase.toLocaleDateString("es-AR", { month: "long", year: "numeric" });
+    } else if (calModo === "semana"){
+      const inicioSemana = new Date(calFechaBase);
+      inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+      const finSemana = new Date(inicioSemana);
+      finSemana.setDate(finSemana.getDate() + 6);
+      t.textContent = inicioSemana.toLocaleDateString("es-AR", { day: "2-digit", month: "short" }) + " – " + finSemana.toLocaleDateString("es-AR", { day: "2-digit", month: "short" });
+    } else {
+      t.textContent = calFechaBase.toLocaleDateString("es-AR", { weekday: "long", day: "2-digit", month: "long" });
+    }
+  }
+
+  function renderCalendario(){
+    calTitulo();
+    if (calModo === "mes") renderCalMes();
+    else if (calModo === "semana") renderCalSemana();
+    else renderCalDia();
+  }
+
+  function renderCalMes(){
+    const cont = document.getElementById("cal-contenido");
+    const anio = calFechaBase.getFullYear(), mes = calFechaBase.getMonth();
+    const primerDiaMes = new Date(anio, mes, 1);
+    const inicioGrilla = new Date(primerDiaMes);
+    inicioGrilla.setDate(inicioGrilla.getDate() - inicioGrilla.getDay());
+    const hoy = new Date();
+
+    const grilla = document.createElement("div");
+    grilla.className = "cal-grid-mes";
+    for (let i = 0; i < 42; i++){
+      const d = new Date(inicioGrilla);
+      d.setDate(d.getDate() + i);
+      const fueraDeMes = d.getMonth() !== mes;
+      const fechaISO = fechaAISO(d);
+      const estado = estadoColorDia(fechaISO);
+      const celda = document.createElement("div");
+      celda.className = "cal-dia-mes " + estado + (fueraDeMes ? " fuera-de-mes" : "") + (esMismoDia(d, hoy) ? " hoy" : "");
+      celda.innerHTML = `<span>${d.getDate()}</span><i class="cal-punto"></i>`;
+      celda.addEventListener("click", () => {
+        calFechaBase = d;
+        calModo = "dia";
+        document.getElementById("cal-modo").value = "dia";
+        renderCalendario();
+      });
+      grilla.appendChild(celda);
+    }
+    cont.innerHTML = "";
+    cont.appendChild(grilla);
+  }
+
+  function renderCalSemana(){
+    const cont = document.getElementById("cal-contenido");
+    const inicioSemana = new Date(calFechaBase);
+    inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+    const hoy = new Date();
+
+    const grilla = document.createElement("div");
+    grilla.className = "cal-grid-semana";
+    for (let i = 0; i < 7; i++){
+      const d = new Date(inicioSemana);
+      d.setDate(d.getDate() + i);
+      const fechaISO = fechaAISO(d);
+      const estado = estadoColorDia(fechaISO);
+      const celda = document.createElement("div");
+      celda.className = "cal-dia-semana " + estado + (esMismoDia(d, hoy) ? " hoy" : "");
+      celda.innerHTML = `
+        <span>${d.toLocaleDateString("es-AR", { weekday: "short" })}</span>
+        <strong>${d.getDate()}</strong>
+        <i class="cal-punto"></i>
+      `;
+      celda.addEventListener("click", () => {
+        calFechaBase = d;
+        calModo = "dia";
+        document.getElementById("cal-modo").value = "dia";
+        renderCalendario();
+      });
+      grilla.appendChild(celda);
+    }
+    cont.innerHTML = "";
+    cont.appendChild(grilla);
+  }
+
+  function renderCalDia(){
+    const cont = document.getElementById("cal-contenido");
+    const fechaISO = fechaAISO(calFechaBase);
+    const capacidad = slotsCapacidadDia(fechaISO);
+    const ocupados = minutosOcupadosDia(fechaISO);
+
+    const titulo = document.createElement("div");
+    titulo.className = "cal-dia-view-title";
+    titulo.textContent = capacidad.length ? "Tocá un horario libre para reservar ahí." : "Sin franja horaria cargada para este día.";
+    cont.innerHTML = "";
+    cont.appendChild(titulo);
+
+    const grilla = document.createElement("div");
+    grilla.className = "slots-grid";
+    capacidad.forEach(m => {
+      const ocupado = ocupados.has(m);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "slot-btn" + (ocupado ? " ocupado" : "");
+      btn.textContent = formatearHora(m);
+      if (!ocupado){
+        btn.addEventListener("click", () => {
+          abrirModalTurno({ datos: { fechaHora: { toDate: () => new Date(fechaISO + "T00:00:00") } }, horaPreset: m });
+        });
+      }
+      grilla.appendChild(btn);
+    });
+    cont.appendChild(grilla);
+  }
+
+  document.getElementById("cal-modo").addEventListener("change", (e) => {
+    calModo = e.target.value;
+    renderCalendario();
+  });
+  document.getElementById("cal-hoy").addEventListener("click", () => {
+    calFechaBase = new Date();
+    renderCalendario();
+  });
+  document.getElementById("cal-anterior").addEventListener("click", () => {
+    if (calModo === "mes") calFechaBase.setMonth(calFechaBase.getMonth() - 1);
+    else if (calModo === "semana") calFechaBase.setDate(calFechaBase.getDate() - 7);
+    else calFechaBase.setDate(calFechaBase.getDate() - 1);
+    calFechaBase = new Date(calFechaBase);
+    renderCalendario();
+  });
+  document.getElementById("cal-siguiente").addEventListener("click", () => {
+    if (calModo === "mes") calFechaBase.setMonth(calFechaBase.getMonth() + 1);
+    else if (calModo === "semana") calFechaBase.setDate(calFechaBase.getDate() + 7);
+    else calFechaBase.setDate(calFechaBase.getDate() + 1);
+    calFechaBase = new Date(calFechaBase);
+    renderCalendario();
+  });
+
   // --- disponibilidad: el profesional tilda libremente los horarios en los que atiende cada día ---
-  const DISP_HORA_INICIO = 9, DISP_HORA_FIN = 19, DISP_PASO = 30;
+  // #5: antes el rango era fijo (9 a 19hs, cableado acá). Ahora "Desde"/"Hasta" los elige el
+  // profesional para cada franja que quiera armar, y se recuerdan en este dispositivo para no
+  // tener que tocarlos cada vez que entra a cargar disponibilidad.
+  const DISP_PASO = 30;
+  const LS_DISP_DESDE = "turnapp_disp_desde";
+  const LS_DISP_HASTA = "turnapp_disp_hasta";
   const dispFecha = document.getElementById("disp-fecha");
+  const dispDesde = document.getElementById("disp-desde");
+  const dispHasta = document.getElementById("disp-hasta");
   const dispSlots = document.getElementById("disp-slots");
   let dispSeleccion = new Set();
 
+  dispDesde.value = localStorage.getItem(LS_DISP_DESDE) || "09:00";
+  dispHasta.value = localStorage.getItem(LS_DISP_HASTA) || "19:00";
+
+  function minutosDesdeHora(hhmm){
+    const [h, m] = (hhmm || "09:00").split(":").map(Number);
+    return h * 60 + m;
+  }
+
   function renderDispSlots(){
     dispSlots.innerHTML = "";
-    for (let m = DISP_HORA_INICIO * 60; m < DISP_HORA_FIN * 60; m += DISP_PASO){
+    const inicio = minutosDesdeHora(dispDesde.value);
+    const fin = minutosDesdeHora(dispHasta.value);
+    if (fin <= inicio){
+      dispSlots.innerHTML = `<span style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);">"Hasta" tiene que ser más tarde que "Desde".</span>`;
+      return;
+    }
+    for (let m = inicio; m < fin; m += DISP_PASO){
       const h = String(Math.floor(m / 60)).padStart(2, "0");
       const mm = String(m % 60).padStart(2, "0");
       const btn = document.createElement("button");
@@ -1638,6 +2482,14 @@
       dispSlots.appendChild(btn);
     }
   }
+  dispDesde.addEventListener("change", () => {
+    localStorage.setItem(LS_DISP_DESDE, dispDesde.value);
+    renderDispSlots();
+  });
+  dispHasta.addEventListener("change", () => {
+    localStorage.setItem(LS_DISP_HASTA, dispHasta.value);
+    renderDispSlots();
+  });
 
   async function cargarDisponibilidad(){
     if (!dispFecha.value) return;
@@ -1675,6 +2527,10 @@
   function escucharResumenDisponibilidad(){
     const ref = query(collection(db, "businesses", businessId, "disponibilidad"), orderBy(documentId()));
     onSnapshot(ref, (snap) => {
+      dispCacheGlobal = {};
+      snap.docs.forEach(d => { dispCacheGlobal[d.id] = d.data().slots || []; });
+      if (vistaActual === "calendario") renderCalendario();
+
       const lista = document.getElementById("disp-resumen-list");
       const conHorarios = snap.docs.filter(d => (d.data().slots || []).length);
       if (!conHorarios.length){

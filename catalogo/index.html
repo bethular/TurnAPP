@@ -1,9 +1,12 @@
 <!DOCTYPE html>
+<!-- Archivo: catalogo/index.html -->
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Reservar turno</title>
+<link rel="manifest" href="../manifest-catalogo.json" />
+<meta name="theme-color" content="#2F4033" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -25,9 +28,12 @@
 
   .servicio-card{
     background:#fff; border:1px solid var(--line); border-radius:12px;
-    padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:12px;
-    cursor:pointer;
+    margin-bottom:10px; cursor:pointer; overflow:hidden;
   }
+  .servicio-card.sin-foto{ padding:14px 16px; display:flex; align-items:center; gap:12px; }
+  .servicio-card.con-foto{ display:flex; flex-direction:column; align-items:stretch; }
+  .servicio-foto-grande{ width:100%; height:190px; object-fit:cover; display:block; }
+  .servicio-card-body{ display:flex; align-items:center; gap:12px; padding:12px 16px; }
   .servicio-card.elegido{ border-color:var(--gold); background:rgba(184,134,46,0.06); }
   .servicio-card input{ width:auto; margin:0; flex-shrink:0; }
   .servicio-info{ flex:1; }
@@ -35,6 +41,15 @@
   .servicio-detalle{ font-size:12.5px; color:rgba(38,42,32,0.55); margin-top:2px; }
   .servicio-precio{ font-family:'Fraunces', serif; font-weight:600; color:var(--forest); font-size:16px; white-space:nowrap; }
   .oferta-tag{ display:inline-block; background:rgba(184,134,46,0.15); color:var(--gold); font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; margin-top:4px; }
+
+  .fecha-nav{ display:flex; align-items:center; gap:8px; }
+  .fecha-nav input[type="date"]{ flex:1; }
+  .fecha-nav-btn{
+    width:40px; height:40px; flex-shrink:0; border-radius:9px; border:1px solid var(--line);
+    background:var(--cream); font-family:inherit; font-size:16px; font-weight:700; color:var(--ink); cursor:pointer;
+  }
+  .fecha-nav-btn:hover{ background:var(--cream-deep); }
+  .fecha-nav-btn:disabled{ opacity:.4; cursor:default; }
 
   .duracion-total{
     font-size:13px; color:rgba(38,42,32,0.6); margin:2px 0 18px; min-height:18px;
@@ -82,11 +97,13 @@
 </div>
 
 <script type="module">
-  import { firebaseConfig } from "../config.js";
+  import { firebaseConfig, registrarServiceWorker, mostrarAvisoActualizacion } from "../config.js";
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
     getFirestore, doc, getDoc, collection, getDocs, addDoc, query, orderBy, Timestamp
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  registrarServiceWorker(mostrarAvisoActualizacion);
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
@@ -94,12 +111,31 @@
   const params = new URLSearchParams(window.location.search);
   const businessId = params.get("negocio");
   const contenedor = document.getElementById("contenedor");
-  const HORA_INICIO = 9, HORA_FIN = 19, PASO_MIN = 30; // debe coincidir con la grilla que usa el profesional en Disponibilidad
+  // #5: antes era fijo 9 a 19hs. Ahora se toma del horario que el negocio configuró en su panel
+  // (Configuración > "Horario de atención"); si no configuró nada, sigue 9 a 19hs por defecto.
+  let HORA_INICIO = 9, HORA_FIN = 19;
+  const PASO_MIN = 30;
 
   function formatearHora(m){
     const h = String(Math.floor(m / 60)).padStart(2, "0");
     const mm = String(m % 60).padStart(2, "0");
     return `${h}:${mm}`;
+  }
+
+  // Misma lógica que usa el negocio en su panel (Disponibilidad): 1) excepción puntual
+  // para esa fecha exacta si existe, 2) si no, el patrón semanal de ese día de la semana
+  // (se repite todas las semanas, para siempre), 3) si tampoco hay patrón, el horario
+  // base configurado por el negocio. Esto es lo que permite reservar en cualquier
+  // semana futura sin que el negocio tenga que cargar cada fecha una por una.
+  async function obtenerCapacidadDia(fechaISO){
+    const dispSnap = await getDoc(doc(db, "businesses", businessId, "disponibilidad", fechaISO));
+    if (dispSnap.exists()) return new Set(dispSnap.data().slots || []);
+    const diaSemana = new Date(fechaISO + "T00:00:00").getDay();
+    const patronSnap = await getDoc(doc(db, "businesses", businessId, "disponibilidadPatron", String(diaSemana)));
+    if (patronSnap.exists()) return new Set(patronSnap.data().slots || []);
+    const base = new Set();
+    for (let m = HORA_INICIO * 60; m < HORA_FIN * 60; m += PASO_MIN) base.add(m);
+    return base;
   }
 
   // --- datos del cliente: se guardan en este dispositivo para no tener que cargarlos cada vez ---
@@ -123,6 +159,8 @@
     }
     const negocio = negocioSnap.data();
     document.getElementById("nombre-negocio").textContent = negocio.nombreComercio || "Reservar turno";
+    HORA_INICIO = negocio.horaInicio ?? 9;
+    HORA_FIN = negocio.horaFin ?? 19;
 
     const vencimiento = negocio.fechaVencimiento?.toDate ? negocio.fechaVencimiento.toDate() : null;
     const vencido = negocio.plan === "gratis" && vencimiento && vencimiento < new Date();
@@ -173,8 +211,8 @@
 
     servicios.forEach(s => {
       const card = document.createElement("div");
-      card.className = "servicio-card";
-      card.innerHTML = `
+      card.className = "servicio-card " + (s.foto ? "con-foto" : "sin-foto");
+      const cuerpo = `
         <input type="checkbox" value="${s.id}">
         <div class="servicio-info">
           <div class="servicio-nombre">${s.nombre}</div>
@@ -183,6 +221,9 @@
         </div>
         <div class="servicio-precio">$${s.precio || 0}</div>
       `;
+      card.innerHTML = s.foto
+        ? `<img class="servicio-foto-grande" src="${s.foto}" alt="${s.nombre}"><div class="servicio-card-body">${cuerpo}</div>`
+        : cuerpo;
       const input = card.querySelector("input");
       card.addEventListener("click", (e) => {
         if (e.target !== input) input.checked = !input.checked;
@@ -216,7 +257,13 @@
         <div class="card-form">
           <div class="campo"><label>Tu nombre</label><input type="text" id="c-nombre" value="${nombreGuardado}"></div>
           <div class="campo"><label>Tu WhatsApp (con código de país, ej: 5493751...)</label><input type="text" id="c-whatsapp" value="${whatsappGuardado}"></div>
-          <div class="campo"><label>Día</label><input type="date" id="c-fecha" min="${hoy}" value="${hoy}"></div>
+          <div class="campo"><label>Día</label>
+            <div class="fecha-nav">
+              <button type="button" class="fecha-nav-btn" id="c-fecha-atras">‹</button>
+              <input type="date" id="c-fecha" min="${hoy}" value="${hoy}">
+              <button type="button" class="fecha-nav-btn" id="c-fecha-adelante">›</button>
+            </div>
+          </div>
           <div class="campo"><label>Horario disponible</label><div class="slots-grid" id="c-slots"></div></div>
           <div class="msg" id="c-msg"></div>
           <button class="submit" id="c-pedir">Pedir turno</button>
@@ -231,11 +278,11 @@
         cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">Cargando…</span>`;
 
         try {
-          // 1) horarios que el profesional dejó habilitados ese día
-          const dispSnap = await getDoc(doc(db, "businesses", businessId, "disponibilidad", cFecha.value));
-          const disponibles = new Set(dispSnap.exists() ? (dispSnap.data().slots || []) : []);
+          // 1) horarios que el profesional dejó habilitados ese día (excepción puntual,
+          // o si no, el patrón semanal — ver obtenerCapacidadDia)
+          const disponibles = await obtenerCapacidadDia(cFecha.value);
           if (!disponibles.size){
-            cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No hay horarios cargados para ese día. Probá con otra fecha.</span>`;
+            cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">Este día no se atiende. Probá con otra fecha.</span>`;
             return;
           }
 
@@ -282,8 +329,26 @@
           cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No pudimos cargar los horarios. Volvé a intentar en un momento.</span>`;
         }
       }
-      cFecha.addEventListener("change", refrescarSlots);
+      const btnFechaAtras = document.getElementById("c-fecha-atras");
+      const btnFechaAdelante = document.getElementById("c-fecha-adelante");
+      cFecha.addEventListener("change", () => {
+        btnFechaAtras.disabled = cFecha.value <= cFecha.min;
+        refrescarSlots();
+      });
       refrescarSlots();
+
+      function sumarDias(dias){
+        const d = new Date(cFecha.value + "T00:00:00");
+        d.setDate(d.getDate() + dias);
+        const iso = d.toISOString().slice(0, 10);
+        if (iso < cFecha.min) return;
+        cFecha.value = iso;
+        btnFechaAtras.disabled = cFecha.value <= cFecha.min;
+        refrescarSlots();
+      }
+      btnFechaAtras.disabled = cFecha.value <= cFecha.min;
+      btnFechaAtras.addEventListener("click", () => sumarDias(-1));
+      btnFechaAdelante.addEventListener("click", () => sumarDias(1));
 
       document.getElementById("c-pedir").addEventListener("click", async () => {
         const msg = document.getElementById("c-msg");
