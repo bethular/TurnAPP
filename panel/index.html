@@ -989,13 +989,17 @@
 
   registrarServiceWorker(mostrarAvisoActualizacion);
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getAuth, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, doc, getDoc, getDocs, setDoc, collection, query, orderBy, documentId, onSnapshot, updateDoc, addDoc, deleteDoc, Timestamp, runTransaction
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  // ETAPA 8 PASO 3: conservar la sesión de Firebase en este dispositivo/navegador.
+  // Se configura antes del guard de autenticación para que, una vez iniciada la sesión,
+  // TurnApp pueda recuperarla al volver a abrir la aplicación.
+  await setPersistence(auth, browserLocalPersistence);
   const db = getFirestore(app);
 
   const ESTADOS = ["Reservado", "Confirmado", "Atendido", "Ausente", "Cambio de turno"];
