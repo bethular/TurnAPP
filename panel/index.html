@@ -552,6 +552,7 @@
       <a href="#" data-view="turnos">Turnos</a>
       <a href="#" data-view="calendario">Calendario</a>
       <a href="#" data-view="solicitudes">Solicitudes <span class="badge-count" id="badge-solicitudes" style="display:none;"></span></a>
+      <a href="#" data-view="disponibilidad">Disponibilidad</a>
       <a href="#" data-view="servicios">Servicios / Catálogo</a>
       <a href="#" data-view="clientes">Clientes</a>
       <a href="#" data-view="caja">Caja <span class="pro-tag">PRO</span></a>
@@ -571,6 +572,7 @@
       <a href="#" data-view="turnos">Turnos</a>
       <a href="#" data-view="calendario">Calendario</a>
       <a href="#" data-view="solicitudes">Solicitudes <span class="badge-count" id="badge-solicitudes-sidebar" style="display:none;"></span></a>
+      <a href="#" data-view="disponibilidad">Disponibilidad</a>
       <a href="#" data-view="servicios">Servicios / Catálogo</a>
       <a href="#" data-view="clientes">Clientes</a>
       <a href="#" data-view="caja">Caja <span class="pro-tag">PRO</span></a>
@@ -691,24 +693,15 @@
       </div>
 
       <div class="turno-card" id="horario-config-card" style="flex-direction:column; align-items:stretch; gap:12px; margin-bottom:16px;">
-        <strong>Horario habitual de atención</strong>
-        <p class="turno-servicio" style="margin:0;">Acá definís <strong>cuándo atendés normalmente cada día de la semana</strong>. Este horario se repite todas las semanas y es la base que usa el calendario para ofrecer turnos.</p>
-        <div style="background:rgba(47,93,80,.07); border:1px solid rgba(47,93,80,.14); border-radius:10px; padding:11px 12px; font-size:calc(13px * var(--ui-scale)); line-height:1.5;">
-          <strong>Importante:</strong> si un día puntual va a ser diferente, no cambies acá el horario habitual. Usá <strong>Excepciones para una fecha</strong>, que forma parte de esta misma configuración.
-        </div>
+        <strong>Horario de atención</strong>
+        <p class="turno-servicio" style="margin:0;">Definí los días y horarios habituales de atención. Esta configuración será la base para calcular la disponibilidad.</p>
         <div id="horario-dias-config" style="display:flex; flex-direction:column; gap:9px;"></div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="submit" id="horario-aplicar-todos" style="width:auto; padding:10px 16px;">Aplicar un mismo horario a todos</button>
-          <button class="btn-secondary" id="horario-guardar" style="padding:10px 16px;">Guardar horario habitual</button>
+          <button class="btn-secondary" id="horario-guardar" style="padding:10px 16px;">Guardar horario</button>
         </div>
         <div class="msg" id="horario-msg"></div>
-        <div style="border-top:1px solid var(--line); padding-top:13px; margin-top:2px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-          <div>
-            <strong style="display:block; margin-bottom:3px;">¿Un día puntual será diferente?</strong>
-            <div style="font-size:calc(12.5px * var(--ui-scale)); color:rgba(38,42,32,0.58); line-height:1.45;">Feriados, vacaciones, ausencias o un horario especial para una fecha concreta.</div>
-          </div>
-          <button class="btn-secondary" id="btn-abrir-excepciones" type="button" style="width:auto; padding:10px 15px;">Configurar excepciones</button>
-        </div>
+        <div style="font-size:calc(12px * var(--ui-scale)); color:rgba(38,42,32,0.55); line-height:1.45;">Los cambios para una fecha concreta (feriado, vacaciones, enfermedad o cambio de un solo día) se manejarán como excepciones y no modificarán este horario habitual.</div>
       </div>
 
       <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:12px; margin-bottom:16px;">
@@ -802,43 +795,14 @@
     </section>
 
     <section class="view" id="view-disponibilidad">
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-        <div>
-          <h1 class="view-title" style="margin-bottom:4px;">Excepciones de horario</h1>
-          <p class="view-sub" style="margin-bottom:0;">Una excepción cambia el horario habitual <strong>solo para una fecha concreta</strong>. No modifica la programación semanal.</p>
-        </div>
-        <button class="btn-secondary" id="btn-volver-horario" type="button" style="width:auto;">← Horario habitual</button>
-      </div>
-      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:7px; max-width:520px; margin-top:16px;">
-        <strong>Cómo funciona</strong>
-        <div style="font-size:calc(13px * var(--ui-scale)); line-height:1.55; color:rgba(38,42,32,0.7);">
-          Primero configurás el <strong>horario habitual</strong>. Después, si una fecha específica es diferente, venís acá y la modificás. Si no creás una excepción, esa fecha usa automáticamente su horario habitual.
-        </div>
-      </div>
+      <h1 class="view-title">Disponibilidad</h1>
+      <p class="view-sub">Usá esta sección para crear una excepción para un día concreto. Podés agregar varias franjas, por ejemplo 08:00–12:00 y 15:00–19:00. Si guardás sin horarios, el día queda cerrado.</p>
       <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:14px; max-width:520px;">
         <input type="date" id="disp-fecha">
-        <div id="disp-ayuda-fecha" style="font-size:calc(12.8px * var(--ui-scale)); line-height:1.5; color:rgba(38,42,32,0.68); background:rgba(47,93,80,.07); border:1px solid rgba(47,93,80,.14); border-radius:9px; padding:10px 11px;">Elegí una fecha para ver qué horario habitual tiene y, si hace falta, crear una excepción.</div>
-        <div id="disp-modos" style="display:grid; gap:8px; margin:12px 0 14px;">
-          <label style="display:flex; gap:10px; align-items:flex-start; padding:11px; border:1px solid rgba(47,93,80,.18); border-radius:10px; cursor:pointer;">
-            <input type="radio" name="disp-modo" value="habitual" style="margin-top:3px;">
-            <span><strong>Mantener horario habitual</strong><br><small>Ese día funciona igual que siempre. No hace falta crear una excepción.</small></span>
-          </label>
-          <label style="display:flex; gap:10px; align-items:flex-start; padding:11px; border:1px solid rgba(47,93,80,.18); border-radius:10px; cursor:pointer;">
-            <input type="radio" name="disp-modo" value="cambiar" style="margin-top:3px;">
-            <span><strong>Cambiar horario solo ese día</strong><br><small>Podés indicar una o varias franjas diferentes al horario habitual.</small></span>
-          </label>
-          <label style="display:flex; gap:10px; align-items:flex-start; padding:11px; border:1px solid rgba(47,93,80,.18); border-radius:10px; cursor:pointer;">
-            <input type="radio" name="disp-modo" value="cerrado" style="margin-top:3px;">
-            <span><strong>Cerrar todo el día</strong><br><small>No se ofrecerán horarios para esa fecha.</small></span>
-          </label>
-        </div>
-        <div id="disp-editor" style="display:none;">
-          <div style="font-size:12.5px; color:rgba(38,42,32,.62); margin-bottom:7px;"><strong>Horario de ese día</strong>. Las franjas deben estar dentro del horario que quieras ofrecer.</div>
-          <div id="disp-rangos" style="display:flex; flex-direction:column; gap:8px;"></div>
-          <button type="button" class="btn-secondary" id="disp-agregar-rango" style="width:auto;">+ Agregar franja</button>
-          <div class="slots-grid" id="disp-slots"></div>
-        </div>
-        <button class="submit" id="disp-guardar" style="width:auto; max-width:250px;">Guardar configuración de ese día</button>
+        <div id="disp-rangos" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <button type="button" class="btn-secondary" id="disp-agregar-rango" style="width:auto;">+ Agregar franja</button>
+        <div class="slots-grid" id="disp-slots"></div>
+        <button class="submit" id="disp-guardar" style="width:auto; max-width:220px;">Guardar disponibilidad</button>
         <div class="msg" id="disp-msg"></div>
       </div>
       <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; max-width:520px; margin-top:16px;">
@@ -1143,9 +1107,6 @@
   // En celular solo existe el dropdown de siempre; en PC además aparece el sidebar,
   // ambos con los mismos data-view y ambos disparan la misma showView().
   const menuLinks = document.querySelectorAll(".menu-dropdown a[data-view], .sidebar a[data-view]");
-  // Horario habitual y excepciones forman una misma configuración.
-  document.getElementById("btn-abrir-excepciones")?.addEventListener("click", () => showView("disponibilidad"));
-  document.getElementById("btn-volver-horario")?.addEventListener("click", () => showView("config"));
   const fab = document.getElementById("fab-agregar");
   const VISTAS_CON_FAB = { turnos: true, servicios: true, clientes: true, caja: true };
 
@@ -3400,23 +3361,6 @@ const DISP_PASO = 30;
     renderDispRangos();
   });
 
-  function modoDisponibilidadActual(){
-    return document.querySelector('input[name="disp-modo"]:checked')?.value || "habitual";
-  }
-  function actualizarModoDisponibilidad(){
-    const modo = modoDisponibilidadActual();
-    const editor = document.getElementById("disp-editor");
-    if (editor) editor.style.display = modo === "cambiar" ? "block" : "none";
-    const btn = document.getElementById("disp-guardar");
-    if (btn) btn.textContent = modo === "habitual" ? "Volver al horario habitual" : modo === "cerrado" ? "Cerrar ese día" : "Guardar nuevo horario";
-  }
-  function seleccionarModoDisponibilidad(modo){
-    const radio = document.querySelector(`input[name="disp-modo"][value="${modo}"]`);
-    if (radio) radio.checked = true;
-    actualizarModoDisponibilidad();
-  }
-  document.querySelectorAll('input[name="disp-modo"]').forEach(r => r.addEventListener("change", actualizarModoDisponibilidad));
-
   async function cargarDisponibilidad(){
     if (!dispFecha.value) return;
     const fechaISO = dispFecha.value;
@@ -3426,7 +3370,6 @@ const DISP_PASO = 30;
       const data = snap.data() || {};
       dispSeleccion = new Set(Array.isArray(data.slots) ? data.slots : []);
       dispRangosData = rangosDesdeSlots(dispSeleccion);
-      seleccionarModoDisponibilidad(dispSeleccion.size ? "cambiar" : "cerrado");
     } else {
       // Sin excepción guardada, mostramos como punto de partida el horario habitual.
       // Todavía no se crea ninguna excepción hasta que el usuario presione Guardar.
@@ -3436,45 +3379,13 @@ const DISP_PASO = 30;
       const rangos = Array.isArray(dia?.rangos) ? dia.rangos.map(r => ({desde:r.desde, hasta:r.hasta})) : [];
       dispRangosData = ordenarRangos(rangos);
       dispSeleccion = slotsDeRangos(dispRangosData);
-      seleccionarModoDisponibilidad("habitual");
     }
     renderDispRangos();
-    actualizarAyudaExcepcion();
-  }
-  function actualizarAyudaExcepcion(){
-    const ayuda = document.getElementById("disp-ayuda-fecha");
-    if (!ayuda || !dispFecha.value) return;
-    const fecha = new Date(dispFecha.value + "T00:00:00");
-    const diaId = fecha.getDay();
-    const dia = horarioConfigCache?.dias?.[String(diaId)];
-    const habitual = Array.isArray(dia?.rangos) ? dia.rangos.map(r => `${r.desde}–${r.hasta}`).join(" / ") : "cerrado";
-    const existe = dispCacheGlobal?.[dispFecha.value]?.existe;
-    ayuda.innerHTML = existe
-      ? `<strong>Esta fecha tiene una excepción guardada.</strong><br>Horario habitual: ${habitual}. La configuración de abajo reemplaza al habitual solo para este día.`
-      : `<strong>Esta fecha todavía usa el horario habitual.</strong><br>Horario habitual: ${habitual}. Si guardás cambios acá, esta fecha pasará a tener una excepción.`;
   }
   dispFecha.addEventListener("change", cargarDisponibilidad);
 
   document.getElementById("disp-guardar").addEventListener("click", async () => {
     if (!dispFecha.value) return;
-    const modo = modoDisponibilidadActual();
-    const msg = document.getElementById("disp-msg");
-    if (modo === "habitual") {
-      const existente = dispCacheGlobal?.[dispFecha.value]?.existe;
-      if (!existente) { msg.className="msg show ok"; msg.textContent="Ese día ya usa el horario habitual. No se creó ninguna excepción."; setTimeout(()=>msg.className="msg",2500); return; }
-      const ocupados = minutosOcupadosDia(dispFecha.value);
-      const habituales = new Set(slotsDeRangos(rangosHabitualesDisponibilidad(dispFecha.value)));
-      const fueraDelHabitual = [...ocupados].filter(m=>!habituales.has(m)).sort((a,b)=>a-b);
-      if (fueraDelHabitual.length) { msg.className="msg show error"; msg.textContent="No se puede volver al horario habitual porque hay turnos fuera de ese horario ("+fueraDelHabitual.map(formatearHora).join(", ")+"). Primero cambiá esos turnos."; return; }
-      await deleteDoc(doc(db,"businesses",businessId,"disponibilidad",dispFecha.value));
-      msg.className="msg show ok"; msg.textContent="Se quitó la excepción. Ese día vuelve a usar el horario habitual."; setTimeout(()=>msg.className="msg",2500); return;
-    }
-    if (modo === "cerrado") {
-      const ocupados = minutosOcupadosDia(dispFecha.value);
-      if (ocupados.size) { msg.className="msg show error"; msg.textContent="No se puede cerrar ese día porque ya hay turnos reservados ("+[...ocupados].sort((a,b)=>a-b).map(formatearHora).join(", ")+"). Primero cambiá esos turnos."; return; }
-      await setDoc(doc(db,"businesses",businessId,"disponibilidad",dispFecha.value),{slots:[],tipo:"excepcion",actualizadoEn:new Date().toISOString()});
-      msg.className="msg show ok"; msg.textContent="El día quedó cerrado por excepción."; setTimeout(()=>msg.className="msg",2500); return;
-    }
     const rangosInvalidos = dispRangosData.some(r => {
       if (!r.desde || !r.hasta) return true;
       const inicio = minutosDesdeHora(r.desde);
@@ -3483,28 +3394,20 @@ const DISP_PASO = 30;
     });
     // Una excepción sin franjas es válida: significa que ese día queda completamente cerrado.
     if (rangosInvalidos){
+      const msg = document.getElementById("disp-msg");
       msg.className = "msg show error";
       msg.textContent = "Revisá las franjas: cada 'Hasta' debe ser posterior a su 'Desde'.";
       return;
     }
 
-    const rangosOrdenados = ordenarRangos(dispRangosData);
-    for (let i = 1; i < rangosOrdenados.length; i++){
-      const anteriorFin = minutosDesdeHora(rangosOrdenados[i - 1].hasta);
-      const actualInicio = minutosDesdeHora(rangosOrdenados[i].desde);
-      if (Number.isFinite(anteriorFin) && Number.isFinite(actualInicio) && actualInicio < anteriorFin){
-          msg.className = "msg show error";
-        msg.textContent = `Las franjas de esta fecha se superponen (${rangosOrdenados[i - 1].desde}–${rangosOrdenados[i - 1].hasta} y ${rangosOrdenados[i].desde}–${rangosOrdenados[i].hasta}). Separalas o modificá una.`;
-        return;
-      }
-    }
-    const rangosValidos = rangosOrdenados.map(r => ({
+    const rangosValidos = ordenarRangos(dispRangosData).map(r => ({
       inicio: minutosDesdeHora(r.desde),
       fin: minutosDesdeHora(r.hasta)
     })).filter(r => Number.isFinite(r.inicio) && Number.isFinite(r.fin) && r.fin > r.inicio);
     const slots = Array.from(dispSeleccion).sort((a, b) => a - b);
     const slotFueraDeRango = slots.find(m => !rangosValidos.some(r => m >= r.inicio && m < r.fin));
     if (slotFueraDeRango !== undefined){
+      const msg = document.getElementById("disp-msg");
       msg.className = "msg show error";
       msg.textContent = `El horario ${formatearHora(slotFueraDeRango)} quedó fuera de las franjas configuradas. Revisá las franjas antes de guardar.`;
       return;
@@ -3513,6 +3416,7 @@ const DISP_PASO = 30;
     const slotsSet = new Set(slots);
     const ocupadosFuera = [...ocupados].filter(m => !slotsSet.has(m)).sort((a, b) => a - b);
     if (ocupadosFuera.length){
+      const msg = document.getElementById("disp-msg");
       msg.className = "msg show error";
       msg.textContent = "No se puede guardar esta excepción porque quitaría horarios de turnos ya existentes (" + ocupadosFuera.map(formatearHora).join(", ") + "). Primero cambiá esos turnos o dejá esas franjas disponibles.";
       return;
@@ -3524,7 +3428,7 @@ const DISP_PASO = 30;
     });
     const msg = document.getElementById("disp-msg");
     msg.className = "msg show ok";
-    msg.textContent = "Excepción de horario guardada.";
+    msg.textContent = "Disponibilidad guardada.";
     setTimeout(() => { msg.className = "msg"; }, 2000);
   });
 
