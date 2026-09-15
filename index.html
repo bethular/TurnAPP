@@ -1,0 +1,272 @@
+```txt
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TurnApp — Gestioná los turnos de tu negocio</title>
+<link rel="manifest" href="./manifest.json" />
+<meta name="theme-color" content="#3F5044" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;0,9..144,500;0,9..144,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #F5EFE4;
+    --cream-deep: #EDE3D3;
+    --ink: #262A20;
+    --forest: #2F4033;
+    --forest-soft: #3F5044;
+    --gold: #B8862E;
+    --gold-soft: #D9B876;
+    --rose: #C48B93;
+    --line: rgba(38,42,32,0.14);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Work Sans', system-ui, sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+
+  header{
+    padding:28px 24px 0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .brand{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    color:var(--forest);
+    letter-spacing:-0.01em;
+  }
+
+  main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 20px 60px;
+    gap:40px;
+  }
+
+  .hero{
+    text-align:center;
+    max-width:520px;
+  }
+  .hero h1{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-style:italic;
+    font-size:clamp(30px, 5vw, 44px);
+    line-height:1.12;
+    margin:0 0 14px;
+    color:var(--forest);
+  }
+  .hero p{
+    font-size:16px;
+    line-height:1.55;
+    color:rgba(38,42,32,0.72);
+    margin:0;
+  }
+
+  .schedule{
+    width:280px;
+    max-width:80vw;
+    margin:28px auto 0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .slot{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    border-radius:10px;
+    background:rgba(47,64,51,0.06);
+    border:1px solid var(--line);
+    font-size:13px;
+    color:rgba(38,42,32,0.65);
+  }
+  .slot .time{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:13px;
+    color:var(--forest);
+    width:44px;
+    flex-shrink:0;
+  }
+  .slot.busy{ background:rgba(47,64,51,0.11); }
+  .slot.open{
+    background:rgba(184,134,46,0.10);
+    border-color:rgba(184,134,46,0.35);
+    color:var(--gold);
+    font-weight:500;
+    animation:breathe 3.2s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ box-shadow:0 0 0 0 rgba(184,134,46,0.0); }
+    50%{ box-shadow:0 0 0 6px rgba(184,134,46,0.08); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .slot.open{ animation:none; }
+  }
+
+  .card{
+    width:100%;
+    max-width:380px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px 26px 26px;
+    box-shadow:0 24px 48px -32px rgba(38,42,32,0.35);
+  }
+  .tabs{
+    display:flex;
+    gap:4px;
+    background:var(--cream-deep);
+    border-radius:999px;
+    padding:4px;
+    margin-bottom:22px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:9px 0;
+    border-radius:999px;
+    font-size:13.5px;
+    font-weight:600;
+    color:rgba(38,42,32,0.55);
+    cursor:pointer;
+    border:none;
+    background:transparent;
+    font-family:inherit;
+    transition:background .2s ease, color .2s ease;
+  }
+  .tab.active{
+    background:var(--forest);
+    color:var(--cream);
+  }
+
+  form{ display:none; flex-direction:column; gap:14px; }
+  form.active{ display:flex; }
+
+  label{
+    font-size:12.5px;
+    font-weight:600;
+    color:rgba(38,42,32,0.6);
+    margin-bottom:5px;
+    display:block;
+  }
+  .field input{
+    width:100%;
+    padding:11px 13px;
+    border-radius:9px;
+    border:1px solid var(--line);
+    background:var(--cream);
+    font-family:inherit;
+    font-size:14.5px;
+    color:var(--ink);
+  }
+  .field input:focus{
+    outline:2px solid var(--gold-soft);
+    outline-offset:1px;
+    border-color:var(--gold);
+  }
+
+  .submit{
+    margin-top:6px;
+    padding:12px 0;
+    border:none;
+    border-radius:9px;
+    background:var(--forest);
+    color:var(--cream);
+    font-family:inherit;
+    font-weight:600;
+    font-size:14.5px;
+    cursor:pointer;
+    transition:background .2s ease, transform .1s ease;
+  }
+  .submit:hover{ background:var(--forest-soft); }
+  .submit:active{ transform:scale(0.98); }
+  .submit:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+
+  .hint{
+    font-size:12.5px;
+    color:rgba(38,42,32,0.5);
+    text-align:center;
+    margin-top:4px;
+  }
+
+  .field{ position:relative; }
+  .toggle-pass{
+    position:absolute;
+    right:10px;
+    top:34px;
+    background:none;
+    border:none;
+    font-size:12px;
+    font-weight:600;
+    color:rgba(38,42,32,0.5);
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .toggle-pass:hover{ color:var(--forest); }
+
+  .forgot{
+    text-align:right;
+    font-size:12px;
+    color:var(--gold);
+    background:none;
+    border:none;
+    font-family:inherit;
+    cursor:pointer;
+    padding:0;
+    margin-top:-6px;
+  }
+  .forgot:hover{ text-decoration:underline; }
+
+  .divider{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:16px 0 4px;
+    color:rgba(38,42,32,0.4);
+    font-size:12px;
+  }
+  .divider::before, .divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  .google-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:11px 0;
+    border:1px solid var(--line);
+    border-radius:9px;
+    background:#fff;
+    font-family:inherit;
+    font-weight:600;
+    font-size:14px;
+    color:var(--ink);
+    cursor:pointer;
+    margin-top:12px;
+  }
+  .google-btn:hover{ background:var(--cream
+```
