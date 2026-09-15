@@ -374,7 +374,8 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
     getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-    sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup
+    sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup,
+    setPersistence, browserLocalPersistence, onAuthStateChanged
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, doc, setDoc, getDoc, serverTimestamp
@@ -384,6 +385,19 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
   const googleProvider = new GoogleAuthProvider();
+
+  // --- ETAPA 8 — PASO 3: conservar la sesión y entrar automáticamente al panel ---
+  setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          window.location.href = "./panel/index.html";
+        }
+      });
+    })
+    .catch(() => {
+      // Si no se puede configurar la persistencia, el login normal sigue disponible.
+    });
 
   // --- crear el documento del negocio si todavía no existe (registro o Google) ---
   async function asegurarNegocio(uid, nombreSugerido){
