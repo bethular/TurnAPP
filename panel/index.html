@@ -338,6 +338,14 @@
   .servicio-check-item input{ width:auto; margin:0; }
   .servicio-check-item.marcado{ border-color:var(--forest); background:rgba(47,64,51,0.07); }
   .slots-grid{ display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+
+  .cal-dia-view-title{ margin-bottom:10px; font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.62); }
+  .cal-excepcion-aviso{ margin-bottom:12px; padding:10px 12px; border:1px dashed var(--forest); border-radius:10px; background:rgba(47,93,80,0.06); font-size:calc(12.5px * var(--ui-scale)); color:var(--forest); }
+  .cal-dia-cerrado{ padding:18px 14px; border:1px dashed var(--line); border-radius:12px; background:rgba(38,42,32,0.025); text-align:center; }
+  .cal-dia-cerrado strong{ display:block; font-size:calc(14px * var(--ui-scale)); color:var(--ink); margin-bottom:4px; }
+  .cal-dia-cerrado span{ display:block; font-size:calc(12.5px * var(--ui-scale)); color:rgba(38,42,32,0.58); }
+  .cal-corte-horario{ width:100%; margin:4px 0; padding:8px 10px; border-top:1px dashed var(--line); border-bottom:1px dashed var(--line); background:rgba(38,42,32,0.025); text-align:center; color:rgba(38,42,32,0.55); font-size:calc(11.5px * var(--ui-scale)); }
+  .cal-corte-horario strong{ font-weight:600; }
   .slot-btn{
     padding:8px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream);
     font-family:inherit; font-size:calc(13px * var(--ui-scale)); font-weight:600; color:var(--ink); cursor:pointer;
@@ -396,6 +404,11 @@
   .cal-dia-mes.libre .cal-punto{ background:#3D6B4A; }
   .cal-dia-mes.parcial .cal-punto{ background:var(--gold); }
   .cal-dia-mes.completo .cal-punto{ background:var(--rose-deep); }
+  .cal-dia-mes.cerrado .cal-punto{ background:var(--line); opacity:0.55; }
+  .cal-dia-mes.cerrado{ opacity:0.62; }
+  .cal-dia-mes .cal-estado{ font-size:calc(8px * var(--ui-scale)); line-height:1; font-weight:600; opacity:.62; letter-spacing:.01em; }
+  .cal-dia-mes.excepcion{ border-style:dashed; }
+  .cal-dia-mes.excepcion .cal-estado{ opacity:.82; }
   .cal-dia-mes.hoy{ border-color:var(--forest); border-width:2px; }
   .cal-grid-semana{ display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; }
   .cal-dia-semana{
@@ -407,8 +420,64 @@
   .cal-dia-semana.libre .cal-punto{ background:#3D6B4A; }
   .cal-dia-semana.parcial .cal-punto{ background:var(--gold); }
   .cal-dia-semana.completo .cal-punto{ background:var(--rose-deep); }
+  .cal-dia-semana.cerrado .cal-punto{ background:var(--line); opacity:0.55; }
+  .cal-dia-semana.cerrado{ opacity:0.62; }
   .cal-dia-semana strong{ font-size:calc(12px * var(--ui-scale)); }
   .cal-dia-semana span{ font-size:calc(10.5px * var(--ui-scale)); color:rgba(38,42,32,0.55); }
+
+  /* ---------- calendario semanal: agenda real por franjas ---------- */
+  .cal-semana-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--line); border-radius:10px; background:#fff; }
+  .cal-semana-agenda{ min-width:920px; display:grid; grid-template-columns:68px repeat(7, minmax(120px,1fr)); }
+  .cal-semana-hora-head{ background:var(--cream); border-right:1px solid var(--line); border-bottom:1px solid var(--line); min-height:74px; }
+  .cal-semana-dia-head{ min-height:74px; padding:8px 7px; background:var(--cream); border-right:1px solid var(--line); border-bottom:1px solid var(--line); cursor:pointer; text-align:center; }
+  .cal-semana-dia-head:last-child{ border-right:none; }
+  .cal-semana-dia-head:hover{ background:var(--cream-deep); }
+  .cal-semana-dia-head.hoy{ box-shadow:inset 0 -3px 0 var(--forest); }
+  .cal-semana-dia-head.excepcion{ border-bottom:2px dashed var(--gold); }
+  .cal-semana-dia-head .dia-nombre{ display:block; font-size:calc(10px * var(--ui-scale)); text-transform:uppercase; letter-spacing:.04em; color:rgba(38,42,32,.55); }
+  .cal-semana-dia-head .dia-numero{ display:block; font-size:calc(17px * var(--ui-scale)); font-weight:700; line-height:1.15; margin-top:2px; }
+  .cal-semana-dia-head .dia-estado{ display:block; font-size:calc(9px * var(--ui-scale)); font-weight:700; margin-top:3px; color:var(--forest); }
+  .cal-semana-dia-head.cerrado .dia-estado{ color:rgba(38,42,32,.48); }
+  .cal-semana-dia-head.completo .dia-estado{ color:var(--rose-deep); }
+  .cal-semana-dia-head.parcial .dia-estado{ color:var(--gold); }
+  .cal-semana-hora{ min-height:38px; display:flex; align-items:flex-start; justify-content:flex-end; padding:6px 7px 0 2px; border-right:1px solid var(--line); border-bottom:1px solid rgba(38,42,32,.08); background:var(--cream); font-size:calc(10px * var(--ui-scale)); font-weight:600; color:rgba(38,42,32,.55); }
+  .cal-semana-slot{ min-height:38px; border-right:1px solid rgba(38,42,32,.08); border-bottom:1px solid rgba(38,42,32,.08); padding:3px; background:#fff; }
+  .cal-semana-slot:last-child{ border-right:none; }
+  .cal-semana-slot button{ width:100%; min-height:30px; border:1px solid transparent; border-radius:6px; font-family:inherit; font-size:calc(10.5px * var(--ui-scale)); font-weight:700; cursor:pointer; background:rgba(61,107,74,.08); color:var(--forest); }
+  .cal-semana-slot button:hover{ border-color:var(--forest); box-shadow:0 3px 8px -6px rgba(38,42,32,.4); }
+  .cal-semana-slot.ocupado{ background:rgba(143,75,82,.08); }
+  .cal-semana-slot.ocupado span{ display:flex; align-items:center; justify-content:center; min-height:30px; border-radius:6px; font-size:calc(10px * var(--ui-scale)); font-weight:700; color:var(--rose-deep); }
+  .cal-semana-slot.cerrado{ background:rgba(38,42,32,.035); }
+  .cal-semana-slot.cerrado span{ display:block; height:100%; min-height:30px; }
+  .cal-semana-excepcion-bar{ grid-column:1 / -1; padding:7px 10px; background:rgba(184,145,67,.08); border-bottom:1px dashed var(--gold); font-size:calc(11px * var(--ui-scale)); color:rgba(38,42,32,.68); }
+  .cal-semana-excepcion-bar strong{ color:var(--gold); }
+  .cal-semana-ayuda{ margin:8px 0 10px; font-size:calc(11.5px * var(--ui-scale)); color:rgba(38,42,32,.58); }
+
+
+  /* ---------- calendario mensual mejorado ---------- */
+  .cal-mes-wrap{ overflow-x:auto; }
+  .cal-mes-cabecera{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; margin-bottom:6px; }
+  .cal-mes-cabecera div{ text-align:center; padding:4px 2px; font-size:calc(10px * var(--ui-scale)); font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:rgba(38,42,32,.5); }
+  .cal-grid-mes{ grid-template-rows:repeat(6,minmax(92px,1fr)); }
+  .cal-dia-mes{ min-height:92px; aspect-ratio:auto; padding:7px 5px; gap:4px; justify-content:flex-start; position:relative; overflow:hidden; }
+  .cal-dia-mes .cal-mes-numero{ font-size:calc(14px * var(--ui-scale)); line-height:1; }
+  .cal-dia-mes .cal-punto{ flex:0 0 auto; }
+  .cal-dia-mes .cal-mes-estado{ font-size:calc(8.5px * var(--ui-scale)); line-height:1.05; font-weight:700; opacity:.72; }
+  .cal-dia-mes .cal-mes-detalle{ font-size:calc(8px * var(--ui-scale)); line-height:1.1; font-weight:600; opacity:.55; text-align:center; }
+  .cal-dia-mes .cal-mes-rangos{ font-size:calc(7.5px * var(--ui-scale)); line-height:1.15; opacity:.48; text-align:center; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .cal-dia-mes.excepcion{ box-shadow:inset 0 0 0 1px var(--gold); }
+  .cal-dia-mes.fuera-de-mes{ opacity:.3; }
+  .cal-dia-mes.hoy{ box-shadow:inset 0 0 0 2px var(--forest); }
+  .cal-dia-mes.hoy.excepcion{ box-shadow:inset 0 0 0 2px var(--forest), inset 0 0 0 4px rgba(184,145,67,.22); }
+  @media (max-width:640px){
+    .cal-mes-wrap{ overflow-x:visible; }
+    .cal-mes-cabecera,.cal-grid-mes{ gap:3px; }
+    .cal-dia-mes{ min-height:76px; padding:5px 2px; border-radius:7px; }
+    .cal-dia-mes .cal-mes-numero{ font-size:calc(12px * var(--ui-scale)); }
+    .cal-dia-mes .cal-mes-detalle{ font-size:calc(7px * var(--ui-scale)); }
+    .cal-dia-mes .cal-mes-rangos{ display:none; }
+  }
+
   .cal-leyenda{ display:flex; gap:14px; flex-wrap:wrap; margin-top:12px; font-size:calc(12px * var(--ui-scale)); color:rgba(38,42,32,0.6); }
   .cal-leyenda span{ display:inline-flex; align-items:center; gap:6px; }
   .cal-leyenda .cal-punto{ width:9px; height:9px; border-radius:50%; display:inline-block; }
@@ -542,9 +611,11 @@
       </div>
       <div id="cal-contenido"></div>
       <div class="cal-leyenda">
-        <span><i class="cal-punto" style="background:#3D6B4A;"></i> Casi vacío</span>
-        <span><i class="cal-punto" style="background:var(--gold);"></i> Con libres y ocupados</span>
+        <span><i class="cal-punto" style="background:#3D6B4A;"></i> Libre</span>
+        <span><i class="cal-punto" style="background:var(--gold);"></i> Parcial</span>
         <span><i class="cal-punto" style="background:var(--rose-deep);"></i> Completo</span>
+        <span><i class="cal-punto" style="background:var(--line);"></i> Cerrado</span>
+        <span style="border:1px dashed var(--forest);border-radius:5px;padding:2px 5px;">Excepción</span>
       </div>
     </section>
 
@@ -619,6 +690,18 @@
           <button class="submit" id="btn-guardar-logo" style="width:auto; padding:10px 18px;">Guardar</button>
         </div>
         <div class="msg" id="msg-comercio"></div>
+      </div>
+
+      <div class="turno-card" id="horario-config-card" style="flex-direction:column; align-items:stretch; gap:12px; margin-bottom:16px;">
+        <strong>Horario de atención</strong>
+        <p class="turno-servicio" style="margin:0;">Definí los días y horarios habituales de atención. Esta configuración será la base para calcular la disponibilidad.</p>
+        <div id="horario-dias-config" style="display:flex; flex-direction:column; gap:9px;"></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="submit" id="horario-aplicar-todos" style="width:auto; padding:10px 16px;">Aplicar un mismo horario a todos</button>
+          <button class="btn-secondary" id="horario-guardar" style="padding:10px 16px;">Guardar horario</button>
+        </div>
+        <div class="msg" id="horario-msg"></div>
+        <div style="font-size:calc(12px * var(--ui-scale)); color:rgba(38,42,32,0.55); line-height:1.45;">Los cambios para una fecha concreta (feriado, vacaciones, enfermedad o cambio de un solo día) se manejarán como excepciones y no modificarán este horario habitual.</div>
       </div>
 
       <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:12px; margin-bottom:16px;">
@@ -713,19 +796,11 @@
 
     <section class="view" id="view-disponibilidad">
       <h1 class="view-title">Disponibilidad</h1>
-      <p class="view-sub">Elegí un día, el rango horario que quieras (mañana, noche, lo que sea) y tildá los horarios en los que vas a poder atender. Lo que no tildes no va a aparecer en tu catálogo.</p>
+      <p class="view-sub">Usá esta sección para crear una excepción para un día concreto. Podés agregar varias franjas, por ejemplo 08:00–12:00 y 15:00–19:00. Si guardás sin horarios, el día queda cerrado.</p>
       <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:14px; max-width:520px;">
         <input type="date" id="disp-fecha">
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <div style="flex:1; min-width:120px;">
-            <label style="font-size:calc(12px * var(--ui-scale)); font-weight:600; color:rgba(38,42,32,0.6); display:block; margin-bottom:4px;">Desde</label>
-            <input type="time" id="disp-desde" step="1800">
-          </div>
-          <div style="flex:1; min-width:120px;">
-            <label style="font-size:calc(12px * var(--ui-scale)); font-weight:600; color:rgba(38,42,32,0.6); display:block; margin-bottom:4px;">Hasta</label>
-            <input type="time" id="disp-hasta" step="1800">
-          </div>
-        </div>
+        <div id="disp-rangos" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <button type="button" class="btn-secondary" id="disp-agregar-rango" style="width:auto;">+ Agregar franja</button>
         <div class="slots-grid" id="disp-slots"></div>
         <button class="submit" id="disp-guardar" style="width:auto; max-width:220px;">Guardar disponibilidad</button>
         <div class="msg" id="disp-msg"></div>
@@ -1058,7 +1133,7 @@
   });
 
   // --- modal: nuevo turno, con calendario y horarios disponibles ---
-  const HORA_INICIO = 9, HORA_FIN = 19, PASO_MIN = 30; // agenda base: 9 a 19hs, cada 30 min
+  const PASO_MIN = 30; // duración de cada bloque; el horario real viene de horarioConfig
 
   const modalTurno = document.getElementById("modal-turno");
   const mtCliente = document.getElementById("mt-cliente");
@@ -1185,14 +1260,36 @@
       return turnosDelDia.filter(t => t.bloqueados.some(m => m >= inicioSlot && m < finSlot));
     }
 
+    // Los horarios de inicio se calculan a partir de la capacidad efectiva del día.
+    // Si existe una excepción para esa fecha, reemplaza al horario habitual.
+    // Cada servicio debe entrar completo dentro de un mismo rango y nunca atravesar un corte.
+    const fechaISO = mtFecha.value;
+    const rangosEfectivos = rangosCapacidadDia(fechaISO);
     const slots = [];
-    for (let m = HORA_INICIO * 60; m + duracion <= HORA_FIN * 60; m += PASO_MIN){
-      slots.push({ minutos: m, texto: formatearHora(m), choques: turnosQueChocan(m, m + duracion) });
-    }
+
+    rangosEfectivos.forEach(rango => {
+      const inicioRango = minutosDesdeHora(rango.desde);
+      const finRango = minutosDesdeHora(rango.hasta);
+      if (!Number.isFinite(inicioRango) || !Number.isFinite(finRango) || finRango <= inicioRango) return;
+
+      for (let m = inicioRango; m + duracion <= finRango; m += PASO_MIN){
+        slots.push({ minutos: m, texto: formatearHora(m), choques: turnosQueChocan(m, m + duracion) });
+      }
+    });
 
     mtSlots.innerHTML = "";
     if (!slots.length){
-      mtSlots.innerHTML = `<span style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);">Ese servicio no entra en el horario de agenda (9 a 19hs).</span>`;
+      const excepcion = dispCacheGlobal[fechaISO]?.existe;
+      const capacidad = slotsCapacidadDia(fechaISO);
+      let mensaje;
+      if (!capacidad.length){
+        mensaje = excepcion
+          ? "Ese día está cerrado por una excepción de horario."
+          : "Ese día no tiene horarios de atención configurados.";
+      } else {
+        mensaje = "Ese servicio no entra completo en ninguno de los horarios de atención configurados para ese día.";
+      }
+      mtSlots.innerHTML = `<span style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);">${mensaje}</span>`;
       return;
     }
     slots.forEach(s => {
@@ -1288,7 +1385,84 @@
     const clienteNombre = mtCliente.value.trim().replace(/\s+/g, " ");
     const clienteWhatsapp = normalizarTelefono(mtWhatsapp.value) || null;
 
+    // Última validación: el horario elegido debe seguir perteneciendo al horario
+    // configurado para ese día y el servicio completo debe entrar en la misma franja.
+    // Esto evita guardar un turno fuera de horario si la configuración cambió
+    // mientras el modal estaba abierto.
     const fecha = new Date(mtFecha.value + "T00:00:00");
+    const finElegido = slotElegido + duracionTotal;
+
+    // Releer configuración y excepción justo antes de guardar. La caché sirve para
+    // mostrar la interfaz, pero la escritura final debe usar el estado actual de Firestore.
+    const [negocioActualSnap, excepcionActualSnap] = await Promise.all([
+      getDoc(doc(db, "businesses", businessId)),
+      getDoc(doc(db, "businesses", businessId, "disponibilidad", mtFecha.value))
+    ]);
+    const negocioActual = negocioActualSnap.exists() ? (negocioActualSnap.data() || {}) : {};
+    const horarioActual = negocioActual.horarioConfig || {};
+    let rangosEfectivosGuardado = [];
+    if (excepcionActualSnap.exists()){
+      const slotsExcepcion = Array.isArray(excepcionActualSnap.data()?.slots) ? excepcionActualSnap.data().slots : [];
+      rangosEfectivosGuardado = rangosDesdeSlots(slotsExcepcion);
+    } else {
+      const diaActual = horarioActual?.dias?.[String(fecha.getDay())];
+      rangosEfectivosGuardado = ordenarRangos(
+        Array.isArray(diaActual?.rangos)
+          ? diaActual.rangos.map(r => ({ desde:r.desde, hasta:r.hasta }))
+          : []
+      );
+    }
+    const horarioValido = rangosEfectivosGuardado.some(rango => {
+      const inicioRango = minutosDesdeHora(rango.desde);
+      const finRango = minutosDesdeHora(rango.hasta);
+      return Number.isFinite(inicioRango) && Number.isFinite(finRango)
+        && slotElegido >= inicioRango && finElegido <= finRango;
+    });
+
+    if (!horarioValido){
+      mtMsg.className = "msg show error";
+      mtMsg.textContent = "Ese horario ya no está disponible dentro del horario de atención configurado.";
+      await actualizarSlots();
+      return;
+    }
+
+    // Última comprobación contra los turnos actuales antes de escribir.
+    // El modal puede haber quedado abierto mientras otro turno ocupó ese horario.
+    // No confiamos solamente en la lista que se mostró al abrir el modal.
+    const turnosActualesSnap = await getDocs(query(
+      collection(db, "businesses", businessId, "turnos"),
+      orderBy("fechaHora", "asc")
+    ));
+    const choqueActual = [];
+    turnosActualesSnap.docs.forEach(d => {
+      const t = d.data();
+      const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
+      if (!f || fechaAISO(f) !== mtFecha.value) return;
+      const inicioTurno = f.getHours() * 60 + f.getMinutes();
+      const finTurno = inicioTurno + (t.duracionTotal || 30);
+      const libres = new Set(t.huecosReabiertos || []);
+      for (let m = inicioTurno; m < finTurno; m += PASO_MIN) {
+        if (!libres.has(m) && m >= slotElegido && m < finElegido) {
+          choqueActual.push({ minuto:m, clienteNombre:t.clienteNombre || "un cliente", servicioNombre:t.servicioNombre || "un servicio" });
+        }
+      }
+    });
+
+    if (choqueActual.length) {
+      const unicos = [];
+      const vistos = new Set();
+      choqueActual.forEach(c => {
+        const clave = c.clienteNombre + "|" + c.servicioNombre;
+        if (!vistos.has(clave)) { vistos.add(clave); unicos.push(c); }
+      });
+      const detalle = unicos.map(c => `${c.clienteNombre} (${c.servicioNombre})`).join(", ");
+      const ok = await confirmarAccion(`El horario elegido acaba de ser ocupado por: ${detalle}. ¿Igual querés asignar este turno ahí?`);
+      if (!ok) {
+        await actualizarSlots();
+        return;
+      }
+    }
+
     fecha.setMinutes(slotElegido);
 
     const datosTurno = {
@@ -1302,8 +1476,17 @@
     };
 
     if (modoSolicitudId){
-      await addDoc(collection(db, "businesses", businessId, "turnos"), { ...datosTurno, estado: "Confirmado" });
-      await deleteDoc(doc(db, "businesses", businessId, "solicitudes", modoSolicitudId));
+      // Confirmación atómica: el pedido se convierte en turno y se elimina de
+      // solicitudes en una sola operación. Así dos pestañas no pueden confirmar
+      // accidentalmente el mismo pedido creando dos turnos.
+      const solicitudRef = doc(db, "businesses", businessId, "solicitudes", modoSolicitudId);
+      const turnoRef = doc(collection(db, "businesses", businessId, "turnos"));
+      await runTransaction(db, async (transaction) => {
+        const solicitudSnap = await transaction.get(solicitudRef);
+        if (!solicitudSnap.exists()) throw new Error("SOLICITUD_YA_NO_EXISTE");
+        transaction.set(turnoRef, { ...datosTurno, estado: "Confirmado" });
+        transaction.delete(solicitudRef);
+      });
       if (clienteWhatsapp){
         window.open(armarLinkConfirmacion(clienteNombre, clienteWhatsapp, nombreServicios, fecha), "_blank");
       }
@@ -1402,6 +1585,7 @@
     dispFecha.value = hoyStr;
     dispFecha.min = hoyStr;
     cargarDisponibilidad();
+    iniciarHorarioConfig();
   });
 
   document.getElementById("btn-guardar-nombre").addEventListener("click", async () => {
@@ -1882,6 +2066,132 @@
   document.getElementById("caja-periodo-fecha").addEventListener("change", renderCajaResumenPeriodo);
   document.getElementById("caja-periodo-fecha").value = new Date().toISOString().slice(0, 10);
 
+  // --- horario habitual de atención: fuente única de configuración ---
+  // Se guarda en businesses/{businessId}.horarioConfig. 0=domingo, 1=lunes ... 6=sábado.
+  const DIAS_SEMANA_TURNAPP = [
+    { id: 1, nombre: "Lunes" }, { id: 2, nombre: "Martes" }, { id: 3, nombre: "Miércoles" },
+    { id: 4, nombre: "Jueves" }, { id: 5, nombre: "Viernes" }, { id: 6, nombre: "Sábado" }, { id: 0, nombre: "Domingo" }
+  ];
+  let horarioConfigCache = null;
+
+  function horarioConfigVacio(){
+    const dias = {};
+    DIAS_SEMANA_TURNAPP.forEach(d => dias[String(d.id)] = { activo:false, rangos:[] });
+    return { dias };
+  }
+  function normalizarHorarioConfig(raw){
+    const base = horarioConfigVacio(), src = raw?.dias || {};
+    DIAS_SEMANA_TURNAPP.forEach(d => {
+      const x = src[String(d.id)] || {};
+      base.dias[String(d.id)] = {
+        activo: x.activo === true,
+        rangos: Array.isArray(x.rangos) ? x.rangos.filter(r => r && /^([01]\d|2[0-3]):[0-5]\d$/.test(r.desde||'') && /^([01]\d|2[0-3]):[0-5]\d$/.test(r.hasta||'') && r.desde < r.hasta).map(r => ({desde:r.desde,hasta:r.hasta})) : []
+      };
+    });
+    return base;
+  }
+  function crearRangoHorario(desde="", hasta=""){
+    const row=document.createElement("div");
+    row.style.cssText="display:flex;gap:8px;align-items:center;flex-wrap:wrap;";
+    row.innerHTML=`<input type="time" data-horario-desde value="${desde}" step="1800" style="flex:1;min-width:120px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--cream);font-family:inherit;"><span style="color:rgba(38,42,32,0.5);">a</span><input type="time" data-horario-hasta value="${hasta}" step="1800" style="flex:1;min-width:120px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--cream);font-family:inherit;"><button type="button" class="turno-reabrir" data-quitar-rango style="border-style:solid;border-color:var(--rose-deep);color:var(--rose-deep);">Quitar</button>`;
+    row.querySelector("[data-quitar-rango]").addEventListener("click",()=>row.remove());
+    return row;
+  }
+  function renderEditorHorario(){
+    const cont=document.getElementById("horario-dias-config"); if(!cont)return;
+    const cfg=normalizarHorarioConfig(horarioConfigCache); cont.innerHTML="";
+    DIAS_SEMANA_TURNAPP.forEach(d=>{
+      const data=cfg.dias[String(d.id)], card=document.createElement("div");
+      card.style.cssText="border:1px solid var(--line);border-radius:10px;padding:10px 11px;background:var(--cream);";
+      card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;"><label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:calc(14px * var(--ui-scale));"><input type="checkbox" data-dia-activo ${data.activo?"checked":""}> ${d.nombre}</label><button type="button" class="btn-secondary" data-agregar-rango style="padding:7px 10px;">+ Rango</button></div><div data-rangos style="display:flex;flex-direction:column;gap:7px;margin-top:9px;"></div>`;
+      const rangos=card.querySelector("[data-rangos]");
+      (data.rangos.length?data.rangos:(data.activo?[{desde:"",hasta:""}]:[])).forEach(r=>rangos.appendChild(crearRangoHorario(r.desde,r.hasta)));
+      card.querySelector("[data-agregar-rango]").addEventListener("click",()=>rangos.appendChild(crearRangoHorario()));
+      card.querySelector("[data-dia-activo]").addEventListener("change",e=>{if(e.target.checked&&!rangos.children.length)rangos.appendChild(crearRangoHorario());});
+      cont.appendChild(card);
+    });
+  }
+  function leerEditorHorario(){
+    const dias={};
+    Array.from(document.querySelectorAll("#horario-dias-config > div")).forEach((card,i)=>{
+      const d=DIAS_SEMANA_TURNAPP[i];
+      dias[String(d.id)]={activo:card.querySelector("[data-dia-activo]").checked,rangos:Array.from(card.querySelectorAll("[data-horario-desde]")).map(input=>({desde:input.value,hasta:input.parentElement.querySelector("[data-horario-hasta]").value})).filter(r=>r.desde&&r.hasta)};
+    });
+    return {dias};
+  }
+  function validarHorarioConfig(cfg){
+    for(const d of DIAS_SEMANA_TURNAPP){
+      const dia=cfg.dias[String(d.id)]; if(!dia.activo)continue;
+      if(!dia.rangos.length)return `Marcaste ${d.nombre} como día de trabajo pero no tiene horario.`;
+      const rangos=dia.rangos.slice().sort((a,b)=>a.desde.localeCompare(b.desde));
+      for(const r of rangos)if(r.desde>=r.hasta)return `El horario de ${d.nombre} tiene un rango inválido.`;
+      for(let i=1;i<rangos.length;i++)if(rangos[i].desde<rangos[i-1].hasta)return `Los rangos de ${d.nombre} se superponen.`;
+    }
+    return null;
+  }
+  function iniciarHorarioConfig(){
+    onSnapshot(doc(db,"businesses",businessId),snap=>{horarioConfigCache=normalizarHorarioConfig(snap.exists()?snap.data().horarioConfig:null);renderEditorHorario();});
+  }
+  function turnoEntraEnRangosConfig(fechaISO, turno, cfg){
+    const f = turno?.fechaHora?.toDate ? turno.fechaHora.toDate() : null;
+    if (!f || fechaAISO(f) !== fechaISO) return true;
+    const fecha = new Date(fechaISO + "T00:00:00");
+    const dia = cfg?.dias?.[String(fecha.getDay())];
+    if (!dia?.activo || !Array.isArray(dia.rangos) || !dia.rangos.length) return false;
+    const inicio = f.getHours() * 60 + f.getMinutes();
+    const duracion = turno.duracionTotal || 30;
+    const fin = inicio + duracion;
+    return dia.rangos.some(r => {
+      const desde = minutosDesdeHora(r.desde), hasta = minutosDesdeHora(r.hasta);
+      return Number.isFinite(desde) && Number.isFinite(hasta) && inicio >= desde && fin <= hasta;
+    });
+  }
+
+  function validarCambioHorarioHabitual(cfg){
+    const afectados = [];
+    const turnos = Array.isArray(turnosCacheGlobal) ? turnosCacheGlobal : [];
+    turnos.forEach(t => {
+      const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
+      if (!f) return;
+      const fechaISO = fechaAISO(f);
+      // Una excepción existente sigue mandando sobre el horario habitual de esa fecha.
+      if (dispCacheGlobal[fechaISO]?.existe) return;
+      if (!turnoEntraEnRangosConfig(fechaISO, t, cfg)) afectados.push({ fechaISO, t, f });
+    });
+    return afectados;
+  }
+
+  document.getElementById("horario-guardar").addEventListener("click",async()=>{
+    const msg=document.getElementById("horario-msg"),cfg=leerEditorHorario(),error=validarHorarioConfig(cfg);
+    if(error){msg.className="msg show error";msg.textContent=error;return;}
+
+    // El horario habitual no puede modificarse de una forma que deje turnos existentes
+    // fuera de una franja. Las excepciones de fechas concretas siguen prevaleciendo.
+    const afectados = validarCambioHorarioHabitual(cfg);
+    if (afectados.length){
+      const detalle = afectados.slice(0, 8).map(x => {
+        const fechaTexto = x.f.toLocaleDateString("es-AR", {day:"2-digit", month:"2-digit"});
+        const horaTexto = x.f.toLocaleTimeString("es-AR", {hour:"2-digit", minute:"2-digit"});
+        return `${fechaTexto} ${horaTexto}`;
+      }).join(", ");
+      const extra = afectados.length > 8 ? ` y ${afectados.length - 8} más` : "";
+      msg.className="msg show error";
+      msg.textContent=`No se puede guardar ese horario porque dejaría turnos existentes fuera de las nuevas franjas (${detalle}${extra}). Primero cambiá esos turnos o configurá una excepción para esas fechas.`;
+      return;
+    }
+
+    try{await updateDoc(doc(db,"businesses",businessId),{horarioConfig:cfg});horarioConfigCache=cfg;msg.className="msg show ok";msg.textContent="Horario de atención guardado.";}
+    catch(err){console.error("Error guardando horario",err);msg.className="msg show error";msg.textContent="No pudimos guardar el horario. Revisá tu conexión o los permisos de la cuenta.";}
+  });
+  document.getElementById("horario-aplicar-todos").addEventListener("click",()=>{
+    const msg=document.getElementById("horario-msg"),cfg=leerEditorHorario(),activos=DIAS_SEMANA_TURNAPP.filter(d=>cfg.dias[String(d.id)].activo);
+    if(!activos.length){msg.className="msg show error";msg.textContent="Seleccioná al menos un día de trabajo.";return;}
+    const origen=cfg.dias[String(activos[0].id)];
+    if(!origen.rangos.length){msg.className="msg show error";msg.textContent=`${activos[0].nombre} no tiene horario para copiar.`;return;}
+    activos.forEach(d=>cfg.dias[String(d.id)]={activo:true,rangos:origen.rangos.map(r=>({...r}))});
+    horarioConfigCache=cfg;renderEditorHorario();msg.className="msg show ok";msg.textContent=`Horario de ${activos[0].nombre} aplicado a los días seleccionados. Guardá para confirmar.`;
+  });
+
   // --- categorías de caja, editables desde Configuración (#11) ---
   let categoriasCajaCache = [];
   function escucharCategoriasCaja(){
@@ -2172,16 +2482,100 @@
     document.getElementById("ct-msg").className = "msg";
     modalCambio.classList.add("show");
   }
+
+  // Valida cualquier movimiento de un turno contra el horario EFECTIVO de la fecha.
+  // No cambia el esquema de Firestore y permite excluir el propio turno al moverlo.
+  function validarHorarioTurno(fechaISO, inicioMinutos, duracion, excluirTurnoId = null){
+    const rangos = rangosCapacidadDia(fechaISO);
+    if (!rangos.length){
+      return { ok:false, mensaje: dispCacheGlobal[fechaISO]?.existe
+        ? "Ese día está cerrado por una excepción de horario."
+        : "Ese día no tiene horarios de atención configurados." };
+    }
+
+    const fin = inicioMinutos + duracion;
+    const entraEnRango = rangos.some(r => {
+      const ini = minutosDesdeHora(r.desde);
+      const finRango = minutosDesdeHora(r.hasta);
+      return Number.isFinite(ini) && Number.isFinite(finRango) && inicioMinutos >= ini && fin <= finRango;
+    });
+    if (!entraEnRango){
+      return { ok:false, mensaje:"El turno no entra completo dentro de una sola franja del horario de atención de ese día." };
+    }
+
+    const ocupados = new Set();
+    turnosCacheGlobal.forEach(t => {
+      if (excluirTurnoId && t.id === excluirTurnoId) return;
+      const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
+      if (!f || fechaAISO(f) !== fechaISO) return;
+      const inicio = f.getHours() * 60 + f.getMinutes();
+      const finTurno = inicio + (t.duracionTotal || 30);
+      const libres = new Set(t.huecosReabiertos || []);
+      for (let m = inicio; m < finTurno; m += PASO_MIN) if (!libres.has(m)) ocupados.add(m);
+    });
+    const choque = [];
+    for (let m = inicioMinutos; m < fin; m += PASO_MIN) if (ocupados.has(m)) choque.push(m);
+    return { ok:true, choque };
+  }
   document.getElementById("ct-cancelar").addEventListener("click", () => modalCambio.classList.remove("show"));
   document.getElementById("ct-guardar").addEventListener("click", async () => {
     const msg = document.getElementById("ct-msg");
     const fechaVal = document.getElementById("ct-fecha").value;
     const horaVal = document.getElementById("ct-hora").value;
     if (!fechaVal || !horaVal){ msg.className = "msg show error"; msg.textContent = "Completá día y horario."; return; }
+
+    const turnoActual = turnosCacheGlobal.find(t => t.id === cambioTurnoId);
+    const duracion = turnoActual?.duracionTotal || 30;
+    const inicio = minutosDesdeHora(horaVal);
+    const validacion = validarHorarioTurno(fechaVal, inicio, duracion, cambioTurnoId);
+    if (!validacion.ok){
+      msg.className = "msg show error";
+      msg.textContent = validacion.mensaje;
+      return;
+    }
+    if (validacion.choque.length){
+      const ok = await confirmarAccion("El nuevo horario se superpone con otro turno (" + validacion.choque.map(formatearHora).join(", ") + "). ¿Igual querés moverlo ahí?");
+      if (!ok) return;
+    }
+
+    // Última comprobación con Firestore antes de mover el turno.
+    // turnosCacheGlobal puede haber quedado desactualizado mientras el modal estaba abierto.
+    const turnosActualesSnap = await getDocs(query(
+      collection(db, "businesses", businessId, "turnos"),
+      orderBy("fechaHora", "asc")
+    ));
+    const ocupadosActuales = new Set();
+    turnosActualesSnap.docs.forEach(d => {
+      if (d.id === cambioTurnoId) return;
+      const t = d.data();
+      const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
+      if (!f || fechaAISO(f) !== fechaVal) return;
+      const inicioTurno = f.getHours() * 60 + f.getMinutes();
+      const finTurno = inicioTurno + (t.duracionTotal || 30);
+      const libres = new Set(t.huecosReabiertos || []);
+      for (let m = inicioTurno; m < finTurno; m += PASO_MIN){
+        if (!libres.has(m)) ocupadosActuales.add(m);
+      }
+    });
+
+    const choqueActual = [];
+    for (let m = inicio; m < inicio + duracion; m += PASO_MIN){
+      if (ocupadosActuales.has(m)) choqueActual.push(m);
+    }
+    if (choqueActual.length){
+      const ok = await confirmarAccion(
+        "El horario elegido acaba de ser ocupado (" +
+        choqueActual.map(formatearHora).join(", ") +
+        "). ¿Igual querés mover el turno ahí?"
+      );
+      if (!ok) return;
+    }
+
     const nuevaFecha = new Date(fechaVal + "T" + horaVal + ":00");
     await updateDoc(doc(db, "businesses", businessId, "turnos", cambioTurnoId), {
       estado: "Reservado",
       fechaHora: Timestamp.fromDate(nuevaFecha),
+      huecosReabiertos: [],
     });
     modalCambio.classList.remove("show");
   });
@@ -2235,20 +2629,156 @@
   }
 
   async function confirmarSolicitud(id, s){
-    const fecha = s.fechaHora?.toDate ? s.fechaHora.toDate() : new Date();
-    await addDoc(collection(db, "businesses", businessId, "turnos"), {
-      clienteNombre: s.clienteNombre || "Sin nombre",
-      clienteWhatsapp: s.clienteWhatsapp || null,
-      servicios: s.servicios || [],
-      servicioNombre: s.servicioNombre || "Servicio sin especificar",
-      duracionTotal: s.duracionTotal || 30,
-      fechaHora: s.fechaHora || Timestamp.fromDate(fecha),
-      estado: "Confirmado",
-      huecosReabiertos: [],
+    // La tarjeta puede haber quedado abierta mientras cambiaba el horario o mientras
+    // otra persona/acción modificaba la solicitud. Volvemos a leer todo antes de confirmar.
+    const solicitudSnap = await getDoc(doc(db, "businesses", businessId, "solicitudes", id));
+    if (!solicitudSnap.exists()){
+      await avisar("Esta solicitud ya no está disponible. La lista se actualizará automáticamente.");
+      return;
+    }
+    s = solicitudSnap.data() || {};
+
+    const fecha = s.fechaHora?.toDate ? s.fechaHora.toDate() : null;
+    if (!fecha){
+      await avisar("La solicitud no tiene una fecha y horario válidos.");
+      return;
+    }
+
+    const fechaISO = fechaAISO(fecha);
+    const inicio = fecha.getHours() * 60 + fecha.getMinutes();
+    const duracion = s.duracionTotal || 30;
+
+    // Volvemos a leer la configuración y la excepción directamente desde Firestore.
+    // Así una solicitud no puede aprobarse usando un horario que cambió después de recibirla.
+    const [negocioSnap, excepcionSnap] = await Promise.all([
+      getDoc(doc(db, "businesses", businessId)),
+      getDoc(doc(db, "businesses", businessId, "disponibilidad", fechaISO))
+    ]);
+
+    const negocio = negocioSnap.exists() ? (negocioSnap.data() || {}) : {};
+    const horario = negocio.horarioConfig || {};
+    let rangosEfectivos = [];
+
+    if (excepcionSnap.exists()){
+      const slotsExcepcion = Array.isArray(excepcionSnap.data()?.slots) ? excepcionSnap.data().slots : [];
+      rangosEfectivos = rangosDesdeSlots(slotsExcepcion);
+    } else {
+      const dia = horario?.dias?.[String(fecha.getDay())];
+      rangosEfectivos = ordenarRangos(
+        Array.isArray(dia?.rangos)
+          ? dia.rangos.map(r => ({ desde:r.desde, hasta:r.hasta }))
+          : []
+      );
+    }
+
+    const fin = inicio + duracion;
+    const entraEnHorario = rangosEfectivos.some(r => {
+      const ini = minutosDesdeHora(r.desde);
+      const finRango = minutosDesdeHora(r.hasta);
+      return Number.isFinite(ini) && Number.isFinite(finRango)
+        && inicio >= ini && fin <= finRango;
     });
-    await deleteDoc(doc(db, "businesses", businessId, "solicitudes", id));
-    if (s.clienteWhatsapp){
-      window.open(armarLinkConfirmacion(s.clienteNombre || "", s.clienteWhatsapp, s.servicioNombre || "tu servicio", fecha), "_blank");
+
+    if (!entraEnHorario){
+      await avisar(
+        rangosEfectivos.length
+          ? "La solicitud ya no entra completa dentro del horario de atención configurado para ese día. Modificala antes de confirmarla."
+          : (excepcionSnap.exists()
+              ? "La fecha de la solicitud está cerrada por una excepción de horario."
+              : "Ese día no tiene horarios de atención configurados.")
+      );
+      return;
+    }
+
+    // Última comprobación contra Firestore: no usamos la caché del calendario para aprobar.
+    const turnosSnap = await getDocs(query(
+      collection(db, "businesses", businessId, "turnos"),
+      orderBy("fechaHora", "asc")
+    ));
+    const choque = [];
+    turnosSnap.docs.forEach(d => {
+      const t = d.data() || {};
+      const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
+      if (!f || fechaAISO(f) !== fechaISO) return;
+      const inicioTurno = f.getHours() * 60 + f.getMinutes();
+      const finTurno = inicioTurno + (t.duracionTotal || 30);
+      const libres = new Set(t.huecosReabiertos || []);
+      for (let m = inicioTurno; m < finTurno; m += PASO_MIN){
+        if (!libres.has(m) && m >= inicio && m < fin){
+          choque.push({
+            minuto:m,
+            clienteNombre:t.clienteNombre || "un cliente",
+            servicioNombre:t.servicioNombre || "un servicio"
+          });
+        }
+      }
+    });
+
+    if (choque.length){
+      const unicos = [];
+      const vistos = new Set();
+      choque.forEach(c => {
+        const clave = c.clienteNombre + "|" + c.servicioNombre;
+        if (!vistos.has(clave)){
+          vistos.add(clave);
+          unicos.push(c);
+        }
+      });
+      const detalle = unicos.map(c => `${c.clienteNombre} (${c.servicioNombre})`).join(", ");
+      const ok = await confirmarAccion(
+        "La solicitud se superpone con: " + detalle + ". ¿Querés confirmarla igual?"
+      );
+      if (!ok) return;
+    }
+
+    // La solicitud podría haber sido eliminada mientras se mostraba el mensaje anterior.
+    // Se vuelve a comprobar antes de crear el turno para no confirmar dos veces la misma solicitud.
+    const solicitudFinalSnap = await getDoc(doc(db, "businesses", businessId, "solicitudes", id));
+    if (!solicitudFinalSnap.exists()){
+      await avisar("Esta solicitud ya no está disponible. La lista se actualizará automáticamente.");
+      return;
+    }
+    const solicitudFinal = solicitudFinalSnap.data() || {};
+
+    // Conversión atómica del pedido: evita que dos pestañas confirmen el mismo
+    // pedido y creen dos turnos antes de borrarlo.
+    const solicitudRefFinal = doc(db, "businesses", businessId, "solicitudes", id);
+    const turnoRefFinal = doc(collection(db, "businesses", businessId, "turnos"));
+    try {
+      await runTransaction(db, async (transaction) => {
+        const solicitudActual = await transaction.get(solicitudRefFinal);
+        if (!solicitudActual.exists()) throw new Error("SOLICITUD_YA_NO_EXISTE");
+        const datosSolicitud = solicitudActual.data() || {};
+        transaction.set(turnoRefFinal, {
+          clienteNombre: datosSolicitud.clienteNombre || "Sin nombre",
+          clienteWhatsapp: datosSolicitud.clienteWhatsapp || null,
+          servicios: datosSolicitud.servicios || [],
+          servicioNombre: datosSolicitud.servicioNombre || "Servicio sin especificar",
+          duracionTotal: datosSolicitud.duracionTotal || duracion,
+          fechaHora: datosSolicitud.fechaHora || Timestamp.fromDate(fecha),
+          estado: "Confirmado",
+          huecosReabiertos: [],
+        });
+        transaction.delete(solicitudRefFinal);
+      });
+    } catch (err) {
+      if (err?.message === "SOLICITUD_YA_NO_EXISTE") {
+        await avisar("Esta solicitud ya fue confirmada o eliminada desde otra ventana. La lista se actualizará automáticamente.");
+        return;
+      }
+      throw err;
+    }
+
+    if (solicitudFinal.clienteWhatsapp){
+      window.open(
+        armarLinkConfirmacion(
+          solicitudFinal.clienteNombre || "",
+          solicitudFinal.clienteWhatsapp,
+          solicitudFinal.servicioNombre || "tu servicio",
+          fecha
+        ),
+        "_blank"
+      );
     }
   }
 
@@ -2266,14 +2796,32 @@
   }
   function esMismoDia(a, b){ return fechaAISO(a) === fechaAISO(b); }
 
-  // slots de capacidad de un día: lo cargado en Disponibilidad si existe, si no el horario
-  // base de la agenda (HORA_INICIO a HORA_FIN, ver arriba en "modal: nuevo turno").
+  // Slots de capacidad del calendario: la fuente base es el horario habitual
+  // configurado por el administrador en businesses/{businessId}.horarioConfig.
+  // No usamos más 09:00–19:00 como horario base del calendario.
+  // La disponibilidad por fecha se mantiene como dato ya existente y, si está
+  // cargada para ese día, sigue teniendo prioridad sobre el horario habitual.
   function slotsCapacidadDia(fechaISO){
-    const cargados = dispCacheGlobal[fechaISO];
-    if (cargados && cargados.length) return [...cargados].sort((a, b) => a - b);
-    const base = [];
-    for (let m = HORA_INICIO * 60; m < HORA_FIN * 60; m += PASO_MIN) base.push(m);
-    return base;
+    const excepcion = dispCacheGlobal[fechaISO];
+    if (excepcion && excepcion.existe) return [...(excepcion.slots || [])].sort((a, b) => a - b);
+
+    if (!horarioConfigCache || !fechaISO) return [];
+
+    const fecha = new Date(fechaISO + "T00:00:00");
+    const diaId = fecha.getDay(); // 0=domingo ... 6=sábado
+    const dia = horarioConfigCache.dias?.[String(diaId)];
+    if (!dia?.activo || !Array.isArray(dia.rangos) || !dia.rangos.length) return [];
+
+    const slots = [];
+    dia.rangos.forEach(rango => {
+      const [desdeH, desdeM] = rango.desde.split(":").map(Number);
+      const [hastaH, hastaM] = rango.hasta.split(":").map(Number);
+      const inicio = desdeH * 60 + desdeM;
+      const fin = hastaH * 60 + hastaM;
+      for (let m = inicio; m < fin; m += PASO_MIN) slots.push(m);
+    });
+
+    return [...new Set(slots)].sort((a, b) => a - b);
   }
 
   // minutos ocupados de un día, a partir de los turnos reservados ese día (respeta los
@@ -2292,11 +2840,22 @@
   }
 
   // clase de color: verde (casi vacío), amarillo (mezcla de libres y ocupados), rojo (completo)
-  function estadoColorDia(fechaISO){
+  function estadoTextoDia(fechaISO){
     const capacidad = slotsCapacidadDia(fechaISO);
+    if (capacidad.length === 0) return "Cerrado";
     const ocupados = minutosOcupadosDia(fechaISO);
     const ocupadosEnCapacidad = capacidad.filter(m => ocupados.has(m)).length;
-    if (ocupados.size === 0) return "libre";
+    if (ocupadosEnCapacidad === 0) return "Libre";
+    if (ocupadosEnCapacidad >= capacidad.length) return "Completo";
+    return "Parcial";
+  }
+
+  function estadoColorDia(fechaISO){
+    const capacidad = slotsCapacidadDia(fechaISO);
+    if (capacidad.length === 0) return "cerrado";
+    const ocupados = minutosOcupadosDia(fechaISO);
+    const ocupadosEnCapacidad = capacidad.filter(m => ocupados.has(m)).length;
+    if (ocupadosEnCapacidad === 0) return "libre";
     if (ocupadosEnCapacidad >= capacidad.length) return "completo";
     return "parcial";
   }
@@ -2331,6 +2890,18 @@
     inicioGrilla.setDate(inicioGrilla.getDate() - inicioGrilla.getDay());
     const hoy = new Date();
 
+    const envoltorio = document.createElement("div");
+    envoltorio.className = "cal-mes-wrap";
+
+    const cabecera = document.createElement("div");
+    cabecera.className = "cal-mes-cabecera";
+    ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].forEach(nombre => {
+      const el = document.createElement("div");
+      el.textContent = nombre;
+      cabecera.appendChild(el);
+    });
+    envoltorio.appendChild(cabecera);
+
     const grilla = document.createElement("div");
     grilla.className = "cal-grid-mes";
     for (let i = 0; i < 42; i++){
@@ -2339,51 +2910,186 @@
       const fueraDeMes = d.getMonth() !== mes;
       const fechaISO = fechaAISO(d);
       const estado = estadoColorDia(fechaISO);
-      const celda = document.createElement("div");
-      celda.className = "cal-dia-mes " + estado + (fueraDeMes ? " fuera-de-mes" : "") + (esMismoDia(d, hoy) ? " hoy" : "");
-      celda.innerHTML = `<span>${d.getDate()}</span><i class="cal-punto"></i>`;
+      const capacidad = slotsCapacidadDia(fechaISO);
+      const ocupados = minutosOcupadosDia(fechaISO);
+      const ocupadosEnCapacidad = capacidad.filter(m => ocupados.has(m)).length;
+      const libres = Math.max(0, capacidad.length - ocupadosEnCapacidad);
+      const esExcepcion = !!dispCacheGlobal[fechaISO]?.existe;
+      const rangos = rangosCapacidadDia(fechaISO);
+      const rangosTexto = rangos.map(r => `${r.desde}–${r.hasta}`).join(" · ");
+
+      const celda = document.createElement("button");
+      celda.type = "button";
+      celda.className = "cal-dia-mes " + estado + (esExcepcion ? " excepcion" : "") + (fueraDeMes ? " fuera-de-mes" : "") + (esMismoDia(d, hoy) ? " hoy" : "");
+      celda.title = `${d.toLocaleDateString("es-AR", { weekday:"long", day:"numeric", month:"long" })}: ${estadoTextoDia(fechaISO)}${esExcepcion ? " · excepción" : ""}${rangosTexto ? " · " + rangosTexto : ""}`;
+
+      let detalle = "Cerrado";
+      if (capacidad.length){
+        detalle = `${libres} libre${libres === 1 ? "" : "s"}`;
+        if (ocupadosEnCapacidad) detalle += ` · ${ocupadosEnCapacidad} ocupado${ocupadosEnCapacidad === 1 ? "" : "s"}`;
+      }
+
+      celda.innerHTML = `
+        <span class="cal-mes-numero">${d.getDate()}</span>
+        <i class="cal-punto"></i>
+        <strong class="cal-mes-estado">${esExcepcion ? "Excepción" : estadoTextoDia(fechaISO)}</strong>
+        <small class="cal-mes-detalle">${detalle}</small>
+        ${rangosTexto ? `<small class="cal-mes-rangos">${rangosTexto}</small>` : ""}
+      `;
+
       celda.addEventListener("click", () => {
-        calFechaBase = d;
+        calFechaBase = new Date(d);
         calModo = "dia";
         document.getElementById("cal-modo").value = "dia";
         renderCalendario();
       });
       grilla.appendChild(celda);
     }
+
+    envoltorio.appendChild(grilla);
     cont.innerHTML = "";
-    cont.appendChild(grilla);
+    cont.appendChild(envoltorio);
   }
 
   function renderCalSemana(){
     const cont = document.getElementById("cal-contenido");
     const inicioSemana = new Date(calFechaBase);
     inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+    inicioSemana.setHours(0,0,0,0);
     const hoy = new Date();
 
-    const grilla = document.createElement("div");
-    grilla.className = "cal-grid-semana";
+    // La semana se escala según los horarios reales configurados/excepciones.
+    // No se usan horarios fijos como 09:00–19:00.
+    let minSemana = Infinity;
+    let maxSemana = -Infinity;
+    const dias = [];
+
     for (let i = 0; i < 7; i++){
       const d = new Date(inicioSemana);
       d.setDate(d.getDate() + i);
       const fechaISO = fechaAISO(d);
+      const capacidad = slotsCapacidadDia(fechaISO);
+      const rangos = rangosCapacidadDia(fechaISO);
+      const capacidadSet = new Set(capacidad);
+      const ocupados = minutosOcupadosDia(fechaISO);
+      const esExcepcion = !!dispCacheGlobal[fechaISO]?.existe;
       const estado = estadoColorDia(fechaISO);
-      const celda = document.createElement("div");
-      celda.className = "cal-dia-semana " + estado + (esMismoDia(d, hoy) ? " hoy" : "");
-      celda.innerHTML = `
-        <span>${d.toLocaleDateString("es-AR", { weekday: "short" })}</span>
-        <strong>${d.getDate()}</strong>
-        <i class="cal-punto"></i>
+
+      capacidad.forEach(m => {
+        if (Number.isFinite(m)){
+          minSemana = Math.min(minSemana, m);
+          maxSemana = Math.max(maxSemana, m + DISP_PASO);
+        }
+      });
+      rangos.forEach(r => {
+        const desde = minutosDesdeHora(r.desde);
+        const hasta = minutosDesdeHora(r.hasta);
+        if (Number.isFinite(desde)) minSemana = Math.min(minSemana, desde);
+        if (Number.isFinite(hasta)) maxSemana = Math.max(maxSemana, hasta);
+      });
+
+      dias.push({d, fechaISO, capacidadSet, ocupados, esExcepcion, estado, rangos});
+    }
+
+    cont.innerHTML = "";
+
+    if (!Number.isFinite(minSemana) || !Number.isFinite(maxSemana) || maxSemana <= minSemana){
+      const cerrado = document.createElement("div");
+      cerrado.className = "cal-dia-cerrado";
+      cerrado.innerHTML = "<strong>Semana sin horarios</strong><span>No hay horarios de atención configurados para ninguna fecha de esta semana.</span>";
+      cont.appendChild(cerrado);
+      return;
+    }
+
+    const ayuda = document.createElement("div");
+    ayuda.className = "cal-semana-ayuda";
+    ayuda.textContent = "Tocá un horario libre para iniciar una reserva. Los espacios sin capacidad aparecen como cerrados.";
+    cont.appendChild(ayuda);
+
+    const excepciones = dias.filter(x => x.esExcepcion);
+    if (excepciones.length){
+      const aviso = document.createElement("div");
+      aviso.className = "cal-semana-excepcion-bar";
+      aviso.innerHTML = `<strong>Excepciones:</strong> ${excepciones.map(x => x.d.toLocaleDateString("es-AR", {weekday:"short", day:"2-digit", month:"2-digit"})).join(" · ")}.`;
+      cont.appendChild(aviso);
+    }
+
+    const scroll = document.createElement("div");
+    scroll.className = "cal-semana-scroll";
+    const agenda = document.createElement("div");
+    agenda.className = "cal-semana-agenda";
+
+    const horaHead = document.createElement("div");
+    horaHead.className = "cal-semana-hora-head";
+    agenda.appendChild(horaHead);
+
+    dias.forEach(info => {
+      const head = document.createElement("div");
+      head.className = "cal-semana-dia-head " + info.estado + (info.esExcepcion ? " excepcion" : "") + (esMismoDia(info.d, hoy) ? " hoy" : "");
+      const rangosTexto = info.rangos.map(r => `${r.desde}–${r.hasta}`).join(" · ");
+      head.title = `${info.d.toLocaleDateString("es-AR", {weekday:"long", day:"numeric", month:"long"})}: ${estadoTextoDia(info.fechaISO)}${info.esExcepcion ? " · excepción" : ""}`;
+      head.innerHTML = `
+        <span class="dia-nombre">${info.d.toLocaleDateString("es-AR", {weekday:"short"})}</span>
+        <strong class="dia-numero">${info.d.getDate()}</strong>
+        <small class="dia-estado">${info.esExcepcion ? "Excepción" : estadoTextoDia(info.fechaISO)}</small>
+        ${rangosTexto ? `<small style="display:block;font-size:calc(8px * var(--ui-scale));opacity:.58;margin-top:2px;line-height:1.2">${rangosTexto}</small>` : ""}
       `;
-      celda.addEventListener("click", () => {
-        calFechaBase = d;
+      head.addEventListener("click", () => {
+        calFechaBase = new Date(info.d);
         calModo = "dia";
         document.getElementById("cal-modo").value = "dia";
         renderCalendario();
       });
-      grilla.appendChild(celda);
+      agenda.appendChild(head);
+    });
+
+    for (let m = minSemana; m < maxSemana; m += DISP_PASO){
+      const hora = document.createElement("div");
+      hora.className = "cal-semana-hora";
+      hora.textContent = formatearHora(m);
+      agenda.appendChild(hora);
+
+      dias.forEach(info => {
+        const celda = document.createElement("div");
+        const tieneCapacidad = info.capacidadSet.has(m);
+        const ocupado = info.ocupados.has(m);
+        celda.className = "cal-semana-slot " + (tieneCapacidad ? (ocupado ? "ocupado" : "libre") : "cerrado");
+
+        if (tieneCapacidad && !ocupado){
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = formatearHora(m);
+          btn.title = `Reservar ${formatearHora(m)}`;
+          btn.addEventListener("click", () => {
+            abrirModalTurno({ datos: { fechaHora: { toDate: () => new Date(info.fechaISO + "T00:00:00") } }, horaPreset: m });
+          });
+          celda.appendChild(btn);
+        } else if (tieneCapacidad && ocupado){
+          const span = document.createElement("span");
+          span.textContent = "Ocupado";
+          span.title = `Horario ocupado · ${formatearHora(m)}`;
+          celda.appendChild(span);
+        } else {
+          const span = document.createElement("span");
+          span.setAttribute("aria-label", `Cerrado ${formatearHora(m)}`);
+          celda.appendChild(span);
+        }
+        agenda.appendChild(celda);
+      });
     }
-    cont.innerHTML = "";
-    cont.appendChild(grilla);
+
+    scroll.appendChild(agenda);
+    cont.appendChild(scroll);
+  }
+
+  function rangosCapacidadDia(fechaISO){
+    const excepcion = dispCacheGlobal[fechaISO];
+    if (excepcion && excepcion.existe){
+      return ordenarRangos(rangosDesdeSlots(slotsCapacidadDia(fechaISO)));
+    }
+    const fecha = new Date(fechaISO + "T00:00:00");
+    const dia = horarioConfigCache?.dias?.[String(fecha.getDay())];
+    return ordenarRangos(Array.isArray(dia?.rangos) ? dia.rangos.map(r => ({desde:r.desde, hasta:r.hasta})) : []);
   }
 
   function renderCalDia(){
@@ -2391,29 +3097,66 @@
     const fechaISO = fechaAISO(calFechaBase);
     const capacidad = slotsCapacidadDia(fechaISO);
     const ocupados = minutosOcupadosDia(fechaISO);
+    const esExcepcion = !!dispCacheGlobal[fechaISO]?.existe;
+    const rangos = rangosCapacidadDia(fechaISO);
+
+    cont.innerHTML = "";
+
+    if (esExcepcion){
+      const aviso = document.createElement("div");
+      aviso.className = "cal-excepcion-aviso";
+      aviso.innerHTML = "<strong>Excepción de horario</strong><br>Esta fecha reemplaza temporalmente el horario habitual.";
+      cont.appendChild(aviso);
+    }
 
     const titulo = document.createElement("div");
     titulo.className = "cal-dia-view-title";
-    titulo.textContent = capacidad.length ? "Tocá un horario libre para reservar ahí." : "Sin franja horaria cargada para este día.";
-    cont.innerHTML = "";
+    titulo.textContent = capacidad.length ? "Tocá un horario libre para reservar ahí." : "No hay horarios disponibles para esta fecha.";
     cont.appendChild(titulo);
 
-    const grilla = document.createElement("div");
-    grilla.className = "slots-grid";
-    capacidad.forEach(m => {
-      const ocupado = ocupados.has(m);
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "slot-btn" + (ocupado ? " ocupado" : "");
-      btn.textContent = formatearHora(m);
-      if (!ocupado){
-        btn.addEventListener("click", () => {
-          abrirModalTurno({ datos: { fechaHora: { toDate: () => new Date(fechaISO + "T00:00:00") } }, horaPreset: m });
-        });
+    if (!capacidad.length){
+      const cerrado = document.createElement("div");
+      cerrado.className = "cal-dia-cerrado";
+      cerrado.innerHTML = `<strong>Día cerrado</strong><span>${esExcepcion ? "La excepción configurada cierra toda la jornada." : "No hay horario de atención configurado para este día."}</span>`;
+      cont.appendChild(cerrado);
+      return;
+    }
+
+    const capacidadSet = new Set(capacidad);
+    const rangosVisibles = rangos.length ? rangos : rangosDesdeSlots(capacidad);
+    let finAnterior = null;
+
+    rangosVisibles.forEach(rango => {
+      const inicio = minutosDesdeHora(rango.desde);
+      const fin = minutosDesdeHora(rango.hasta);
+      if (!Number.isFinite(inicio) || !Number.isFinite(fin) || fin <= inicio) return;
+
+      if (finAnterior !== null && inicio > finAnterior){
+        const corte = document.createElement("div");
+        corte.className = "cal-corte-horario";
+        corte.innerHTML = `<strong>Cerrado</strong> · ${formatearHora(finAnterior)}–${formatearHora(inicio)}`;
+        cont.appendChild(corte);
       }
-      grilla.appendChild(btn);
+
+      const grilla = document.createElement("div");
+      grilla.className = "slots-grid";
+      for (let m = inicio; m < fin; m += DISP_PASO){
+        if (!capacidadSet.has(m)) continue;
+        const ocupado = ocupados.has(m);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "slot-btn" + (ocupado ? " ocupado" : "");
+        btn.textContent = formatearHora(m);
+        if (!ocupado){
+          btn.addEventListener("click", () => {
+            abrirModalTurno({ datos: { fechaHora: { toDate: () => new Date(fechaISO + "T00:00:00") } }, horaPreset: m });
+          });
+        }
+        grilla.appendChild(btn);
+      }
+      cont.appendChild(grilla);
+      finAnterior = fin;
     });
-    cont.appendChild(grilla);
   }
 
   document.getElementById("cal-modo").addEventListener("change", (e) => {
@@ -2440,69 +3183,248 @@
   });
 
   // --- disponibilidad: el profesional tilda libremente los horarios en los que atiende cada día ---
-  // #5: antes el rango era fijo (9 a 19hs, cableado acá). Ahora "Desde"/"Hasta" los elige el
-  // profesional para cada franja que quiera armar, y se recuerdan en este dispositivo para no
-  // tener que tocarlos cada vez que entra a cargar disponibilidad.
-  const DISP_PASO = 30;
-  const LS_DISP_DESDE = "turnapp_disp_desde";
-  const LS_DISP_HASTA = "turnapp_disp_hasta";
+  // Disponibilidad especial por fecha: si existe un documento para un día,
+  // ese día reemplaza el horario habitual. Un documento con slots vacíos significa cerrado.
+  const TURNAPP_ETAPA6_PASO = "5";
+
+function validarIntegridadHorarioDia(fechaISO, duracionMin, inicioMin, ocupadosIgnorados = new Set()) {
+  const capacidad = new Set(slotsCapacidadDia(fechaISO));
+  if (!capacidad.size) return { ok:false, motivo:"cerrado" };
+  const rangos = rangosCapacidadDia(fechaISO);
+  const fin = inicioMin + Number(duracionMin || 30);
+  const rangoValido = rangos.some(r => {
+    const a = minutosDesdeHora(r.desde);
+    const b = minutosDesdeHora(r.hasta);
+    return Number.isFinite(a) && Number.isFinite(b) && inicioMin >= a && fin <= b;
+  });
+  if (!rangoValido) return { ok:false, motivo:"fuera_horario" };
+  for (let m = inicioMin; m < fin; m += PASO_MIN) {
+    if (!capacidad.has(m)) return { ok:false, motivo:"fuera_horario" };
+    if (!ocupadosIgnorados.has(m) && minutosOcupadosDia(fechaISO).has(m)) return { ok:false, motivo:"ocupado", minuto:m };
+  }
+  return { ok:true };
+}
+
+const DISP_PASO = 30;
   const dispFecha = document.getElementById("disp-fecha");
-  const dispDesde = document.getElementById("disp-desde");
-  const dispHasta = document.getElementById("disp-hasta");
+  const dispRangos = document.getElementById("disp-rangos");
+  const dispAgregarRango = document.getElementById("disp-agregar-rango");
   const dispSlots = document.getElementById("disp-slots");
   let dispSeleccion = new Set();
-
-  dispDesde.value = localStorage.getItem(LS_DISP_DESDE) || "09:00";
-  dispHasta.value = localStorage.getItem(LS_DISP_HASTA) || "19:00";
+  let dispRangosData = [];
 
   function minutosDesdeHora(hhmm){
-    const [h, m] = (hhmm || "09:00").split(":").map(Number);
+    if (!hhmm) return NaN;
+    const [h, m] = hhmm.split(":").map(Number);
     return h * 60 + m;
+  }
+
+  function horaDesdeMinutos(minutos){
+    const h = String(Math.floor(minutos / 60)).padStart(2, "0");
+    const m = String(minutos % 60).padStart(2, "0");
+    return `${h}:${m}`;
+  }
+
+  function slotsDeRangos(rangos){
+    const slots = new Set();
+    rangos.forEach(rango => {
+      const inicio = minutosDesdeHora(rango.desde);
+      const fin = minutosDesdeHora(rango.hasta);
+      if (!Number.isFinite(inicio) || !Number.isFinite(fin) || fin <= inicio) return;
+      for (let m = inicio; m < fin; m += DISP_PASO) slots.add(m);
+    });
+    return slots;
+  }
+
+  function rangosDesdeSlots(slots){
+    const ordenado = [...new Set(slots)].sort((a, b) => a - b);
+    const rangos = [];
+    let inicio = null, anterior = null;
+    ordenado.forEach(m => {
+      if (inicio === null){ inicio = m; anterior = m; return; }
+      if (m === anterior + DISP_PASO){ anterior = m; return; }
+      rangos.push({desde:horaDesdeMinutos(inicio), hasta:horaDesdeMinutos(anterior + DISP_PASO)});
+      inicio = m; anterior = m;
+    });
+    if (inicio !== null) rangos.push({desde:horaDesdeMinutos(inicio), hasta:horaDesdeMinutos(anterior + DISP_PASO)});
+    return rangos;
+  }
+
+  function ordenarRangos(rangos){
+    return [...rangos].sort((a,b) => minutosDesdeHora(a.desde) - minutosDesdeHora(b.desde));
+  }
+
+  function renderDispRangos({seleccionarTodos = false} = {}){
+    dispRangos.innerHTML = "";
+    if (!dispRangosData.length){
+      const vacio = document.createElement("div");
+      vacio.style.cssText = "font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);";
+      vacio.textContent = "No hay franjas. Podés agregar una o guardar el día cerrado.";
+      dispRangos.appendChild(vacio);
+      renderDispSlots();
+      return;
+    }
+
+    dispRangosData.forEach((rango, indice) => {
+      const fila = document.createElement("div");
+      fila.style.cssText = "display:flex; gap:8px; align-items:end; flex-wrap:wrap;";
+
+      const grupoDesde = document.createElement("div");
+      grupoDesde.style.cssText = "flex:1; min-width:120px;";
+      const labelDesde = document.createElement("label");
+      labelDesde.style.cssText = "font-size:calc(12px * var(--ui-scale)); font-weight:600; color:rgba(38,42,32,0.6); display:block; margin-bottom:4px;";
+      labelDesde.textContent = "Desde";
+      const inputDesde = document.createElement("input");
+      inputDesde.type = "time";
+      inputDesde.step = "1800";
+      inputDesde.value = rango.desde || "";
+      grupoDesde.append(labelDesde, inputDesde);
+
+      const grupoHasta = document.createElement("div");
+      grupoHasta.style.cssText = "flex:1; min-width:120px;";
+      const labelHasta = document.createElement("label");
+      labelHasta.style.cssText = "font-size:calc(12px * var(--ui-scale)); font-weight:600; color:rgba(38,42,32,0.6); display:block; margin-bottom:4px;";
+      labelHasta.textContent = "Hasta";
+      const inputHasta = document.createElement("input");
+      inputHasta.type = "time";
+      inputHasta.step = "1800";
+      inputHasta.value = rango.hasta || "";
+      grupoHasta.append(labelHasta, inputHasta);
+
+      const eliminar = document.createElement("button");
+      eliminar.type = "button";
+      eliminar.className = "btn-secondary";
+      eliminar.textContent = "Quitar";
+      eliminar.style.width = "auto";
+
+      const cambio = () => {
+        dispRangosData[indice] = {desde:inputDesde.value, hasta:inputHasta.value};
+        dispSeleccion = slotsDeRangos(dispRangosData);
+        renderDispSlots();
+      };
+      inputDesde.addEventListener("change", cambio);
+      inputHasta.addEventListener("change", cambio);
+      eliminar.addEventListener("click", () => {
+        const slotsQuitados = slotsDeRangos([dispRangosData[indice]]);
+        slotsQuitados.forEach(m => dispSeleccion.delete(m));
+        dispRangosData.splice(indice, 1);
+        renderDispRangos();
+      });
+
+      fila.append(grupoDesde, grupoHasta, eliminar);
+      dispRangos.appendChild(fila);
+    });
+    renderDispSlots();
   }
 
   function renderDispSlots(){
     dispSlots.innerHTML = "";
-    const inicio = minutosDesdeHora(dispDesde.value);
-    const fin = minutosDesdeHora(dispHasta.value);
-    if (fin <= inicio){
-      dispSlots.innerHTML = `<span style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);">"Hasta" tiene que ser más tarde que "Desde".</span>`;
+    const rangosValidos = ordenarRangos(dispRangosData).filter(r => {
+      const inicio = minutosDesdeHora(r.desde);
+      const fin = minutosDesdeHora(r.hasta);
+      return Number.isFinite(inicio) && Number.isFinite(fin) && fin > inicio;
+    });
+
+    if (!rangosValidos.length){
+      dispSlots.innerHTML = `<span style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);">Agregá una franja con "Desde" y "Hasta" válidos.</span>`;
       return;
     }
-    for (let m = inicio; m < fin; m += DISP_PASO){
-      const h = String(Math.floor(m / 60)).padStart(2, "0");
-      const mm = String(m % 60).padStart(2, "0");
+
+    const slotsVisibles = [...slotsDeRangos(rangosValidos)].sort((a,b) => a-b);
+    slotsVisibles.forEach(m => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "slot-btn" + (dispSeleccion.has(m) ? " elegido" : "");
-      btn.textContent = `${h}:${mm}`;
+      btn.textContent = horaDesdeMinutos(m);
       btn.addEventListener("click", () => {
         if (dispSeleccion.has(m)) dispSeleccion.delete(m); else dispSeleccion.add(m);
         btn.classList.toggle("elegido");
       });
       dispSlots.appendChild(btn);
-    }
+    });
   }
-  dispDesde.addEventListener("change", () => {
-    localStorage.setItem(LS_DISP_DESDE, dispDesde.value);
-    renderDispSlots();
-  });
-  dispHasta.addEventListener("change", () => {
-    localStorage.setItem(LS_DISP_HASTA, dispHasta.value);
-    renderDispSlots();
+
+  dispAgregarRango.addEventListener("click", () => {
+    let desde = "", hasta = "";
+    const validos = ordenarRangos(dispRangosData).filter(r => {
+      const d = minutosDesdeHora(r.desde), h = minutosDesdeHora(r.hasta);
+      return Number.isFinite(d) && Number.isFinite(h) && h > d;
+    });
+    if (validos.length){
+      const ultimoFin = minutosDesdeHora(validos[validos.length - 1].hasta);
+      if (Number.isFinite(ultimoFin) && ultimoFin < 24 * 60){
+        desde = horaDesdeMinutos(ultimoFin);
+        hasta = horaDesdeMinutos(Math.min(ultimoFin + 60, 24 * 60));
+      }
+    }
+    dispRangosData.push({desde, hasta});
+    renderDispRangos();
   });
 
   async function cargarDisponibilidad(){
     if (!dispFecha.value) return;
-    const snap = await getDoc(doc(db, "businesses", businessId, "disponibilidad", dispFecha.value));
-    dispSeleccion = new Set(snap.exists() ? (snap.data().slots || []) : []);
-    renderDispSlots();
+    const fechaISO = dispFecha.value;
+    const snap = await getDoc(doc(db, "businesses", businessId, "disponibilidad", fechaISO));
+
+    if (snap.exists()) {
+      const data = snap.data() || {};
+      dispSeleccion = new Set(Array.isArray(data.slots) ? data.slots : []);
+      dispRangosData = rangosDesdeSlots(dispSeleccion);
+    } else {
+      // Sin excepción guardada, mostramos como punto de partida el horario habitual.
+      // Todavía no se crea ninguna excepción hasta que el usuario presione Guardar.
+      const fecha = new Date(fechaISO + "T00:00:00");
+      const diaId = fecha.getDay();
+      const dia = horarioConfigCache?.dias?.[String(diaId)];
+      const rangos = Array.isArray(dia?.rangos) ? dia.rangos.map(r => ({desde:r.desde, hasta:r.hasta})) : [];
+      dispRangosData = ordenarRangos(rangos);
+      dispSeleccion = slotsDeRangos(dispRangosData);
+    }
+    renderDispRangos();
   }
   dispFecha.addEventListener("change", cargarDisponibilidad);
 
   document.getElementById("disp-guardar").addEventListener("click", async () => {
     if (!dispFecha.value) return;
+    const rangosInvalidos = dispRangosData.some(r => {
+      if (!r.desde || !r.hasta) return true;
+      const inicio = minutosDesdeHora(r.desde);
+      const fin = minutosDesdeHora(r.hasta);
+      return !Number.isFinite(inicio) || !Number.isFinite(fin) || fin <= inicio;
+    });
+    // Una excepción sin franjas es válida: significa que ese día queda completamente cerrado.
+    if (rangosInvalidos){
+      const msg = document.getElementById("disp-msg");
+      msg.className = "msg show error";
+      msg.textContent = "Revisá las franjas: cada 'Hasta' debe ser posterior a su 'Desde'.";
+      return;
+    }
+
+    const rangosValidos = ordenarRangos(dispRangosData).map(r => ({
+      inicio: minutosDesdeHora(r.desde),
+      fin: minutosDesdeHora(r.hasta)
+    })).filter(r => Number.isFinite(r.inicio) && Number.isFinite(r.fin) && r.fin > r.inicio);
+    const slots = Array.from(dispSeleccion).sort((a, b) => a - b);
+    const slotFueraDeRango = slots.find(m => !rangosValidos.some(r => m >= r.inicio && m < r.fin));
+    if (slotFueraDeRango !== undefined){
+      const msg = document.getElementById("disp-msg");
+      msg.className = "msg show error";
+      msg.textContent = `El horario ${formatearHora(slotFueraDeRango)} quedó fuera de las franjas configuradas. Revisá las franjas antes de guardar.`;
+      return;
+    }
+    const ocupados = minutosOcupadosDia(dispFecha.value);
+    const slotsSet = new Set(slots);
+    const ocupadosFuera = [...ocupados].filter(m => !slotsSet.has(m)).sort((a, b) => a - b);
+    if (ocupadosFuera.length){
+      const msg = document.getElementById("disp-msg");
+      msg.className = "msg show error";
+      msg.textContent = "No se puede guardar esta excepción porque quitaría horarios de turnos ya existentes (" + ocupadosFuera.map(formatearHora).join(", ") + "). Primero cambiá esos turnos o dejá esas franjas disponibles.";
+      return;
+    }
     await setDoc(doc(db, "businesses", businessId, "disponibilidad", dispFecha.value), {
-      slots: Array.from(dispSeleccion).sort((a, b) => a - b),
+      slots,
+      tipo: "excepcion",
+      actualizadoEn: new Date().toISOString()
     });
     const msg = document.getElementById("disp-msg");
     msg.className = "msg show ok";
@@ -2528,32 +3450,59 @@
     const ref = query(collection(db, "businesses", businessId, "disponibilidad"), orderBy(documentId()));
     onSnapshot(ref, (snap) => {
       dispCacheGlobal = {};
-      snap.docs.forEach(d => { dispCacheGlobal[d.id] = d.data().slots || []; });
+      snap.docs.forEach(d => {
+        dispCacheGlobal[d.id] = { existe:true, slots:Array.isArray(d.data().slots) ? d.data().slots : [] };
+      });
       if (vistaActual === "calendario") renderCalendario();
 
       const lista = document.getElementById("disp-resumen-list");
-      const conHorarios = snap.docs.filter(d => (d.data().slots || []).length);
-      if (!conHorarios.length){
-        lista.innerHTML = `<div class="empty-state">Todavía no cargaste disponibilidad para ningún día.</div>`;
+      const excepciones = snap.docs;
+      if (!excepciones.length){
+        lista.innerHTML = `<div class="empty-state">Todavía no cargaste excepciones para ningún día.</div>`;
         return;
       }
       lista.innerHTML = "";
-      conHorarios.forEach(docSnap => {
-        const slots = docSnap.data().slots || [];
+      excepciones.forEach(docSnap => {
+        const slots = Array.isArray(docSnap.data().slots) ? docSnap.data().slots : [];
         const fechaObj = new Date(docSnap.id + "T00:00:00");
+        const cerrado = slots.length === 0;
         const card = document.createElement("div");
         card.className = "turno-card";
         card.innerHTML = `
           <div class="turno-info">
             <strong>${fechaObj.toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "2-digit" })}</strong>
-            <div class="turno-servicio">${formatearRangosDisponibilidad(slots)}</div>
+            <div class="turno-servicio">${cerrado ? "Cerrado por excepción" : formatearRangosDisponibilidad(slots)}</div>
           </div>
           <button class="turno-reabrir" data-editar>Editar</button>
+          <button class="turno-reabrir" data-restaurar style="border-style:solid;">Restaurar habitual</button>
         `;
         card.querySelector("[data-editar]").addEventListener("click", () => {
           dispFecha.value = docSnap.id;
           cargarDisponibilidad();
           window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+        card.querySelector("[data-restaurar]").addEventListener("click", async () => {
+          if (!await confirmarAccion(`¿Restaurar el horario habitual del ${fechaObj.toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit", year:"numeric" })}?`)) return;
+          try {
+            // Al quitar la excepción, todos los turnos existentes deben seguir entrando
+            // dentro del horario habitual que volverá a regir para esa fecha.
+            const ocupados = minutosOcupadosDia(docSnap.id);
+            const habituales = new Set(slotsDeRangos(rangosHabitualesDisponibilidad(docSnap.id)));
+            const fueraDelHabitual = [...ocupados].filter(m => !habituales.has(m)).sort((a,b) => a-b);
+            if (fueraDelHabitual.length){
+              const msg = document.getElementById("disp-msg");
+              msg.className = "msg show error";
+              msg.textContent = "No se puede restaurar el horario habitual porque hay turnos en horarios que ese horario no cubre (" + fueraDelHabitual.map(formatearHora).join(", ") + "). Primero cambiá esos turnos.";
+              return;
+            }
+            await deleteDoc(doc(db, "businesses", businessId, "disponibilidad", docSnap.id));
+            if (dispFecha.value === docSnap.id) await cargarDisponibilidad();
+          } catch (err) {
+            console.error("Error restaurando horario habitual", err);
+            const msg = document.getElementById("disp-msg");
+            msg.className = "msg show error";
+            msg.textContent = "No se pudo restaurar el horario habitual.";
+          }
         });
         lista.appendChild(card);
       });
