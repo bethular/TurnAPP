@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ETAPA 8 — PASO 2 — CARPETA: panel — ARCHIVO: index.html -->
+<!-- Archivo: panel/index.html -->
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
@@ -3512,20 +3512,13 @@ const DISP_PASO = 30;
   function escucharResumenDisponibilidad(){
     const ref=query(collection(db,"businesses",businessId,"disponibilidad"),orderBy(documentId()));
     onSnapshot(ref,(snap)=>{
-      const hoyISO=new Date().toISOString().slice(0,10);
-      const pasadas=snap.docs.filter(d=>d.id < hoyISO);
-      // Las excepciones vencidas ya no tienen utilidad: se eliminan automáticamente.
-      if(pasadas.length){
-        Promise.all(pasadas.map(d=>deleteDoc(doc(db,"businesses",businessId,"disponibilidad",d.id))))
-          .catch(err=>console.error("Error limpiando excepciones pasadas",err));
-      }
       dispCacheGlobal={};
-      snap.docs.filter(d=>d.id >= hoyISO).forEach(d=>{dispCacheGlobal[d.id]={existe:true,slots:Array.isArray(d.data().slots)?d.data().slots:[]};});
+      snap.docs.forEach(d=>{dispCacheGlobal[d.id]={existe:true,slots:Array.isArray(d.data().slots)?d.data().slots:[]};});
       if(vistaActual==="calendario")renderCalendario();
 
       const lista=document.getElementById("disp-resumen-list");
       if(!lista)return;
-      const excepciones=snap.docs.filter(d=>d.id >= hoyISO);
+      const excepciones=snap.docs;
       if(!excepciones.length){lista.innerHTML=`<div class="empty-state" style="padding:20px;">Todavía no cargaste excepciones.</div>`;return;}
       lista.innerHTML="";
       excepciones.forEach(docSnap=>{
@@ -3534,32 +3527,24 @@ const DISP_PASO = 30;
         const cerrado=slots.length===0;
         const card=document.createElement("div");
         card.className="excepcion-resumen "+(cerrado?"excepcion-cerrada":"excepcion-activa");
-        const fechaTexto=fechaObj.toLocaleDateString("es-AR",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"});
-        const esPasada=docSnap.id < new Date().toISOString().slice(0,10);
-        card.innerHTML=`<div class="turno-info"><strong>${fechaTexto}</strong><div class="turno-servicio">${cerrado?"Cerrado por excepción":formatearRangosDisponibilidad(slots)}</div><div style="font-size:calc(11px * var(--ui-scale));color:rgba(38,42,32,.48);margin-top:3px;">Reemplaza el horario habitual para esta fecha.</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="turno-reabrir" data-editar ${esPasada?"disabled style="opacity:.45;cursor:not-allowed;"":""}>Editar</button><button class="turno-reabrir" data-eliminar style="border-style:solid;border-color:var(--rose-deep);color:var(--rose-deep);">Eliminar</button></div>`;
-        const btnEditar=card.querySelector("[data-editar]");
-        if (!esPasada) btnEditar.addEventListener("click",()=>{
+        card.innerHTML=`<div class="turno-info"><strong>${fechaObj.toLocaleDateString("es-AR",{weekday:"short",day:"2-digit",month:"2-digit"})}</strong><div class="turno-servicio">${cerrado?"Cerrado por excepción":formatearRangosDisponibilidad(slots)}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="turno-reabrir" data-editar>Editar</button><button class="turno-reabrir" data-restaurar style="border-style:solid;">Restaurar habitual</button></div>`;
+        card.querySelector("[data-editar]").addEventListener("click",()=>{
           document.querySelector('input[name="excepcion-tipo"][value="dia"]').checked=true;
           actualizarModoExcepcion();
           dispFecha.value=docSnap.id; dispFechaHasta.value="";
           cargarDisponibilidad(); window.scrollTo({top:0,behavior:"smooth"});
         });
-        card.querySelector("[data-eliminar]").addEventListener("click",async()=>{
-          if(!await confirmarAccion(`¿Eliminar la excepción del ${fechaTexto}?`))return;
-          const msg=document.getElementById("disp-msg");
+        card.querySelector("[data-restaurar]").addEventListener("click",async()=>{
+          if(!await confirmarAccion(`¿Restaurar el horario habitual del ${fechaObj.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"})}?`))return;
           try{
+            const ocupados=minutosOcupadosDia(docSnap.id);
+            const habituales=new Set(slotsDeRangos(rangosHabitualesDisponibilidad(docSnap.id)));
+            const fuera=[...ocupados].filter(m=>!habituales.has(m)).sort((a,b)=>a-b);
+            if(fuera.length){const msg=document.getElementById("disp-msg");msg.className="msg show error";msg.textContent="No se puede restaurar el horario habitual porque hay turnos en horarios que ese horario no cubre ("+fuera.map(formatearHora).join(", ")+"). Primero cambiá esos turnos.";return;}
             await deleteDoc(doc(db,"businesses",businessId,"disponibilidad",docSnap.id));
-            msg.className="msg show ok";
-            msg.textContent="Excepción eliminada. El día vuelve a usar el horario habitual.";
-            if(dispFecha.value===docSnap.id) await cargarDisponibilidad();
-            setTimeout(()=>{msg.className="msg";},3000);
-          }catch(err){
-            console.error("Error eliminando excepción",err);
-            msg.className="msg show error";
-            msg.textContent="No se pudo eliminar la excepción. Revisá tu conexión o los permisos de la cuenta.";
-          }
+            if(dispFecha.value===docSnap.id)await cargarDisponibilidad();
+          }catch(err){console.error("Error restaurando horario habitual",err);const msg=document.getElementById("disp-msg");msg.className="msg show error";msg.textContent="No se pudo restaurar el horario habitual.";}
         });
-
         lista.appendChild(card);
       });
     });
