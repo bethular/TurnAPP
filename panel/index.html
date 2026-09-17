@@ -1028,7 +1028,7 @@ BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
-    getFirestore, doc, getDoc, getDocs, setDoc, collection, query, orderBy, documentId, onSnapshot, updateDoc, addDoc, deleteDoc, Timestamp, runTransaction
+    getFirestore, doc, getDoc, getDocs, setDoc, writeBatch, collection, query, orderBy, documentId, onSnapshot, updateDoc, addDoc, deleteDoc, Timestamp, runTransaction
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const app = initializeApp(firebaseConfig);
@@ -1755,6 +1755,53 @@ BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
     }
   });
 
+  // --- ocupación pública: el catálogo nunca lee la colección privada "turnos" ---
+  // Solo se publica qué medias horas están ocupadas, sin nombre, WhatsApp ni servicios.
+  async function sincronizarOcupacionPublica(todosLosTurnos){
+    const ocupadosPorFecha = {};
+
+    (todosLosTurnos || []).forEach(t => {
+      const f = t?.fechaHora?.toDate ? t.fechaHora.toDate() : null;
+      if (!f) return;
+
+      const fechaISO = fechaAISO(f);
+      const inicio = f.getHours() * 60 + f.getMinutes();
+      const duracion = Number(t.duracionTotal) || 30;
+      const libres = new Set(Array.isArray(t.huecosReabiertos) ? t.huecosReabiertos : []);
+      if (!ocupadosPorFecha[fechaISO]) ocupadosPorFecha[fechaISO] = new Set();
+
+      for (let m = inicio; m < inicio + duracion; m += 30){
+        if (!libres.has(m)) ocupadosPorFecha[fechaISO].add(m);
+      }
+    });
+
+    try {
+      const ref = collection(db, "businesses", businessId, "ocupacionPublica");
+      const existentes = await getDocs(ref);
+      const batch = writeBatch(db);
+
+      // Reconciliamos la colección pública completa para que también se eliminen
+      // automáticamente los días cuyos turnos fueron borrados o movidos.
+      existentes.docs.forEach(d => batch.delete(d.ref));
+
+      Object.entries(ocupadosPorFecha).forEach(([fechaISO, set]) => {
+        const ocupados = [...set].sort((a, b) => a - b);
+        if (!ocupados.length) return;
+        batch.set(doc(ref, fechaISO), { ocupados });
+      });
+
+      await batch.commit();
+    } catch (err) {
+      // La ocupación pública no debe impedir que el panel siga funcionando.
+      console.error("TURNAPP — Error sincronizando ocupación pública", {
+        businessId,
+        codigo: err?.code || "(sin código)",
+        mensaje: err?.message || String(err),
+        error: err
+      });
+    }
+  }
+
   // --- turnos reservados en tiempo real ---
   function escucharTurnos(){
     const turnosRef = query(
@@ -1780,6 +1827,8 @@ BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
       renderClientes(todosLosTurnos);
 
       turnosCacheGlobal = todosLosTurnos;
+      // Se ejecuta aparte del render: si falla, no bloquea el panel.
+      sincronizarOcupacionPublica(todosLosTurnos);
       if (vistaActual === "calendario") renderCalendario();
     });
   }
