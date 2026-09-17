@@ -410,40 +410,16 @@ BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
   }
   .cal-dia-mes:hover{ box-shadow:0 6px 14px -8px rgba(38,42,32,0.35); }
   .cal-dia-mes.fuera-de-mes{ opacity:0.3; cursor:default; }
-  /* Calendario mensual: color visible en todo el recuadro y contorno intenso. */
-  .cal-dia-mes.libre{
-    background:rgba(61,107,74,.22);
-    border:3px solid #3D6B4A;
-  }
-  .cal-dia-mes.parcial{
-    background:rgba(184,134,46,.25);
-    border:3px solid #8A620F;
-  }
-  .cal-dia-mes.completo{
-    background:rgba(156,59,59,.22);
-    border:3px solid #9C3B3B;
-  }
-  .cal-dia-mes.cerrado{
-    background:rgba(90,95,88,.13);
-    border:3px solid #666B64;
-  }
-  .cal-dia-mes.excepcion{
-    background:rgba(224,126,27,.22);
-    border:3px solid #D56A00;
-  }
-  .cal-dia-mes .cal-mes-estado{
-    font-size:calc(8.5px * var(--ui-scale));
-    line-height:1.05;
-    font-weight:800;
-    opacity:1;
-    letter-spacing:.01em;
-  }
-  .cal-dia-mes.libre .cal-mes-estado{ color:#245A37; }
-  .cal-dia-mes.parcial .cal-mes-estado{ color:#684B00; }
-  .cal-dia-mes.completo .cal-mes-estado{ color:#7B2222; }
-  .cal-dia-mes.cerrado .cal-mes-estado{ color:#3F433D; }
-  .cal-dia-mes.excepcion .cal-mes-estado{ color:#9A4800; }
-  .cal-dia-mes.hoy{ border-width:3px; }
+  .cal-dia-mes .cal-punto{ width:8px; height:8px; border-radius:50%; background:var(--line); }
+  .cal-dia-mes.libre .cal-punto{ background:#3D6B4A; }
+  .cal-dia-mes.parcial .cal-punto{ background:var(--gold); }
+  .cal-dia-mes.completo .cal-punto{ background:var(--rose-deep); }
+  .cal-dia-mes.cerrado .cal-punto{ background:var(--line); opacity:0.55; }
+  .cal-dia-mes.cerrado{ opacity:0.62; }
+  .cal-dia-mes .cal-estado{ font-size:calc(8px * var(--ui-scale)); line-height:1; font-weight:600; opacity:.62; letter-spacing:.01em; }
+  .cal-dia-mes.excepcion{ border-style:dashed; }
+  .cal-dia-mes.excepcion .cal-estado{ opacity:.82; }
+  .cal-dia-mes.hoy{ border-color:var(--forest); border-width:2px; }
   .cal-grid-semana{ display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; }
   .cal-dia-semana{
     border-radius:9px; border:1px solid var(--line); background:#fff; padding:10px 6px;
@@ -495,17 +471,8 @@ BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
   .cal-grid-mes{ grid-template-rows:repeat(6,minmax(92px,1fr)); }
   .cal-dia-mes{ min-height:92px; aspect-ratio:auto; padding:7px 5px; gap:4px; justify-content:flex-start; position:relative; overflow:hidden; }
   .cal-dia-mes .cal-mes-numero{ font-size:calc(14px * var(--ui-scale)); line-height:1; }
-  .cal-dia-mes.libre{
-  flex:0 0 auto;
-  background:#D8F3DC;
-  border:3px solid #24913F;
-}
-  .cal-dia-mes .cal-mes-estado{
-  font-size:calc(9px * var(--ui-scale));
-  line-height:1.05;
-  font-weight:800;
-  opacity:1;
-}
+  .cal-dia-mes .cal-punto{ flex:0 0 auto; }
+  .cal-dia-mes .cal-mes-estado{ font-size:calc(8.5px * var(--ui-scale)); line-height:1.05; font-weight:700; opacity:.72; }
   .cal-dia-mes .cal-mes-detalle{ font-size:calc(8px * var(--ui-scale)); line-height:1.1; font-weight:600; opacity:.55; text-align:center; }
   .cal-dia-mes .cal-mes-rangos{ font-size:calc(7.5px * var(--ui-scale)); line-height:1.15; opacity:.48; text-align:center; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .cal-dia-mes.excepcion{ box-shadow:inset 0 0 0 1px var(--gold); }
@@ -1794,73 +1761,10 @@ BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
 
   // --- turnos reservados en tiempo real ---
   function escucharTurnos(){
-  const turnosRef = query(
-    collection(db, "businesses", businessId, "turnos"),
-    orderBy("fechaHora", "asc")
-  );
-
-  onSnapshot(turnosRef, (snap) => {
-    const lista = document.getElementById("turnos-list");
-    const todosLosTurnos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-    if (snap.empty){
-      lista.innerHTML = `<div class="empty-state">Todavía no tenés turnos reservados.</div>`;
-    } else {
-      let turnos = todosLosTurnos;
-
-      if (prefOrden === "nombre"){
-        turnos = [...turnos].sort((a, b) =>
-          (a.clienteNombre || "").localeCompare(b.clienteNombre || "")
-        );
-      }
-
-      lista.innerHTML = "";
-
-      turnos.forEach((t) =>
-        lista.appendChild(renderTurno(t.id, t))
-      );
-    }
-
-    actualizarListaClientesConocidos(todosLosTurnos);
-    renderClientes(todosLosTurnos);
-
-    turnosCacheGlobal = todosLosTurnos;
-
-    sincronizarOcupacionPublica(todosLosTurnos).catch(err => {
-      console.error("TURNAPP — Error sincronizando ocupación pública", {
-        businessId,
-        codigo: err?.code || "(sin código)",
-        mensaje: err?.message || String(err),
-        error: err
-      });
-    });
-
-    if (vistaActual === "calendario") {
-      renderCalendario();
-    }
-
-  }, (err) => {
-
-    console.error("TURNAPP — Error cargando turnos", {
-      businessId,
-      codigo: err?.code || "(sin código)",
-      mensaje: err?.message || String(err),
-      error: err
-    });
-
-    const lista = document.getElementById("turnos-list");
-
-    if (lista){
-      lista.innerHTML = `
-        <div class="empty-state">
-          <strong>No pudimos cargar los turnos.</strong><br>
-          Código: ${err?.code || "desconocido"}<br>
-          ${err?.message || "Revisá tu conexión o los permisos de Firebase."}
-        </div>
-      `;
-    }
-  });
-}
+    const turnosRef = query(
+      collection(db, "businesses", businessId, "turnos"),
+      orderBy("fechaHora", "asc")
+    );
     onSnapshot(turnosRef, (snap) => {
       const lista = document.getElementById("turnos-list");
       const todosLosTurnos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -3123,6 +3027,7 @@ BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
 
       celda.innerHTML = `
         <span class="cal-mes-numero">${d.getDate()}</span>
+        <i class="cal-punto"></i>
         <strong class="cal-mes-estado">${esExcepcion ? "Excepción" : estadoTextoDia(fechaISO)}</strong>
         <small class="cal-mes-detalle">${detalle}</small>
         ${rangosTexto ? `<small class="cal-mes-rangos">${rangosTexto}</small>` : ""}

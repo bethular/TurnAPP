@@ -1,3 +1,13 @@
+<!-- ETAPA 9 — PASO 3 — CARPETA: panel — ARCHIVO: index.html -->
+<!--
+TURNAPP
+CARPETA: panel
+ARCHIVO: index.html
+ETAPA: 8
+PASO: 3
+VERSION: CORREGIDO 3
+BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
+-->
 <!DOCTYPE html>
 <!-- Archivo: panel/index.html -->
 <html lang="es">
@@ -381,12 +391,6 @@
   .msg.show{ display:block; }
   .msg.error{ background:rgba(196,66,66,0.1); color:#9C3B3B; }
   .msg.ok{ background:rgba(63,80,68,0.1); color:var(--forest); }
-  .excepcion-resumen{
-    border:1px solid var(--line); border-radius:10px; padding:10px 11px; background:var(--cream);
-    display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
-  }
-  .excepcion-resumen.excepcion-cerrada{ border-color:rgba(156,59,59,.35); }
-  .excepcion-resumen.excepcion-activa{ border-color:rgba(184,134,46,.45); }
 
   /* ---------- sidebar de PC (#18) — en celular se mantiene el dropdown de siempre ---------- */
   .sidebar{ display:none; }
@@ -826,7 +830,24 @@
       </div>
     </section>
 
-
+    <section class="view" id="view-disponibilidad">
+      <h1 class="view-title">Excepciones de horario</h1>
+      <p class="view-sub">Acá configurás un día puntual que será diferente del horario habitual. La excepción reemplaza el horario normal solo para esa fecha. Si guardás sin horarios, el día queda cerrado.</p>
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:14px; max-width:520px;">
+        <input type="date" id="disp-fecha">
+        <div id="disp-rangos" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <button type="button" class="btn-secondary" id="disp-agregar-rango" style="width:auto;">+ Agregar franja</button>
+        <div class="slots-grid" id="disp-slots"></div>
+        <button class="submit" id="disp-guardar" style="width:auto; max-width:220px;">Guardar configuración de ese día</button>
+        <div class="msg" id="disp-msg"></div>
+      </div>
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; max-width:520px; margin-top:16px;">
+        <strong>Días con excepciones cargadas</strong>
+        <div class="turnos-list" id="disp-resumen-list">
+          <div class="empty-state">Cargando…</div>
+        </div>
+      </div>
+    </section>
 
     <button class="fab" id="fab-agregar" title="Agregar">+</button>
 
@@ -1126,6 +1147,11 @@
   // En celular solo existe el dropdown de siempre; en PC además aparece el sidebar,
   // ambos con los mismos data-view y ambos disparan la misma showView().
   const menuLinks = document.querySelectorAll(".menu-dropdown a[data-view], .sidebar a[data-view]");
+
+  // Horario habitual y excepciones forman una sola configuración de horario.
+  // La vista de excepciones no aparece en el menú: se abre desde Configuración.
+  document.getElementById("btn-abrir-excepciones")?.addEventListener("click", () => showView("disponibilidad"));
+  document.getElementById("btn-volver-horario")?.addEventListener("click", () => showView("config"));
   const fab = document.getElementById("fab-agregar");
   const VISTAS_CON_FAB = { turnos: true, servicios: true, clientes: true, caja: true };
 
@@ -1758,8 +1784,59 @@
       renderClientes(todosLosTurnos);
 
       turnosCacheGlobal = todosLosTurnos;
+
+      // Publicar la ocupación no bloquea la interfaz del panel.
+      sincronizarOcupacionPublica(todosLosTurnos).catch(err => {
+        console.error("TURNAPP — Error sincronizando ocupación pública", {
+          businessId,
+          codigo: err?.code || "(sin código)",
+          mensaje: err?.message || String(err),
+          error: err
+        });
+      });
+
       if (vistaActual === "calendario") renderCalendario();
     });
+  }
+
+  // --- ETAPA 9 — PASO 3 — ocupación pública para el catálogo ---
+  // El catálogo nunca lee "turnos" porque allí hay datos privados de clientes.
+  // El panel publica únicamente los minutos ocupados por fecha.
+  let fechasOcupacionPublicaAnteriores = new Set();
+
+  function calcularOcupadosPublicos(turnos){
+    const porFecha = new Map();
+    (Array.isArray(turnos) ? turnos : []).forEach(t => {
+      const fechaHora = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
+      if (!fechaHora) return;
+      const fechaISO = fechaAISO(fechaHora);
+      if (!porFecha.has(fechaISO)) porFecha.set(fechaISO, new Set());
+      const inicio = fechaHora.getHours() * 60 + fechaHora.getMinutes();
+      const fin = inicio + (Number(t.duracionTotal) || 30);
+      const reabiertos = new Set(Array.isArray(t.huecosReabiertos) ? t.huecosReabiertos : []);
+      for (let m = inicio; m < fin; m += 30){
+        if (!reabiertos.has(m)) porFecha.get(fechaISO).add(m);
+      }
+    });
+    return porFecha;
+  }
+
+  async function sincronizarOcupacionPublica(turnos){
+    const porFecha = calcularOcupadosPublicos(turnos);
+    const fechasActuales = new Set(porFecha.keys());
+    const fechasAActualizar = new Set([
+      ...fechasOcupacionPublicaAnteriores,
+      ...fechasActuales
+    ]);
+
+    for (const fechaISO of fechasAActualizar){
+      const ocupados = [...(porFecha.get(fechaISO) || new Set())].sort((a,b) => a-b);
+      await setDoc(
+        doc(db, "businesses", businessId, "ocupacionPublica", fechaISO),
+        { ocupados, actualizadoEn: new Date().toISOString() }
+      );
+    }
+    fechasOcupacionPublicaAnteriores = fechasActuales;
   }
 
   // --- clientes: se arman solos a partir de los turnos, agrupando por teléfono ---
@@ -3498,27 +3575,44 @@ const DISP_PASO = 30;
   });
 
   function formatearRangosDisponibilidad(slots){
-    const ordenado=[...slots].sort((a,b)=>a-b), rangos=[];
-    let inicio=null, anterior=null;
-    ordenado.forEach(m=>{
-      if(inicio===null){inicio=m;anterior=m;return;}
-      if(m===anterior+DISP_PASO){anterior=m;return;}
-      rangos.push([inicio,anterior+DISP_PASO]); inicio=m; anterior=m;
+    const ordenado = [...slots].sort((a, b) => a - b);
+    const rangos = [];
+    let inicio = null, anterior = null;
+    ordenado.forEach(m => {
+      if (inicio === null){ inicio = m; anterior = m; return; }
+      if (m === anterior + DISP_PASO){ anterior = m; return; }
+      rangos.push([inicio, anterior + DISP_PASO]);
+      inicio = m; anterior = m;
     });
-    if(inicio!==null)rangos.push([inicio,anterior+DISP_PASO]);
-    return rangos.map(([i,f])=>formatearHora(i)+"–"+formatearHora(f)).join(", ");
+    if (inicio !== null) rangos.push([inicio, anterior + DISP_PASO]);
+    return rangos.map(([i, f]) => formatearHora(i) + "–" + formatearHora(f)).join(", ");
+  }
+
+  // Limpieza automática de excepciones vencidas.
+  // Se ejecuta de manera secundaria y nunca bloquea la carga de turnos.
+  function limpiarExcepcionesPasadas(snap){
+    const hoyISO = fechaAISO(new Date());
+    snap.docs.forEach(docSnap => {
+      if (docSnap.id >= hoyISO) return;
+      const data = docSnap.data() || {};
+      if (data.tipo !== "excepcion") return;
+      deleteDoc(doc(db, "businesses", businessId, "disponibilidad", docSnap.id))
+        .catch(err => console.error("Error limpiando excepción pasada", docSnap.id, err));
+    });
   }
 
   function escucharResumenDisponibilidad(){
     const ref=query(collection(db,"businesses",businessId,"disponibilidad"),orderBy(documentId()));
     onSnapshot(ref,(snap)=>{
+      // Limpieza secundaria: no bloquea la carga de turnos ni la interfaz.
+      limpiarExcepcionesPasadas(snap);
       dispCacheGlobal={};
       snap.docs.forEach(d=>{dispCacheGlobal[d.id]={existe:true,slots:Array.isArray(d.data().slots)?d.data().slots:[]};});
       if(vistaActual==="calendario")renderCalendario();
 
       const lista=document.getElementById("disp-resumen-list");
       if(!lista)return;
-      const excepciones=snap.docs;
+      const excepciones=snap.docs.filter(d => (d.data() || {}).tipo === "excepcion");
       if(!excepciones.length){lista.innerHTML=`<div class="empty-state" style="padding:20px;">Todavía no cargaste excepciones.</div>`;return;}
       lista.innerHTML="";
       excepciones.forEach(docSnap=>{
@@ -3527,28 +3621,42 @@ const DISP_PASO = 30;
         const cerrado=slots.length===0;
         const card=document.createElement("div");
         card.className="excepcion-resumen "+(cerrado?"excepcion-cerrada":"excepcion-activa");
-        card.innerHTML=`<div class="turno-info"><strong>${fechaObj.toLocaleDateString("es-AR",{weekday:"short",day:"2-digit",month:"2-digit"})}</strong><div class="turno-servicio">${cerrado?"Cerrado por excepción":formatearRangosDisponibilidad(slots)}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="turno-reabrir" data-editar>Editar</button><button class="turno-reabrir" data-restaurar style="border-style:solid;">Restaurar habitual</button></div>`;
-        card.querySelector("[data-editar]").addEventListener("click",()=>{
-          document.querySelector('input[name="excepcion-tipo"][value="dia"]').checked=true;
+        const fechaTexto=fechaObj.toLocaleDateString("es-AR",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"});
+        card.innerHTML=`<div class="turno-info"><strong>${fechaTexto}</strong><div class="turno-servicio">${cerrado?"Cerrado por excepción":formatearRangosDisponibilidad(slots)}</div><div style="font-size:calc(11px * var(--ui-scale));color:rgba(38,42,32,.48);margin-top:3px;">Reemplaza el horario habitual para esta fecha.</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="turno-reabrir" data-editar>Editar</button><button class="turno-reabrir" data-eliminar style="border-style:solid;border-color:var(--rose-deep);color:var(--rose-deep);">Eliminar</button></div>`;
+        const btnEditar=card.querySelector("[data-editar]");
+        btnEditar.addEventListener("click", async ()=>{
+          document.getElementById("excepciones-config").style.display="block";
+          document.getElementById("btn-configurar-excepciones").textContent="Ocultar excepciones";
+          const esPeriodo = docSnap.data()?.origen === "periodo";
+          document.querySelector(`input[name="excepcion-tipo"][value="${esPeriodo ? "periodo" : "dia"}"]`).checked=true;
+          dispFecha.value=docSnap.id;
+          dispFechaHasta.value=esPeriodo ? (docSnap.data()?.periodoHasta || docSnap.id) : "";
           actualizarModoExcepcion();
-          dispFecha.value=docSnap.id; dispFechaHasta.value="";
-          cargarDisponibilidad(); window.scrollTo({top:0,behavior:"smooth"});
+          await cargarDisponibilidad();
+          dispFecha.scrollIntoView({behavior:"smooth", block:"center"});
+          dispFecha.focus();
         });
-        card.querySelector("[data-restaurar]").addEventListener("click",async()=>{
-          if(!await confirmarAccion(`¿Restaurar el horario habitual del ${fechaObj.toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit",year:"numeric"})}?`))return;
+        card.querySelector("[data-eliminar]").addEventListener("click",async()=>{
+          if(!await confirmarAccion(`¿Eliminar la excepción del ${fechaTexto}?`))return;
+          const msg=document.getElementById("disp-msg");
           try{
-            const ocupados=minutosOcupadosDia(docSnap.id);
-            const habituales=new Set(slotsDeRangos(rangosHabitualesDisponibilidad(docSnap.id)));
-            const fuera=[...ocupados].filter(m=>!habituales.has(m)).sort((a,b)=>a-b);
-            if(fuera.length){const msg=document.getElementById("disp-msg");msg.className="msg show error";msg.textContent="No se puede restaurar el horario habitual porque hay turnos en horarios que ese horario no cubre ("+fuera.map(formatearHora).join(", ")+"). Primero cambiá esos turnos.";return;}
             await deleteDoc(doc(db,"businesses",businessId,"disponibilidad",docSnap.id));
-            if(dispFecha.value===docSnap.id)await cargarDisponibilidad();
-          }catch(err){console.error("Error restaurando horario habitual",err);const msg=document.getElementById("disp-msg");msg.className="msg show error";msg.textContent="No se pudo restaurar el horario habitual.";}
+            msg.className="msg show ok";
+            msg.textContent="Excepción eliminada. El día vuelve a usar el horario habitual.";
+            if(dispFecha.value===docSnap.id) await cargarDisponibilidad();
+            setTimeout(()=>{msg.className="msg";},3000);
+          }catch(err){
+            console.error("Error eliminando excepción",err);
+            msg.className="msg show error";
+            msg.textContent="No se pudo eliminar la excepción. Revisá tu conexión o los permisos de la cuenta.";
+          }
         });
+
         lista.appendChild(card);
       });
     });
   }
+
 </script>
 
 </body>
