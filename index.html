@@ -1794,10 +1794,73 @@ BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
 
   // --- turnos reservados en tiempo real ---
   function escucharTurnos(){
-    const turnosRef = query(
-      collection(db, "businesses", businessId, "turnos"),
-      orderBy("fechaHora", "asc")
-    );
+  const turnosRef = query(
+    collection(db, "businesses", businessId, "turnos"),
+    orderBy("fechaHora", "asc")
+  );
+
+  onSnapshot(turnosRef, (snap) => {
+    const lista = document.getElementById("turnos-list");
+    const todosLosTurnos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (snap.empty){
+      lista.innerHTML = `<div class="empty-state">Todavía no tenés turnos reservados.</div>`;
+    } else {
+      let turnos = todosLosTurnos;
+
+      if (prefOrden === "nombre"){
+        turnos = [...turnos].sort((a, b) =>
+          (a.clienteNombre || "").localeCompare(b.clienteNombre || "")
+        );
+      }
+
+      lista.innerHTML = "";
+
+      turnos.forEach((t) =>
+        lista.appendChild(renderTurno(t.id, t))
+      );
+    }
+
+    actualizarListaClientesConocidos(todosLosTurnos);
+    renderClientes(todosLosTurnos);
+
+    turnosCacheGlobal = todosLosTurnos;
+
+    sincronizarOcupacionPublica(todosLosTurnos).catch(err => {
+      console.error("TURNAPP — Error sincronizando ocupación pública", {
+        businessId,
+        codigo: err?.code || "(sin código)",
+        mensaje: err?.message || String(err),
+        error: err
+      });
+    });
+
+    if (vistaActual === "calendario") {
+      renderCalendario();
+    }
+
+  }, (err) => {
+
+    console.error("TURNAPP — Error cargando turnos", {
+      businessId,
+      codigo: err?.code || "(sin código)",
+      mensaje: err?.message || String(err),
+      error: err
+    });
+
+    const lista = document.getElementById("turnos-list");
+
+    if (lista){
+      lista.innerHTML = `
+        <div class="empty-state">
+          <strong>No pudimos cargar los turnos.</strong><br>
+          Código: ${err?.code || "desconocido"}<br>
+          ${err?.message || "Revisá tu conexión o los permisos de Firebase."}
+        </div>
+      `;
+    }
+  });
+}
     onSnapshot(turnosRef, (snap) => {
       const lista = document.getElementById("turnos-list");
       const todosLosTurnos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
