@@ -1,4 +1,4 @@
-<!-- ETAPA 8 — PASO 3 — CARPETA: panel — ARCHIVO: index.html -->
+<!-- ETAPA 8 — PASO 3 CORREGIDO — CARPETA: panel — ARCHIVO: index.html -->
 <!DOCTYPE html>
 <!-- Archivo: panel/index.html -->
 <html lang="es">
@@ -3451,9 +3451,9 @@ const DISP_PASO = 30;
     return rangos.map(([i, f]) => formatearHora(i) + "–" + formatearHora(f)).join(", ");
   }
 
+  // Limpieza automática de excepciones vencidas.
+  // Se ejecuta de manera secundaria y nunca bloquea la carga de turnos.
   function limpiarExcepcionesPasadas(snap){
-    // Limpieza secundaria: nunca bloquea la carga de turnos ni la interfaz.
-    // Cada documento se evalúa por separado, usando la fecha local.
     const hoyISO = fechaAISO(new Date());
     snap.docs.forEach(docSnap => {
       if (docSnap.id >= hoyISO) return;
@@ -3467,8 +3467,7 @@ const DISP_PASO = 30;
   function escucharResumenDisponibilidad(){
     const ref = query(collection(db, "businesses", businessId, "disponibilidad"), orderBy(documentId()));
     onSnapshot(ref, (snap) => {
-      // Se inicia de forma independiente. La aplicación continúa aunque Firestore
-      // tarde o falle al eliminar alguna excepción vencida.
+      // La limpieza es independiente: aunque un borrado falle, el panel sigue funcionando.
       limpiarExcepcionesPasadas(snap);
       dispCacheGlobal = {};
       snap.docs.forEach(d => {
@@ -3495,15 +3494,24 @@ const DISP_PASO = 30;
             <div class="turno-servicio">${cerrado ? "Cerrado por excepción" : formatearRangosDisponibilidad(slots)}</div>
           </div>
           <button class="turno-reabrir" data-editar>Editar</button>
-          <button class="turno-reabrir" data-restaurar style="border-style:solid;">Restaurar habitual</button>
+          <button class="turno-reabrir" data-eliminar style="border-style:solid;">Eliminar excepción</button>
         `;
-        card.querySelector("[data-editar]").addEventListener("click", () => {
+        card.querySelector("[data-editar]").addEventListener("click", async () => {
           dispFecha.value = docSnap.id;
-          cargarDisponibilidad();
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          try {
+            await cargarDisponibilidad();
+            // Llevar al formulario de la excepción, no al comienzo de la página.
+            dispFecha.scrollIntoView({ behavior: "smooth", block: "center" });
+            dispFecha.focus();
+          } catch (err) {
+            console.error("Error cargando excepción para editar", err);
+            const msg = document.getElementById("disp-msg");
+            msg.className = "msg show error";
+            msg.textContent = "No se pudo cargar esta excepción para editarla.";
+          }
         });
-        card.querySelector("[data-restaurar]").addEventListener("click", async () => {
-          if (!await confirmarAccion(`¿Restaurar el horario habitual del ${fechaObj.toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit", year:"numeric" })}?`)) return;
+        card.querySelector("[data-eliminar]").addEventListener("click", async () => {
+          if (!await confirmarAccion(`¿Eliminar la excepción del ${fechaObj.toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit", year:"numeric" })}? El día volverá a usar el horario habitual.`)) return;
           try {
             // Al quitar la excepción, todos los turnos existentes deben seguir entrando
             // dentro del horario habitual que volverá a regir para esa fecha.
@@ -3513,16 +3521,16 @@ const DISP_PASO = 30;
             if (fueraDelHabitual.length){
               const msg = document.getElementById("disp-msg");
               msg.className = "msg show error";
-              msg.textContent = "No se puede restaurar el horario habitual porque hay turnos en horarios que ese horario no cubre (" + fueraDelHabitual.map(formatearHora).join(", ") + "). Primero cambiá esos turnos.";
+              msg.textContent = "No se puede eliminar la excepción porque hay turnos en horarios que el horario habitual no cubre (" + fueraDelHabitual.map(formatearHora).join(", ") + "). Primero cambiá esos turnos.";
               return;
             }
             await deleteDoc(doc(db, "businesses", businessId, "disponibilidad", docSnap.id));
             if (dispFecha.value === docSnap.id) await cargarDisponibilidad();
           } catch (err) {
-            console.error("Error restaurando horario habitual", err);
+            console.error("Error eliminando excepción", err);
             const msg = document.getElementById("disp-msg");
             msg.className = "msg show error";
-            msg.textContent = "No se pudo restaurar el horario habitual.";
+            msg.textContent = "No se pudo eliminar la excepción.";
           }
         });
         lista.appendChild(card);
