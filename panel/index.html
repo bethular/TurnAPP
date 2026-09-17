@@ -354,6 +354,13 @@ BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
   .cal-dia-cerrado{ padding:18px 14px; border:1px dashed var(--line); border-radius:12px; background:rgba(38,42,32,0.025); text-align:center; }
   .cal-dia-cerrado strong{ display:block; font-size:calc(14px * var(--ui-scale)); color:var(--ink); margin-bottom:4px; }
   .cal-dia-cerrado span{ display:block; font-size:calc(12.5px * var(--ui-scale)); color:rgba(38,42,32,0.58); }
+    .cal-habilitar-dia{
+    margin-top:12px; padding:11px 16px; border-radius:9px; border:2px solid var(--forest);
+    background:var(--forest); color:#fff; font-family:inherit; font-size:calc(13.5px * var(--ui-scale));
+    font-weight:700; cursor:pointer; width:100%; max-width:280px;
+  }
+  .cal-habilitar-dia:hover{ background:var(--forest-soft); }
+  .cal-habilitar-dia:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
   .cal-corte-horario{ width:100%; margin:4px 0; padding:8px 10px; border-top:1px dashed var(--line); border-bottom:1px dashed var(--line); background:rgba(38,42,32,0.025); text-align:center; color:rgba(38,42,32,0.55); font-size:calc(11.5px * var(--ui-scale)); }
   .cal-corte-horario strong{ font-weight:600; }
   .slot-btn{
@@ -410,13 +417,21 @@ BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
   }
   .cal-dia-mes:hover{ box-shadow:0 6px 14px -8px rgba(38,42,32,0.35); }
   .cal-dia-mes.fuera-de-mes{ opacity:0.3; cursor:default; }
-  .cal-dia-mes .cal-punto{ width:8px; height:8px; border-radius:50%; background:var(--line); }
+  .cal-dia-mes .cal-punto{ width:9px; height:9px; border-radius:50%; background:var(--line); }
+  /* Contraste accesible: el estado colorea toda la celda, no depende solo del puntito. */
+  .cal-dia-mes.libre{ background:rgba(61,107,74,.20); border-color:rgba(61,107,74,.48); }
   .cal-dia-mes.libre .cal-punto{ background:#3D6B4A; }
-  .cal-dia-mes.parcial .cal-punto{ background:var(--gold); }
-  .cal-dia-mes.completo .cal-punto{ background:var(--rose-deep); }
-  .cal-dia-mes.cerrado .cal-punto{ background:var(--line); opacity:0.55; }
-  .cal-dia-mes.cerrado{ opacity:0.62; }
-  .cal-dia-mes .cal-estado{ font-size:calc(8px * var(--ui-scale)); line-height:1; font-weight:600; opacity:.62; letter-spacing:.01em; }
+  .cal-dia-mes.parcial{ background:rgba(184,134,46,.24); border-color:rgba(184,134,46,.58); }
+  .cal-dia-mes.parcial .cal-punto{ background:#8A620F; }
+  .cal-dia-mes.completo{ background:rgba(156,59,59,.20); border-color:rgba(156,59,59,.50); }
+  .cal-dia-mes.completo .cal-punto{ background:#9C3B3B; }
+  .cal-dia-mes.cerrado{ background:rgba(38,42,32,.09); border-color:rgba(38,42,32,.28); }
+  .cal-dia-mes.cerrado .cal-punto{ background:#555A52; opacity:1; }
+  .cal-dia-mes .cal-mes-estado{ font-size:calc(8.5px * var(--ui-scale)); line-height:1; font-weight:800; letter-spacing:.01em; opacity:1; }
+  .cal-dia-mes.libre .cal-mes-estado{ color:#245A37; }
+  .cal-dia-mes.parcial .cal-mes-estado{ color:#684B00; }
+  .cal-dia-mes.completo .cal-mes-estado{ color:#7B2222; }
+  .cal-dia-mes.cerrado .cal-mes-estado{ color:#3F433D; }
   .cal-dia-mes.excepcion{ border-style:dashed; }
   .cal-dia-mes.excepcion .cal-estado{ opacity:.82; }
   .cal-dia-mes.hoy{ border-color:var(--forest); border-width:2px; }
@@ -427,11 +442,14 @@ BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
   }
   .cal-dia-semana:hover{ box-shadow:0 6px 14px -8px rgba(38,42,32,0.35); }
   .cal-dia-semana .cal-punto{ width:10px; height:10px; border-radius:50%; background:var(--line); }
+  .cal-dia-semana.libre{ background:rgba(61,107,74,.20); border-color:rgba(61,107,74,.48); }
   .cal-dia-semana.libre .cal-punto{ background:#3D6B4A; }
-  .cal-dia-semana.parcial .cal-punto{ background:var(--gold); }
-  .cal-dia-semana.completo .cal-punto{ background:var(--rose-deep); }
-  .cal-dia-semana.cerrado .cal-punto{ background:var(--line); opacity:0.55; }
-  .cal-dia-semana.cerrado{ opacity:0.62; }
+  .cal-dia-semana.parcial{ background:rgba(184,134,46,.24); border-color:rgba(184,134,46,.58); }
+  .cal-dia-semana.parcial .cal-punto{ background:#8A620F; }
+  .cal-dia-semana.completo{ background:rgba(156,59,59,.20); border-color:rgba(156,59,59,.50); }
+  .cal-dia-semana.completo .cal-punto{ background:#9C3B3B; }
+  .cal-dia-semana.cerrado{ background:rgba(38,42,32,.09); border-color:rgba(38,42,32,.28); }
+  .cal-dia-semana.cerrado .cal-punto{ background:#555A52; opacity:1; }
   .cal-dia-semana strong{ font-size:calc(12px * var(--ui-scale)); }
   .cal-dia-semana span{ font-size:calc(10.5px * var(--ui-scale)); color:rgba(38,42,32,0.55); }
 
@@ -3214,6 +3232,33 @@ BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
       const cerrado = document.createElement("div");
       cerrado.className = "cal-dia-cerrado";
       cerrado.innerHTML = `<strong>Día cerrado</strong><span>${esExcepcion ? "La excepción configurada cierra toda la jornada." : "No hay horario de atención configurado para este día."}</span>`;
+      if (!esExcepcion){
+        const habilitar = document.createElement("button");
+        habilitar.type = "button";
+        habilitar.className = "cal-habilitar-dia";
+        habilitar.textContent = "Habilitar este día";
+        habilitar.title = "Configurar un horario solamente para este día";
+        habilitar.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          const fecha = fechaISO;
+          const panel = document.getElementById("excepciones-config");
+          const btnConfig = document.getElementById("btn-configurar-excepciones");
+          const inputFecha = document.getElementById("disp-fecha");
+          const inputHasta = document.getElementById("disp-fecha-hasta");
+          if (panel && btnConfig && inputFecha){
+            inputFecha.value = fecha;
+            inputFecha.min = new Date().toISOString().slice(0,10);
+            if (inputHasta) inputHasta.value = "";
+            document.querySelectorAll('input[name="excepcion-tipo"]').forEach(r => { r.checked = r.value === "dia"; });
+            actualizarModoExcepcion();
+            panel.style.display = "block";
+            btnConfig.textContent = "Ocultar excepciones";
+            cargarDisponibilidad();
+            showView("config");
+          }
+        });
+        cerrado.appendChild(habilitar);
+      }
       cont.appendChild(cerrado);
       return;
     }
