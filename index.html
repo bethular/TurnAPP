@@ -7,6 +7,15 @@ PASO: 1
 VERSION: 1
 -->
 <!DOCTYPE html>
+<!--
+TURNAPP
+CARPETA: catalogo
+ARCHIVO: index.html
+ETAPA: 9
+PASO: 1
+VERSION: CORREGIDO 2
+BASE: catalogo-index_ETAPA9_PASO1
+-->
 <!-- Archivo: catalogo/index.html -->
 <html lang="es">
 <head>
@@ -108,7 +117,7 @@ VERSION: 1
   import { firebaseConfig, registrarServiceWorker, mostrarAvisoActualizacion } from "../config.js";
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
-    getFirestore, doc, getDoc, collection, getDocs, addDoc, query, orderBy, Timestamp
+    getFirestore, doc, getDoc, collection, getDocs, addDoc, query, where, orderBy, Timestamp
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   registrarServiceWorker(mostrarAvisoActualizacion);
@@ -321,11 +330,22 @@ VERSION: 1
           // 2) turnos ya confirmados ese día, restando solo las franjas que siguen ocupadas
           // (un turno puede tener partes reabiertas a mano por el profesional)
           const inicioDia = new Date(cFecha.value + "T00:00:00");
-          const finDia = new Date(cFecha.value + "T23:59:59");
-          const turnosSnap = await getDocs(query(collection(db, "businesses", businessId, "turnos"), orderBy("fechaHora", "asc")));
+          const finDia = new Date(cFecha.value + "T00:00:00");
+          finDia.setDate(finDia.getDate() + 1);
+
+          // Consultamos solamente los turnos de la fecha elegida.
+          // La consulta anterior intentaba leer y ordenar toda la colección "turnos";
+          // además de ser innecesario, eso puede ser rechazado por las reglas de Firestore
+          // cuando el catálogo público no tiene permiso para consultar toda la colección.
+          const turnosQuery = query(
+            collection(db, "businesses", businessId, "turnos"),
+            where("fechaHora", ">=", Timestamp.fromDate(inicioDia)),
+            where("fechaHora", "<", Timestamp.fromDate(finDia)),
+            orderBy("fechaHora", "asc")
+          );
+          const turnosSnap = await getDocs(turnosQuery);
           const bloqueadosPorTurnos = new Set();
           turnosSnap.docs.map(d => d.data())
-            .filter(t => { const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null; return f && f >= inicioDia && f <= finDia; })
             .forEach(t => {
               const f = t.fechaHora.toDate();
               const inicio = f.getHours() * 60 + f.getMinutes();
@@ -360,7 +380,11 @@ VERSION: 1
           }
           if (!cSlots.children.length) cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No hay horarios libres ese día para lo que elegiste.</span>`;
         } catch (err) {
-          console.error("Error cargando horarios disponibles del catálogo", err);
+          console.error("Error cargando horarios disponibles del catálogo", {
+            businessId,
+            fecha: cFecha.value,
+            error: err
+          });
           cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No pudimos cargar los horarios. Volvé a intentar en un momento.</span>`;
         }
       }
