@@ -1,4 +1,21 @@
+<!--
+TURNAPP
+CARPETA: catalogo
+ARCHIVO: index.html
+ETAPA: 9
+PASO: 1
+VERSION: 1
+-->
 <!DOCTYPE html>
+<!--
+TURNAPP
+CARPETA: catalogo
+ARCHIVO: index.html
+ETAPA: 9
+PASO: 1
+VERSION: CORREGIDO 3
+BASE: catalogo-index_ETAPA9_PASO1
+-->
 <!-- Archivo: catalogo/index.html -->
 <html lang="es">
 <head>
@@ -100,7 +117,7 @@
   import { firebaseConfig, registrarServiceWorker, mostrarAvisoActualizacion } from "../config.js";
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
-    getFirestore, doc, getDoc, collection, getDocs, addDoc, query, orderBy, Timestamp
+    getFirestore, doc, getDoc, collection, getDocs, addDoc, query, where, orderBy, Timestamp
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   registrarServiceWorker(mostrarAvisoActualizacion);
@@ -111,9 +128,9 @@
   const params = new URLSearchParams(window.location.search);
   const businessId = params.get("negocio");
   const contenedor = document.getElementById("contenedor");
-  // #5: antes era fijo 9 a 19hs. Ahora se toma del horario que el negocio configuró en su panel
-  // (Configuración > "Horario de atención"); si no configuró nada, sigue 9 a 19hs por defecto.
-  let HORA_INICIO = 9, HORA_FIN = 19;
+  // El horario real se obtiene de businesses/{businessId}.horarioConfig,
+  // igual que en el panel. No se usa un horario fijo como respaldo.
+  let horarioConfigCatalogo = null;
   const PASO_MIN = 30;
 
   function formatearHora(m){
@@ -122,20 +139,45 @@
     return `${h}:${mm}`;
   }
 
-  // Misma lógica que usa el negocio en su panel (Disponibilidad): 1) excepción puntual
-  // para esa fecha exacta si existe, 2) si no, el patrón semanal de ese día de la semana
-  // (se repite todas las semanas, para siempre), 3) si tampoco hay patrón, el horario
-  // base configurado por el negocio. Esto es lo que permite reservar en cualquier
-  // semana futura sin que el negocio tenga que cargar cada fecha una por una.
+  // Misma lógica efectiva que usa el panel:
+  // 1) si existe una excepción para la fecha, esa excepción tiene prioridad;
+  //    incluso slots=[] significa día cerrado.
+  // 2) si no hay excepción, se usa el horario habitual de horarioConfig.dias.
+  // No se consulta una colección "disponibilidadPatron" porque la configuración
+  // vigente se guarda dentro del documento del negocio.
   async function obtenerCapacidadDia(fechaISO){
-    const dispSnap = await getDoc(doc(db, "businesses", businessId, "disponibilidad", fechaISO));
-    if (dispSnap.exists()) return new Set(dispSnap.data().slots || []);
-    const diaSemana = new Date(fechaISO + "T00:00:00").getDay();
-    const patronSnap = await getDoc(doc(db, "businesses", businessId, "disponibilidadPatron", String(diaSemana)));
-    if (patronSnap.exists()) return new Set(patronSnap.data().slots || []);
-    const base = new Set();
-    for (let m = HORA_INICIO * 60; m < HORA_FIN * 60; m += PASO_MIN) base.add(m);
-    return base;
+    const dispSnap = await getDoc(
+      doc(db, "businesses", businessId, "disponibilidad", fechaISO)
+    );
+
+    if (dispSnap.exists()){
+      const slots = dispSnap.data()?.slots;
+      return new Set(Array.isArray(slots) ? slots : []);
+    }
+
+    const fecha = new Date(fechaISO + "T00:00:00");
+    const diaSemana = fecha.getDay();
+    const dia = horarioConfigCatalogo?.dias?.[String(diaSemana)];
+
+    if (!dia?.activo || !Array.isArray(dia.rangos) || !dia.rangos.length){
+      return new Set();
+    }
+
+    const slots = [];
+    dia.rangos.forEach(rango => {
+      const [desdeH, desdeM] = String(rango.desde || "").split(":").map(Number);
+      const [hastaH, hastaM] = String(rango.hasta || "").split(":").map(Number);
+      const inicio = desdeH * 60 + desdeM;
+      const fin = hastaH * 60 + hastaM;
+
+      if (!Number.isFinite(inicio) || !Number.isFinite(fin) || fin <= inicio) return;
+
+      for (let m = inicio; m < fin; m += PASO_MIN){
+        slots.push(m);
+      }
+    });
+
+    return new Set(slots);
   }
 
   // --- datos del cliente: se guardan en este dispositivo para no tener que cargarlos cada vez ---
@@ -159,8 +201,7 @@
     }
     const negocio = negocioSnap.data();
     document.getElementById("nombre-negocio").textContent = negocio.nombreComercio || "Reservar turno";
-    HORA_INICIO = negocio.horaInicio ?? 9;
-    HORA_FIN = negocio.horaFin ?? 19;
+    horarioConfigCatalogo = negocio.horarioConfig || null;
 
     const vencimiento = negocio.fechaVencimiento?.toDate ? negocio.fechaVencimiento.toDate() : null;
     const vencido = negocio.plan === "gratis" && vencimiento && vencimiento < new Date();
@@ -289,11 +330,24 @@
           // 2) turnos ya confirmados ese día, restando solo las franjas que siguen ocupadas
           // (un turno puede tener partes reabiertas a mano por el profesional)
           const inicioDia = new Date(cFecha.value + "T00:00:00");
-          const finDia = new Date(cFecha.value + "T23:59:59");
-          const turnosSnap = await getDocs(query(collection(db, "businesses", businessId, "turnos"), orderBy("fechaHora", "asc")));
+          const finDia = new Date(cFecha.value + "T00:00:00");
+          finDia.setDate(finDia.getDate() + 1);
+
+          // Consultamos solamente los turnos de la fecha elegida.
+          // La consulta anterior intentaba leer y ordenar toda la colección "turnos";
+          // además de ser innecesario, eso puede ser rechazado por las reglas de Firestore
+          // cuando el catálogo público no tiene permiso para consultar toda la colección.
+          // Consultamos solamente los turnos del día elegido.
+          // No agregamos orderBy: la consulta usa únicamente los filtros por
+          // fechaHora y así no depende de un índice compuesto adicional.
+          const turnosQuery = query(
+            collection(db, "businesses", businessId, "turnos"),
+            where("fechaHora", ">=", Timestamp.fromDate(inicioDia)),
+            where("fechaHora", "<", Timestamp.fromDate(finDia))
+          );
+          const turnosSnap = await getDocs(turnosQuery);
           const bloqueadosPorTurnos = new Set();
           turnosSnap.docs.map(d => d.data())
-            .filter(t => { const f = t.fechaHora?.toDate ? t.fechaHora.toDate() : null; return f && f >= inicioDia && f <= finDia; })
             .forEach(t => {
               const f = t.fechaHora.toDate();
               const inicio = f.getHours() * 60 + f.getMinutes();
@@ -311,7 +365,9 @@
           }
 
           cSlots.innerHTML = "";
-          for (let m = HORA_INICIO * 60; m + duracion <= HORA_FIN * 60; m += PASO_MIN){
+          const posiblesInicios = [...disponibles].sort((a, b) => a - b);
+          for (const m of posiblesInicios){
+            if (m + duracion > 24 * 60) continue;
             if (!bloqueLibre(m, m + duracion)) continue;
             const btn = document.createElement("button");
             btn.type = "button";
@@ -326,6 +382,13 @@
           }
           if (!cSlots.children.length) cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No hay horarios libres ese día para lo que elegiste.</span>`;
         } catch (err) {
+          console.error("TURNAPP — Error cargando horarios disponibles del catálogo", {
+            businessId,
+            fecha: cFecha.value,
+            codigo: err?.code || "(sin código)",
+            mensaje: err?.message || String(err),
+            error: err
+          });
           cSlots.innerHTML = `<span style="font-size:13px; color:rgba(38,42,32,0.5);">No pudimos cargar los horarios. Volvé a intentar en un momento.</span>`;
         }
       }
