@@ -1,4 +1,12 @@
-<!-- ETAPA 8 — PASO 3 CORREGIDO — CARPETA: panel — ARCHIVO: index.html -->
+<!--
+TURNAPP
+CARPETA: panel
+ARCHIVO: index.html
+ETAPA: 8
+PASO: 3
+VERSION: CORREGIDO 3
+BASE: ETAPA 7 PASO 5 FINAL / BACKUP ETAPA 8
+-->
 <!DOCTYPE html>
 <!-- Archivo: panel/index.html -->
 <html lang="es">
@@ -700,9 +708,37 @@
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="submit" id="horario-aplicar-todos" style="width:auto; padding:10px 16px;">Aplicar un mismo horario a todos</button>
           <button class="btn-secondary" id="horario-guardar" style="padding:10px 16px;">Guardar horario</button>
+          <button class="btn-secondary" id="btn-configurar-excepciones" style="padding:10px 16px;">Configurar excepciones</button>
         </div>
         <div class="msg" id="horario-msg"></div>
-        <div style="font-size:calc(12px * var(--ui-scale)); color:rgba(38,42,32,0.55); line-height:1.45;">Los cambios para una fecha concreta (feriado, vacaciones, enfermedad o cambio de un solo día) se manejarán como excepciones y no modificarán este horario habitual.</div>
+        <div style="font-size:calc(12px * var(--ui-scale)); color:rgba(38,42,32,0.55); line-height:1.45;">Este es tu horario semanal habitual. Si necesitás cambiar un día, varios días seguidos o cerrar temporalmente, usá <strong>Configurar excepciones</strong>. Esos cambios no modifican el horario habitual.</div>
+        <div id="excepciones-config" style="display:none; margin-top:4px;">
+          <div style="border-top:1px solid var(--line); padding-top:14px; display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <strong>Excepciones de horario</strong>
+              <p class="turno-servicio" style="margin:4px 0 0;">Usá una fecha para un cambio puntual o un período para aplicar el mismo horario a varios días.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--ui-scale));font-weight:600;"><input type="radio" name="excepcion-tipo" value="dia" checked> Un día</label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--ui-scale));font-weight:600;"><input type="radio" name="excepcion-tipo" value="periodo"> Período</label>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <label style="flex:1;min-width:145px;font-size:calc(12px * var(--ui-scale));font-weight:600;">Desde<input type="date" id="disp-fecha" style="width:100%;margin-top:5px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--cream);font-family:inherit;"></label>
+              <label id="disp-hasta-wrap" style="flex:1;min-width:145px;font-size:calc(12px * var(--ui-scale));font-weight:600;display:none;">Hasta<input type="date" id="disp-fecha-hasta" style="width:100%;margin-top:5px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--cream);font-family:inherit;"></label>
+            </div>
+            <div id="disp-rangos" style="display:flex; flex-direction:column; gap:8px;"></div>
+            <button type="button" class="btn-secondary" id="disp-agregar-rango" style="width:auto;">+ Agregar franja</button>
+            <div class="slots-grid" id="disp-slots"></div>
+            <button class="submit" id="disp-guardar" style="width:auto; max-width:260px;">Guardar excepción</button>
+            <div class="msg" id="disp-msg"></div>
+            <div>
+              <strong>Excepciones cargadas</strong>
+              <div class="turnos-list" id="disp-resumen-list" style="margin-top:8px;">
+                <div class="empty-state">Cargando…</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:12px; margin-bottom:16px;">
@@ -3212,6 +3248,8 @@ function validarIntegridadHorarioDia(fechaISO, duracionMin, inicioMin, ocupadosI
 
 const DISP_PASO = 30;
   const dispFecha = document.getElementById("disp-fecha");
+  const dispFechaHasta = document.getElementById("disp-fecha-hasta");
+  const dispHastaWrap = document.getElementById("disp-hasta-wrap");
   const dispRangos = document.getElementById("disp-rangos");
   const dispAgregarRango = document.getElementById("disp-agregar-rango");
   const dispSlots = document.getElementById("disp-slots");
@@ -3366,6 +3404,41 @@ const DISP_PASO = 30;
     renderDispRangos();
   });
 
+  function tipoExcepcionSeleccionado(){
+    return document.querySelector('input[name="excepcion-tipo"]:checked')?.value || "dia";
+  }
+
+  function actualizarModoExcepcion(){
+    const periodo = tipoExcepcionSeleccionado() === "periodo";
+    dispHastaWrap.style.display = periodo ? "block" : "none";
+    if (periodo && dispFecha.value && !dispFechaHasta.value) dispFechaHasta.value = dispFecha.value;
+    if (!periodo) dispFechaHasta.value = "";
+  }
+  document.querySelectorAll('input[name="excepcion-tipo"]').forEach(r => r.addEventListener("change", actualizarModoExcepcion));
+
+  document.getElementById("btn-configurar-excepciones").addEventListener("click", () => {
+    const panel = document.getElementById("excepciones-config");
+    const abierto = panel.style.display !== "none";
+    panel.style.display = abierto ? "none" : "block";
+    document.getElementById("btn-configurar-excepciones").textContent = abierto ? "Configurar excepciones" : "Ocultar excepciones";
+    if (!abierto) {
+      const hoy = new Date().toISOString().slice(0,10);
+      if (!dispFecha.value) dispFecha.value = hoy;
+      dispFecha.min = hoy;
+      actualizarModoExcepcion();
+      cargarDisponibilidad();
+    }
+  });
+
+  function fechasEntre(desdeISO, hastaISO){
+    const fechas=[];
+    const ini=new Date(desdeISO+"T00:00:00");
+    const fin=new Date(hastaISO+"T00:00:00");
+    if (!Number.isFinite(ini.getTime()) || !Number.isFinite(fin.getTime()) || ini>fin) return fechas;
+    for(let d=new Date(ini); d<=fin; d.setDate(d.getDate()+1)) fechas.push(fechaAISO(new Date(d)));
+    return fechas;
+  }
+
   async function cargarDisponibilidad(){
     if (!dispFecha.value) return;
     const fechaISO = dispFecha.value;
@@ -3376,8 +3449,6 @@ const DISP_PASO = 30;
       dispSeleccion = new Set(Array.isArray(data.slots) ? data.slots : []);
       dispRangosData = rangosDesdeSlots(dispSeleccion);
     } else {
-      // Sin excepción guardada, mostramos como punto de partida el horario habitual.
-      // Todavía no se crea ninguna excepción hasta que el usuario presione Guardar.
       const fecha = new Date(fechaISO + "T00:00:00");
       const diaId = fecha.getDay();
       const dia = horarioConfigCache?.dias?.[String(diaId)];
@@ -3387,54 +3458,65 @@ const DISP_PASO = 30;
     }
     renderDispRangos();
   }
-  dispFecha.addEventListener("change", cargarDisponibilidad);
+  dispFecha.addEventListener("change", async () => {
+    if (tipoExcepcionSeleccionado() === "periodo" && dispFecha.value && !dispFechaHasta.value) dispFechaHasta.value=dispFecha.value;
+    await cargarDisponibilidad();
+  });
 
   document.getElementById("disp-guardar").addEventListener("click", async () => {
     if (!dispFecha.value) return;
+    const tipo=tipoExcepcionSeleccionado();
+    const desdeISO=dispFecha.value;
+    const hastaISO=tipo === "periodo" ? dispFechaHasta.value : desdeISO;
+    const msg=document.getElementById("disp-msg");
+    if (!hastaISO){ msg.className="msg show error"; msg.textContent="Elegí la fecha de finalización del período."; return; }
+    const fechas=fechasEntre(desdeISO,hastaISO);
+    if (!fechas.length){ msg.className="msg show error"; msg.textContent="El período no es válido: 'Hasta' debe ser igual o posterior a 'Desde'."; return; }
+    if (fechas.length > 366){ msg.className="msg show error"; msg.textContent="El período no puede superar 366 días."; return; }
+
     const rangosInvalidos = dispRangosData.some(r => {
       if (!r.desde || !r.hasta) return true;
-      const inicio = minutosDesdeHora(r.desde);
-      const fin = minutosDesdeHora(r.hasta);
+      const inicio = minutosDesdeHora(r.desde), fin = minutosDesdeHora(r.hasta);
       return !Number.isFinite(inicio) || !Number.isFinite(fin) || fin <= inicio;
     });
-    // Una excepción sin franjas es válida: significa que ese día queda completamente cerrado.
-    if (rangosInvalidos){
-      const msg = document.getElementById("disp-msg");
-      msg.className = "msg show error";
-      msg.textContent = "Revisá las franjas: cada 'Hasta' debe ser posterior a su 'Desde'.";
-      return;
+    if (rangosInvalidos){ msg.className="msg show error"; msg.textContent="Revisá las franjas: cada 'Hasta' debe ser posterior a su 'Desde'."; return; }
+
+    const rangosValidos = ordenarRangos(dispRangosData).map(r => ({inicio:minutosDesdeHora(r.desde),fin:minutosDesdeHora(r.hasta)})).filter(r => Number.isFinite(r.inicio)&&Number.isFinite(r.fin)&&r.fin>r.inicio);
+    const slots = Array.from(dispSeleccion).sort((a,b)=>a-b);
+    const slotFueraDeRango = slots.find(m => !rangosValidos.some(r => m>=r.inicio && m<r.fin));
+    if (slotFueraDeRango !== undefined){ msg.className="msg show error"; msg.textContent=`El horario ${formatearHora(slotFueraDeRango)} quedó fuera de las franjas configuradas. Revisá las franjas antes de guardar.`; return; }
+
+    // Validamos todos los días antes de escribir para no dejar un período a medias.
+    for (const fechaISO of fechas){
+      const ocupados=minutosOcupadosDia(fechaISO);
+      const fuera=[...ocupados].filter(m=>!dispSeleccion.has(m));
+      if (fuera.length){
+        msg.className="msg show error";
+        msg.textContent=`No se puede guardar porque el cambio dejaría turnos existentes fuera de la disponibilidad del ${new Date(fechaISO+"T00:00:00").toLocaleDateString("es-AR",{day:"2-digit",month:"2-digit"})} (${fuera.slice(0,6).map(formatearHora).join(", ")}${fuera.length>6?" y más":""}). Primero cambiá esos turnos o dejá esas franjas disponibles.`;
+        return;
+      }
     }
 
-    const rangosValidos = ordenarRangos(dispRangosData).map(r => ({
-      inicio: minutosDesdeHora(r.desde),
-      fin: minutosDesdeHora(r.hasta)
-    })).filter(r => Number.isFinite(r.inicio) && Number.isFinite(r.fin) && r.fin > r.inicio);
-    const slots = Array.from(dispSeleccion).sort((a, b) => a - b);
-    const slotFueraDeRango = slots.find(m => !rangosValidos.some(r => m >= r.inicio && m < r.fin));
-    if (slotFueraDeRango !== undefined){
-      const msg = document.getElementById("disp-msg");
-      msg.className = "msg show error";
-      msg.textContent = `El horario ${formatearHora(slotFueraDeRango)} quedó fuera de las franjas configuradas. Revisá las franjas antes de guardar.`;
-      return;
+    try{
+      for (const fechaISO of fechas){
+        await setDoc(doc(db,"businesses",businessId,"disponibilidad",fechaISO),{
+          slots,
+          tipo:"excepcion",
+          actualizadoEn:new Date().toISOString(),
+          origen: tipo === "periodo" ? "periodo" : "dia",
+          periodoDesde: desdeISO,
+          periodoHasta: hastaISO
+        });
+      }
+      msg.className="msg show ok";
+      msg.textContent=fechas.length===1 ? "Excepción guardada." : `Excepción guardada para ${fechas.length} días.`;
+      setTimeout(()=>{msg.className="msg";},2500);
+      await cargarDisponibilidad();
+    }catch(err){
+      console.error("Error guardando excepción",err);
+      msg.className="msg show error";
+      msg.textContent="No se pudo guardar la excepción. Revisá tu conexión o los permisos de la cuenta.";
     }
-    const ocupados = minutosOcupadosDia(dispFecha.value);
-    const slotsSet = new Set(slots);
-    const ocupadosFuera = [...ocupados].filter(m => !slotsSet.has(m)).sort((a, b) => a - b);
-    if (ocupadosFuera.length){
-      const msg = document.getElementById("disp-msg");
-      msg.className = "msg show error";
-      msg.textContent = "No se puede guardar esta excepción porque quitaría horarios de turnos ya existentes (" + ocupadosFuera.map(formatearHora).join(", ") + "). Primero cambiá esos turnos o dejá esas franjas disponibles.";
-      return;
-    }
-    await setDoc(doc(db, "businesses", businessId, "disponibilidad", dispFecha.value), {
-      slots,
-      tipo: "excepcion",
-      actualizadoEn: new Date().toISOString()
-    });
-    const msg = document.getElementById("disp-msg");
-    msg.className = "msg show ok";
-    msg.textContent = "Disponibilidad guardada.";
-    setTimeout(() => { msg.className = "msg"; }, 2000);
   });
 
   function formatearRangosDisponibilidad(slots){
@@ -3465,78 +3547,61 @@ const DISP_PASO = 30;
   }
 
   function escucharResumenDisponibilidad(){
-    const ref = query(collection(db, "businesses", businessId, "disponibilidad"), orderBy(documentId()));
-    onSnapshot(ref, (snap) => {
-      // La limpieza es independiente: aunque un borrado falle, el panel sigue funcionando.
+    const ref=query(collection(db,"businesses",businessId,"disponibilidad"),orderBy(documentId()));
+    onSnapshot(ref,(snap)=>{
+      // Limpieza secundaria: no bloquea la carga de turnos ni la interfaz.
       limpiarExcepcionesPasadas(snap);
-      dispCacheGlobal = {};
-      snap.docs.forEach(d => {
-        dispCacheGlobal[d.id] = { existe:true, slots:Array.isArray(d.data().slots) ? d.data().slots : [] };
-      });
-      if (vistaActual === "calendario") renderCalendario();
+      dispCacheGlobal={};
+      snap.docs.forEach(d=>{dispCacheGlobal[d.id]={existe:true,slots:Array.isArray(d.data().slots)?d.data().slots:[]};});
+      if(vistaActual==="calendario")renderCalendario();
 
-      const lista = document.getElementById("disp-resumen-list");
-      const excepciones = snap.docs;
-      if (!excepciones.length){
-        lista.innerHTML = `<div class="empty-state">Todavía no cargaste excepciones para ningún día.</div>`;
-        return;
-      }
-      lista.innerHTML = "";
-      excepciones.forEach(docSnap => {
-        const slots = Array.isArray(docSnap.data().slots) ? docSnap.data().slots : [];
-        const fechaObj = new Date(docSnap.id + "T00:00:00");
-        const cerrado = slots.length === 0;
-        const card = document.createElement("div");
-        card.className = "turno-card";
-        card.innerHTML = `
-          <div class="turno-info">
-            <strong>${fechaObj.toLocaleDateString("es-AR", { weekday: "short", day: "2-digit", month: "2-digit" })}</strong>
-            <div class="turno-servicio">${cerrado ? "Cerrado por excepción" : formatearRangosDisponibilidad(slots)}</div>
-          </div>
-          <button class="turno-reabrir" data-editar>Editar</button>
-          <button class="turno-reabrir" data-eliminar style="border-style:solid;">Eliminar excepción</button>
-        `;
-        card.querySelector("[data-editar]").addEventListener("click", async () => {
-          dispFecha.value = docSnap.id;
-          try {
-            await cargarDisponibilidad();
-            // Llevar al formulario de la excepción, no al comienzo de la página.
-            dispFecha.scrollIntoView({ behavior: "smooth", block: "center" });
-            dispFecha.focus();
-          } catch (err) {
-            console.error("Error cargando excepción para editar", err);
-            const msg = document.getElementById("disp-msg");
-            msg.className = "msg show error";
-            msg.textContent = "No se pudo cargar esta excepción para editarla.";
+      const lista=document.getElementById("disp-resumen-list");
+      if(!lista)return;
+      const excepciones=snap.docs.filter(d => (d.data() || {}).tipo === "excepcion");
+      if(!excepciones.length){lista.innerHTML=`<div class="empty-state" style="padding:20px;">Todavía no cargaste excepciones.</div>`;return;}
+      lista.innerHTML="";
+      excepciones.forEach(docSnap=>{
+        const slots=Array.isArray(docSnap.data().slots)?docSnap.data().slots:[];
+        const fechaObj=new Date(docSnap.id+"T00:00:00");
+        const cerrado=slots.length===0;
+        const card=document.createElement("div");
+        card.className="excepcion-resumen "+(cerrado?"excepcion-cerrada":"excepcion-activa");
+        const fechaTexto=fechaObj.toLocaleDateString("es-AR",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"});
+        card.innerHTML=`<div class="turno-info"><strong>${fechaTexto}</strong><div class="turno-servicio">${cerrado?"Cerrado por excepción":formatearRangosDisponibilidad(slots)}</div><div style="font-size:calc(11px * var(--ui-scale));color:rgba(38,42,32,.48);margin-top:3px;">Reemplaza el horario habitual para esta fecha.</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="turno-reabrir" data-editar>Editar</button><button class="turno-reabrir" data-eliminar style="border-style:solid;border-color:var(--rose-deep);color:var(--rose-deep);">Eliminar</button></div>`;
+        const btnEditar=card.querySelector("[data-editar]");
+        btnEditar.addEventListener("click", async ()=>{
+          document.getElementById("excepciones-config").style.display="block";
+          document.getElementById("btn-configurar-excepciones").textContent="Ocultar excepciones";
+          const esPeriodo = docSnap.data()?.origen === "periodo";
+          document.querySelector(`input[name="excepcion-tipo"][value="${esPeriodo ? "periodo" : "dia"}"]`).checked=true;
+          dispFecha.value=docSnap.id;
+          dispFechaHasta.value=esPeriodo ? (docSnap.data()?.periodoHasta || docSnap.id) : "";
+          actualizarModoExcepcion();
+          await cargarDisponibilidad();
+          dispFecha.scrollIntoView({behavior:"smooth", block:"center"});
+          dispFecha.focus();
+        });
+        card.querySelector("[data-eliminar]").addEventListener("click",async()=>{
+          if(!await confirmarAccion(`¿Eliminar la excepción del ${fechaTexto}?`))return;
+          const msg=document.getElementById("disp-msg");
+          try{
+            await deleteDoc(doc(db,"businesses",businessId,"disponibilidad",docSnap.id));
+            msg.className="msg show ok";
+            msg.textContent="Excepción eliminada. El día vuelve a usar el horario habitual.";
+            if(dispFecha.value===docSnap.id) await cargarDisponibilidad();
+            setTimeout(()=>{msg.className="msg";},3000);
+          }catch(err){
+            console.error("Error eliminando excepción",err);
+            msg.className="msg show error";
+            msg.textContent="No se pudo eliminar la excepción. Revisá tu conexión o los permisos de la cuenta.";
           }
         });
-        card.querySelector("[data-eliminar]").addEventListener("click", async () => {
-          if (!await confirmarAccion(`¿Eliminar la excepción del ${fechaObj.toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit", year:"numeric" })}? El día volverá a usar el horario habitual.`)) return;
-          try {
-            // Al quitar la excepción, todos los turnos existentes deben seguir entrando
-            // dentro del horario habitual que volverá a regir para esa fecha.
-            const ocupados = minutosOcupadosDia(docSnap.id);
-            const habituales = new Set(slotsDeRangos(rangosHabitualesDisponibilidad(docSnap.id)));
-            const fueraDelHabitual = [...ocupados].filter(m => !habituales.has(m)).sort((a,b) => a-b);
-            if (fueraDelHabitual.length){
-              const msg = document.getElementById("disp-msg");
-              msg.className = "msg show error";
-              msg.textContent = "No se puede eliminar la excepción porque hay turnos en horarios que el horario habitual no cubre (" + fueraDelHabitual.map(formatearHora).join(", ") + "). Primero cambiá esos turnos.";
-              return;
-            }
-            await deleteDoc(doc(db, "businesses", businessId, "disponibilidad", docSnap.id));
-            if (dispFecha.value === docSnap.id) await cargarDisponibilidad();
-          } catch (err) {
-            console.error("Error eliminando excepción", err);
-            const msg = document.getElementById("disp-msg");
-            msg.className = "msg show error";
-            msg.textContent = "No se pudo eliminar la excepción.";
-          }
-        });
+
         lista.appendChild(card);
       });
     });
   }
+
 </script>
 
 </body>
