@@ -2314,7 +2314,11 @@ BASE: ETAPA 8 PASO 3 CORREGIDO 3
     if(!activos.length){msg.className="msg show error";msg.textContent="Seleccioná al menos un día de trabajo.";return;}
     const origen=cfg.dias[String(activos[0].id)];
     if(!origen.rangos.length){msg.className="msg show error";msg.textContent=`${activos[0].nombre} no tiene horario para copiar.`;return;}
-    activos.forEach(d=>cfg.dias[String(d.id)]={activo:true,rangos:origen.rangos.map(r=>({...r}))});
+    const rangosOrigen=origen.rangos.map(r=>({desde:r.desde,hasta:r.hasta}));
+    activos.forEach(d=>{
+      cfg.dias[String(d.id)].activo=true;
+      cfg.dias[String(d.id)].rangos=rangosOrigen.map(r=>({desde:r.desde,hasta:r.hasta}));
+    });
     horarioConfigCache=cfg;renderEditorHorario();msg.className="msg show ok";msg.textContent=`Horario de ${activos[0].nombre} aplicado a los días seleccionados. Guardá para confirmar.`;
   });
 
