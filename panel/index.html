@@ -5,7 +5,7 @@ CARPETA: panel
 ARCHIVO: index.html
 ETAPA: 8
 PASO: 3
-VERSION: RECUPERADA + CALENDARIO COLORES + MENU OCULTO
+VERSION: CORRECCIÓN 2026-09-25 — FECHA TURNOS + CLIENTE MANUAL
 BASE: ETAPA 8 PASO 3 CORREGIDO 3
 -->
 <!DOCTYPE html>
@@ -1566,7 +1566,13 @@ BASE: ETAPA 8 PASO 3 CORREGIDO 3
         window.open(armarLinkConfirmacion(clienteNombre, clienteWhatsapp, nombreServicios, fecha), "_blank");
       }
     } else {
-      await addDoc(collection(db, "businesses", businessId, "turnos"), { ...datosTurno, estado: "Reservado" });
+      const nuevoTurnoRef = await addDoc(collection(db, "businesses", businessId, "turnos"), { ...datosTurno, estado: "Reservado" });
+      // Actualizar inmediatamente la vista de Clientes con el turno recién guardado,
+      // sin esperar al siguiente evento del listener de Firestore.
+      const nuevoTurno = { id: nuevoTurnoRef.id, ...datosTurno, estado: "Reservado" };
+      turnosCacheGlobal = [...turnosCacheGlobal, nuevoTurno];
+      actualizarListaClientesConocidos(turnosCacheGlobal);
+      renderClientes(turnosCacheGlobal);
     }
     modalTurno.classList.remove("show");
   });
@@ -2450,6 +2456,7 @@ BASE: ETAPA 8 PASO 3 CORREGIDO 3
   function renderTurno(id, t){
     const hora = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
     const horaTexto = hora ? hora.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }) : "--:--";
+    const fechaTexto = hora ? hora.toLocaleDateString("es-AR") : "--/--/----";
     const duracion = t.duracionTotal || 30;
     const horaFinTexto = hora
       ? new Date(hora.getTime() + duracion * 60000).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
@@ -2466,7 +2473,7 @@ BASE: ETAPA 8 PASO 3 CORREGIDO 3
       <div class="turno-hora">${horaTexto}</div>
       <div class="turno-info">
         <button class="turno-cliente" ${whatsappHref ? "" : "disabled"}>${t.clienteNombre || "Sin nombre"}</button>
-        <div class="turno-servicio">${t.servicioNombre || "Servicio sin especificar"} · ${horaTexto}–${horaFinTexto} (${duracion} min)</div>
+        <div class="turno-servicio">Fecha: ${fechaTexto} · ${t.servicioNombre || "Servicio sin especificar"} · ${horaTexto}–${horaFinTexto} (${duracion} min)</div>
       </div>
       <select class="estado-select estado-${t.estado || "Reservado"}" ${planVencido ? "disabled" : ""}></select>
       <button class="turno-reabrir ${planVencido ? "locked" : ""}" ${planVencido ? "disabled" : ""} data-editar-horario>Editar horario</button>
