@@ -1349,34 +1349,59 @@ import { formatearRangosDisponibilidad } from "./modulos/disponibilidad.js";
     }
   });
 
-  function renderTurno(id, t){
+  // Actualización v1.0.1 — turnos en una sola línea y detalle en ventana.
+  function abrirModalDetalleTurno(id, t){
     const hora = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
-    const horaTexto = hora ? hora.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }) : "--:--";
-    const fechaTexto = hora ? hora.toLocaleDateString("es-AR") : "--/--/----";
+    const fechaTexto = hora ? hora.toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit", year:"numeric" }) : "--/--/----";
+    const horaTexto = hora ? hora.toLocaleTimeString("es-AR", { hour:"2-digit", minute:"2-digit" }) : "--:--";
     const duracion = t.duracionTotal || 30;
     const horaFinTexto = hora
-      ? new Date(hora.getTime() + duracion * 60000).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
+      ? new Date(hora.getTime() + duracion * 60000).toLocaleTimeString("es-AR", { hour:"2-digit", minute:"2-digit" })
       : "--:--";
 
-    const card = document.createElement("div");
-    card.className = "turno-card";
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay show";
+    overlay.innerHTML = `
+      <div class="modal-card" style="max-width:460px;">
+        <h2>${t.clienteNombre || "Sin nombre"}</h2>
+        <div class="modal-field">
+          <label>Fecha y horario</label>
+          <div style="font-size:calc(14px * var(--ui-scale)); color:var(--ink);">${fechaTexto} · ${horaTexto}–${horaFinTexto} (${duracion} min)</div>
+        </div>
+        <div class="modal-field">
+          <label>Servicio</label>
+          <div style="font-size:calc(14px * var(--ui-scale)); color:var(--ink);">${t.servicioNombre || "Servicio sin especificar"}</div>
+        </div>
+        <div class="modal-field">
+          <label for="detalle-estado-${id}">Estado</label>
+          <select id="detalle-estado-${id}" class="estado-select estado-${t.estado || "Reservado"}" style="width:100%;"></select>
+        </div>
+        <div class="modal-actions" style="flex-wrap:wrap;">
+          <button type="button" class="submit" data-recordatorio ${t.clienteWhatsapp ? "" : "disabled"}>${t.clienteWhatsapp ? "Enviar recordatorio" : "Sin WhatsApp"}</button>
+          <button type="button" class="turno-reabrir ${planVencido ? "locked" : ""}" ${planVencido ? "disabled" : ""} data-editar-horario>Editar horario</button>
+          <button type="button" class="turno-reabrir" style="border-style:solid; border-color:var(--rose-deep); color:var(--rose-deep);" data-borrar>Borrar</button>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancelar" data-cerrar>Cerrar</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const cerrar = () => overlay.remove();
+    overlay.querySelector("[data-cerrar]").addEventListener("click", cerrar);
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) cerrar();
+    });
 
     const whatsappHref = t.clienteWhatsapp
       ? `https://wa.me/${t.clienteWhatsapp}?text=${encodeURIComponent("Hola " + (t.clienteNombre || "") + ", te recordamos tu turno de " + (t.servicioNombre || "") + " a las " + horaTexto + ".")}`
       : null;
+    overlay.querySelector("[data-recordatorio]").addEventListener("click", () => {
+      if (whatsappHref) window.open(whatsappHref, "_blank");
+    });
 
-    card.innerHTML = `
-      <div class="turno-hora">${horaTexto}</div>
-      <div class="turno-info">
-        <button class="turno-cliente" ${whatsappHref ? "" : "disabled"}>${t.clienteNombre || "Sin nombre"}</button>
-        <div class="turno-servicio">Fecha: ${fechaTexto} · ${t.servicioNombre || "Servicio sin especificar"} · ${horaTexto}–${horaFinTexto} (${duracion} min)</div>
-      </div>
-      <select class="estado-select estado-${t.estado || "Reservado"}" ${planVencido ? "disabled" : ""}></select>
-      <button class="turno-reabrir ${planVencido ? "locked" : ""}" ${planVencido ? "disabled" : ""} data-editar-horario>Editar horario</button>
-      <button class="turno-reabrir" style="border-style:solid; border-color:var(--rose-deep); color:var(--rose-deep);" data-borrar>Borrar</button>
-    `;
-
-    const select = card.querySelector(".estado-select");
+    const select = overlay.querySelector("select");
     ESTADOS.forEach(e => {
       const opt = document.createElement("option");
       opt.value = e;
@@ -1387,35 +1412,49 @@ import { formatearRangosDisponibilidad } from "./modulos/disponibilidad.js";
     select.addEventListener("change", async () => {
       const nuevoEstado = select.value;
       if (nuevoEstado === "Cambio de turno"){
+        cerrar();
         abrirModalCambioTurno(id, t.estado);
-        select.value = t.estado; // el modal decide el estado real al confirmar
         return;
       }
       if (nuevoEstado === "Atendido" && t.estado !== "Atendido"){
+        cerrar();
         abrirModalCobro(id, t);
-        select.value = t.estado; // el modal decide el estado real al confirmar el cobro
         return;
       }
       select.className = "estado-select estado-" + nuevoEstado;
       await updateDoc(doc(db, "businesses", businessId, "turnos", id), { estado: nuevoEstado });
     });
 
-    const btnCliente = card.querySelector(".turno-cliente");
-    if (whatsappHref){
-      btnCliente.addEventListener("click", () => window.open(whatsappHref, "_blank"));
-    }
-
-    card.querySelector("[data-editar-horario]").addEventListener("click", () => {
+    overlay.querySelector("[data-editar-horario]").addEventListener("click", () => {
       if (planVencido) return;
+      cerrar();
       abrirModalHuecos(id, t);
     });
 
-    card.querySelector("[data-borrar]").addEventListener("click", async () => {
+    overlay.querySelector("[data-borrar]").addEventListener("click", async () => {
       if (await confirmarAccion(`¿Borrar el turno de ${t.clienteNombre || "este cliente"}?`)) {
+        cerrar();
         await deleteDoc(doc(db, "businesses", businessId, "turnos", id));
       }
     });
+  }
 
+  function renderTurno(id, t){
+    const hora = t.fechaHora?.toDate ? t.fechaHora.toDate() : null;
+    const horaTexto = hora ? hora.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" }) : "--:--";
+    const fechaTexto = hora ? hora.toLocaleDateString("es-AR", { day:"2-digit", month:"2-digit" }) : "--/--";
+
+    const card = document.createElement("div");
+    card.className = "turno-card";
+    card.innerHTML = `
+      <button type="button" class="turno-cliente turno-resumen-turno" aria-label="Ver detalle del turno" style="display:flex; align-items:center; gap:12px; width:100%; text-decoration:none;">
+        <span style="font-weight:600; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${t.clienteNombre || "Sin nombre"}</span>
+        <span style="font-size:calc(12.5px * var(--ui-scale)); color:rgba(38,42,32,0.58); flex-shrink:0;">${fechaTexto}</span>
+        <span style="font-family:'Fraunces', serif; font-weight:600; color:var(--forest); flex-shrink:0;">${horaTexto}</span>
+      </button>
+    `;
+
+    card.querySelector(".turno-resumen-turno").addEventListener("click", () => abrirModalDetalleTurno(id, t));
     return card;
   }
 
