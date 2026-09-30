@@ -1,0 +1,47 @@
+:root{
+    --cream: #F5EFE4; --cream-deep: #EDE3D3; --ink: #262A20;
+    --forest: #2F4033; --gold: #B8862E; --line: rgba(38,42,32,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'Work Sans', sans-serif; background:var(--cream); color:var(--ink);
+    margin:0; padding:24px; min-height:100vh;
+  }
+  h1{ font-family:'Fraunces', serif; font-weight:600; color:var(--forest); font-size:22px; margin:0 0 4px; }
+  .sub{ font-size:13px; color:rgba(38,42,32,0.55); margin:0 0 24px; }
+
+  .card{
+    background:#fff; border:1px solid var(--line); border-radius:14px;
+    padding:20px; margin-bottom:20px; max-width:520px;
+  }
+
+  input{
+    width:100%; padding:11px 13px; border-radius:9px; border:1px solid var(--line);
+    background:var(--cream); font-family:inherit; font-size:14.5px; margin-bottom:10px;
+  }
+  button{
+    font-family:inherit; font-weight:600; font-size:14px; cursor:pointer;
+    border:none; border-radius:9px; padding:11px 18px;
+  }
+  .btn-primary{ background:var(--forest); color:#fff; width:100%; }
+  .btn-secondary{ background:var(--cream-deep); color:var(--ink); margin-right:8px; }
+
+  .resultado{
+    display:none; margin-top:16px; padding:16px; border-radius:10px;
+    background:rgba(184,134,46,0.08); border:1px solid rgba(184,134,46,0.3);
+  }
+  .resultado.show{ display:block; }
+  .codigo-grande{
+    font-family:'Fraunces', serif; font-size:26px; font-weight:600; color:var(--gold);
+    letter-spacing:0.03em; margin:0 0 12px; word-break:break-all;
+  }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th, td{ text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); }
+  th{ color:rgba(38,42,32,0.5); font-weight:600; font-size:11.5px; text-transform:uppercase; }
+  .estado-usado{ color:#9C3B3B; font-weight:600; }
+  .estado-libre{ color:#3D6B4A; font-weight:600; }
+
+  #login-gate{ max-width:380px; }
+  .msg{ font-size:13px; padding:10px 12px; border-radius:8px; margin-top:10px; display:none; }
+  .msg.show{ display:block; background:rgba(196,66,66,0.1); color:#9C3B3B; }

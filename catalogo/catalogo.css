@@ -1,0 +1,73 @@
+:root{
+    --cream: #F5EFE4; --cream-deep: #EDE3D3; --ink: #262A20;
+    --forest: #2F4033; --forest-soft: #3F5044; --gold: #B8862E; --line: rgba(38,42,32,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Work Sans', sans-serif; background:var(--cream); color:var(--ink);
+    min-height:100vh; padding-bottom:40px;
+  }
+  header{ padding:26px 20px 10px; text-align:center; }
+  header h1{ font-family:'Fraunces', serif; font-weight:600; font-size:24px; color:var(--forest); margin:0 0 4px; }
+  header p{ font-size:13px; color:rgba(38,42,32,0.55); margin:0; }
+
+  .contenedor{ max-width:480px; margin:0 auto; padding:0 18px; }
+
+  .servicio-card{
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    margin-bottom:10px; cursor:pointer; overflow:hidden;
+  }
+  .servicio-card.sin-foto{ padding:14px 16px; display:flex; align-items:center; gap:12px; }
+  .servicio-card.con-foto{ display:flex; flex-direction:column; align-items:stretch; }
+  .servicio-foto-grande{ width:100%; height:190px; object-fit:cover; display:block; }
+  .servicio-card-body{ display:flex; align-items:center; gap:12px; padding:12px 16px; }
+  .servicio-card.elegido{ border-color:var(--gold); background:rgba(184,134,46,0.06); }
+  .servicio-card input{ width:auto; margin:0; flex-shrink:0; }
+  .servicio-info{ flex:1; }
+  .servicio-nombre{ font-weight:600; font-size:14.5px; }
+  .servicio-detalle{ font-size:12.5px; color:rgba(38,42,32,0.55); margin-top:2px; }
+  .servicio-precio{ font-family:'Fraunces', serif; font-weight:600; color:var(--forest); font-size:16px; white-space:nowrap; }
+  .oferta-tag{ display:inline-block; background:rgba(184,134,46,0.15); color:var(--gold); font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; margin-top:4px; }
+
+  .fecha-nav{ display:flex; align-items:center; gap:8px; }
+  .fecha-nav input[type="date"]{ flex:1; }
+  .fecha-nav-btn{
+    width:40px; height:40px; flex-shrink:0; border-radius:9px; border:1px solid var(--line);
+    background:var(--cream); font-family:inherit; font-size:16px; font-weight:700; color:var(--ink); cursor:pointer;
+  }
+  .fecha-nav-btn:hover{ background:var(--cream-deep); }
+  .fecha-nav-btn:disabled{ opacity:.4; cursor:default; }
+
+  .duracion-total{
+    font-size:13px; color:rgba(38,42,32,0.6); margin:2px 0 18px; min-height:18px;
+  }
+
+  .card-form{
+    background:#fff; border:1px solid var(--line); border-radius:14px; padding:20px; margin-top:18px;
+  }
+  .campo{ margin-bottom:14px; }
+  .campo label{ font-size:12.5px; font-weight:600; color:rgba(38,42,32,0.6); display:block; margin-bottom:5px; }
+  .campo input{
+    width:100%; padding:11px 12px; border-radius:9px; border:1px solid var(--line);
+    background:var(--cream); font-family:inherit; font-size:14.5px;
+  }
+  .slots-grid{ display:flex; flex-wrap:wrap; gap:8px; }
+  .slot-btn{
+    padding:8px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream);
+    font-family:inherit; font-size:13px; font-weight:600; color:var(--ink); cursor:pointer;
+  }
+  .slot-btn.elegido{ background:var(--forest); color:var(--cream); border-color:var(--forest); }
+
+  .submit{
+    width:100%; margin-top:6px; padding:13px 0; border:none; border-radius:9px;
+    background:var(--forest); color:var(--cream); font-family:inherit; font-weight:600; font-size:14.5px; cursor:pointer;
+  }
+  .submit:hover{ background:var(--forest-soft); }
+
+  .msg{ font-size:13px; padding:10px 12px; border-radius:8px; margin-top:10px; display:none; }
+  .msg.show{ display:block; }
+  .msg.error{ background:rgba(196,66,66,0.1); color:#9C3B3B; }
+  .msg.ok{ background:rgba(63,80,68,0.1); color:var(--forest); }
+
+  .pantalla-msg{ text-align:center; padding:60px 24px; color:rgba(38,42,32,0.55); font-size:14.5px; }
+  .pantalla-msg h2{ font-family:'Fraunces', serif; color:var(--forest); font-weight:500; }

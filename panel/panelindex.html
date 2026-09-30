@@ -1,0 +1,504 @@
+<!-- ETAPA 9 — PASO 3 — CARPETA: panel — ARCHIVO: index.html -->
+<!--
+TURNAPP
+CARPETA: panel
+ARCHIVO: index.html
+ETAPA: 8
+PASO: 3
+VERSION: CORRECCIÓN 2026-09-25 — FECHA TURNOS + CLIENTE MANUAL
+BASE: ETAPA 8 PASO 3 CORREGIDO 3
+-->
+<!DOCTYPE html>
+<!-- Archivo: panel/index.html -->
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Panel — TurnApp</title>
+<link rel="manifest" href="../manifest.json" />
+<meta name="theme-color" content="#3F5044" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./panel.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <img class="logo-negocio" id="logo-negocio" alt="Logo del negocio">
+    <div>
+      <div><span id="nombre-negocio-header"></span><span class="plan-badge" id="badge-plan" style="display:none;"></span></div>
+      <div style="font-size:calc(11px * var(--ui-scale)); color:rgba(47,64,51,0.5); font-weight:600; letter-spacing:.02em;">TurnApp</div>
+    </div>
+  </div>
+  <div class="menu-wrap">
+    <button class="menu-btn" id="menu-btn">
+      Menú ▾
+    </button>
+    <div class="menu-dropdown" id="menu-dropdown">
+      <a href="#" data-view="turnos">Turnos</a>
+      <a href="#" data-view="calendario">Calendario</a>
+      <a href="#" data-view="solicitudes">Solicitudes <span class="badge-count" id="badge-solicitudes" style="display:none;"></span></a>
+      <a href="#" data-view="servicios">Servicios / Catálogo</a>
+      <a href="#" data-view="clientes">Clientes</a>
+      <a href="#" data-view="caja">Caja <span class="pro-tag">PRO</span></a>
+      <a href="#" data-view="config">Configuración</a>
+      <a href="#" data-view="tusapp">TusApp</a>
+      <hr>
+      <button id="btn-logout">Cerrar sesión</button>
+      <hr>
+      <a class="soporte" id="link-soporte" href="#">Asistencia técnica</a>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-links">
+      <a href="#" data-view="turnos">Turnos</a>
+      <a href="#" data-view="calendario">Calendario</a>
+      <a href="#" data-view="solicitudes">Solicitudes <span class="badge-count" id="badge-solicitudes-sidebar" style="display:none;"></span></a>
+      <a href="#" data-view="servicios">Servicios / Catálogo</a>
+      <a href="#" data-view="clientes">Clientes</a>
+      <a href="#" data-view="caja">Caja <span class="pro-tag">PRO</span></a>
+      <a href="#" data-view="config">Configuración</a>
+      <a href="#" data-view="tusapp">TusApp</a>
+    </div>
+    <div class="sidebar-links">
+      <hr>
+      <button id="btn-logout-sidebar">Cerrar sesión</button>
+      <a class="soporte" id="link-soporte-sidebar" href="#">Asistencia técnica</a>
+    </div>
+  </nav>
+  <main class="content">
+
+    <section class="view active" id="view-turnos">
+      <h1 class="view-title">Turnos reservados</h1>
+      <p class="view-sub">Nombre del cliente y servicio, para decidir de un vistazo si reabrís un hueco o das otro turno encima.</p>
+      <div class="turnos-list" id="turnos-list">
+        <div class="empty-state">Cargando turnos…</div>
+      </div>
+    </section>
+
+    <section class="view" id="view-calendario">
+      <h1 class="view-title">Calendario</h1>
+      <p class="view-sub">De un vistazo: verde es un día con casi todo libre, amarillo tiene turnos libres y ocupados mezclados, rojo está completo. Tocá un horario libre para reservar ahí mismo.</p>
+      <div class="cal-toolbar">
+        <button id="cal-anterior">◂</button>
+        <span class="cal-titulo" id="cal-titulo"></span>
+        <button id="cal-siguiente">▸</button>
+        <button id="cal-hoy">Hoy</button>
+        <select id="cal-modo">
+          <option value="dia">Día</option>
+          <option value="semana">Semana</option>
+          <option value="mes" selected>Mes</option>
+        </select>
+      </div>
+      <div id="cal-contenido"></div>
+      <div class="cal-leyenda">
+        <span><i class="cal-punto" style="background:#3D6B4A;"></i> Libre</span>
+        <span><i class="cal-punto" style="background:var(--gold);"></i> Parcial</span>
+        <span><i class="cal-punto" style="background:var(--rose-deep);"></i> Completo</span>
+        <span><i class="cal-punto" style="background:var(--line);"></i> Cerrado</span>
+        <span style="border:1px dashed var(--forest);border-radius:5px;padding:2px 5px;">Excepción</span>
+      </div>
+    </section>
+
+    <section class="view" id="view-servicios">
+      <h1 class="view-title">Servicios / Catálogo</h1>
+      <p class="view-sub">Precios, duración y ofertas de lo que ve el cliente en tu catálogo público.</p>
+      <div class="turnos-list" id="servicios-list">
+        <div class="empty-state">Cargando servicios…</div>
+      </div>
+    </section>
+
+    <section class="view" id="view-clientes">
+      <h1 class="view-title">Clientes</h1>
+      <p class="view-sub" id="clientes-sub">En el plan gratis solo se ve la última fecha de turno de cada cliente.</p>
+      <input type="text" id="buscar-cliente" placeholder="Buscar por nombre o teléfono…" style="width:100%; max-width:360px; padding:10px 12px; border-radius:9px; border:1px solid var(--line); background:#fff; font-family:inherit; font-size:calc(14px * var(--ui-scale)); color:var(--ink); margin-bottom:14px;">
+      <div class="turnos-list" id="clientes-list">
+        <div class="empty-state">Cargando clientes…</div>
+      </div>
+    </section>
+
+    <section class="view" id="view-caja">
+      <h1 class="view-title">Caja</h1>
+      <p class="view-sub" id="caja-sub">Ingresos, gastos y resumen por período.</p>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:14px;">
+        <strong>Balance del período</strong>
+        <div class="cal-toolbar" style="margin-bottom:0;">
+          <select id="caja-periodo-tipo">
+            <option value="dia">Día</option>
+            <option value="mes" selected>Mes</option>
+            <option value="anio">Año</option>
+          </select>
+          <input type="date" id="caja-periodo-fecha" style="padding:8px 10px; border-radius:8px; border:1px solid var(--line); font-family:inherit; font-size:calc(13px * var(--ui-scale));">
+        </div>
+        <strong id="caja-resumen-periodo-total">Ingresos: $0 · Gastos: $0 · Saldo: $0</strong>
+        <div id="caja-resumen-periodo-categorias"></div>
+      </div>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:4px; margin-bottom:14px;">
+        <strong id="caja-resumen">Total histórico — Ingresos: $0 · Gastos: $0 · Saldo: $0</strong>
+      </div>
+      <div class="turnos-list" id="caja-list">
+        <div class="empty-state">Cargando caja…</div>
+      </div>
+    </section>
+
+    <section class="view" id="view-config">
+      <h1 class="view-title">Configuración</h1>
+      <p class="view-sub">Nombre del negocio, WhatsApp, tema de color y profesionales.</p>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:12px; margin-bottom:16px;">
+        <div>
+          <strong id="plan-label">Plan actual: —</strong>
+          <div class="turno-servicio" id="plan-detalle"></div>
+        </div>
+        <div id="canje-form" style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="input-codigo" placeholder="Código de la versión Pro" style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(14px * var(--ui-scale));">
+          <button class="submit" id="btn-canjear" style="width:auto; padding:10px 18px;">Canjear</button>
+        </div>
+        <div class="msg" id="msg-canje"></div>
+      </div>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:16px;">
+        <strong>Tu comercio</strong>
+        <p class="turno-servicio" style="margin:0;">Nombre y logo que se ven arriba de todo, en el panel y en tu catálogo.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="input-nombre-negocio" placeholder="Nombre del comercio" style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(14px * var(--ui-scale));">
+          <button class="submit" id="btn-guardar-nombre" style="width:auto; padding:10px 18px;">Guardar</button>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="input-logo-url" placeholder="Link a la imagen del logo (opcional)" style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(14px * var(--ui-scale));">
+          <button class="submit" id="btn-guardar-logo" style="width:auto; padding:10px 18px;">Guardar</button>
+        </div>
+        <div class="msg" id="msg-comercio"></div>
+      </div>
+
+      <div class="turno-card" id="horario-config-card" style="flex-direction:column; align-items:stretch; gap:12px; margin-bottom:16px;">
+        <strong>Horario de atención</strong>
+        <p class="turno-servicio" style="margin:0;">Definí los días y horarios habituales de atención. Esta configuración será la base para calcular la disponibilidad.</p>
+        <div id="horario-dias-config" style="display:flex; flex-direction:column; gap:9px;"></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="submit" id="horario-aplicar-todos" style="width:auto; padding:10px 16px;">Aplicar un mismo horario a todos</button>
+          <button class="btn-secondary" id="horario-guardar" style="padding:10px 16px;">Guardar horario</button>
+          <button class="btn-secondary" id="btn-configurar-excepciones" style="padding:10px 16px;">Configurar excepciones</button>
+        </div>
+        <div class="msg" id="horario-msg"></div>
+        <div style="font-size:calc(12px * var(--ui-scale)); color:rgba(38,42,32,0.55); line-height:1.45;">Este es tu horario semanal habitual. Si necesitás cambiar un día, varios días seguidos o cerrar temporalmente, usá <strong>Configurar excepciones</strong>. Esos cambios no modifican el horario habitual.</div>
+        <div id="excepciones-config" style="display:none; margin-top:4px;">
+          <div style="border-top:1px solid var(--line); padding-top:14px; display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <strong>Excepciones de horario</strong>
+              <p class="turno-servicio" style="margin:4px 0 0;">Usá una fecha para un cambio puntual o un período para aplicar el mismo horario a varios días.</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--ui-scale));font-weight:600;"><input type="radio" name="excepcion-tipo" value="dia" checked> Un día</label>
+              <label style="display:flex;align-items:center;gap:6px;font-size:calc(13px * var(--ui-scale));font-weight:600;"><input type="radio" name="excepcion-tipo" value="periodo"> Período</label>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <label style="flex:1;min-width:145px;font-size:calc(12px * var(--ui-scale));font-weight:600;">Desde<input type="date" id="disp-fecha" style="width:100%;margin-top:5px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--cream);font-family:inherit;"></label>
+              <label id="disp-hasta-wrap" style="flex:1;min-width:145px;font-size:calc(12px * var(--ui-scale));font-weight:600;display:none;">Hasta<input type="date" id="disp-fecha-hasta" style="width:100%;margin-top:5px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--cream);font-family:inherit;"></label>
+            </div>
+            <div id="disp-rangos" style="display:flex; flex-direction:column; gap:8px;"></div>
+            <button type="button" class="btn-secondary" id="disp-agregar-rango" style="width:auto;">+ Agregar franja</button>
+            <div class="slots-grid" id="disp-slots"></div>
+            <button class="submit" id="disp-guardar" style="width:auto; max-width:260px;">Guardar excepción</button>
+            <div class="msg" id="disp-msg"></div>
+            <div>
+              <strong>Excepciones cargadas</strong>
+              <div class="turnos-list" id="disp-resumen-list" style="margin-top:8px;">
+                <div class="empty-state">Cargando…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:12px; margin-bottom:16px;">
+        <strong>Cómo se ven las listas</strong>
+        <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:calc(13.5px * var(--ui-scale));">
+          <label>Formato:
+            <select id="pref-formato" class="estado-select">
+              <option value="detallado">Detallado</option>
+              <option value="recuadros">Recuadros</option>
+            </select>
+          </label>
+          <label>Ordenar por:
+            <select id="pref-orden" class="estado-select">
+              <option value="horario">Horario</option>
+              <option value="nombre">Nombre</option>
+            </select>
+          </label>
+          <label>Tamaño de letra:
+            <select id="pref-tamano-letra" class="estado-select">
+              <option value="0.9">Chico</option>
+              <option value="1">Mediano</option>
+              <option value="1.15">Grande</option>
+              <option value="1.3">Muy grande</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:16px;">
+        <strong>Tu WhatsApp de contacto</strong>
+        <p class="turno-servicio" style="margin:0;">Lo usamos para completar automáticamente tus mensajes de soporte y de pedido de Pro.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="input-whatsapp-negocio" placeholder="Ej: 5493751..." style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(14px * var(--ui-scale));">
+          <button class="submit" id="btn-guardar-whatsapp" style="width:auto; padding:10px 18px;">Guardar</button>
+        </div>
+      </div>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:16px;">
+        <strong>Tu catálogo público</strong>
+        <p class="turno-servicio" style="margin:0;">Compartí este link con tus clientes para que pidan turno solos.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="link-catalogo" readonly style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(13px * var(--ui-scale));">
+          <button class="submit" id="btn-copiar-catalogo" style="width:auto; padding:10px 18px;">Copiar</button>
+        </div>
+      </div>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:16px;">
+        <strong>Respaldo de tus datos</strong>
+        <p class="turno-servicio" style="margin:0;">Descargá un archivo con todos tus turnos, clientes, servicios y caja — útil si en algún momento decidís dejar de usar TurnApp.</p>
+        <button class="submit" id="btn-exportar" style="width:auto; max-width:220px;">Descargar mis datos</button>
+      </div>
+
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; margin-bottom:16px;">
+        <strong>Categorías de Caja</strong>
+        <p class="turno-servicio" style="margin:0;">Las categorías que vas a poder elegir al cargar un movimiento de Caja.</p>
+        <div id="lista-categorias-caja" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <input type="text" id="input-nueva-categoria" placeholder="Nueva categoría (ej: Corte, Insumos, Alquiler)" style="flex:1; min-width:180px; padding:10px 12px; border-radius:8px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(14px * var(--ui-scale));">
+          <button class="submit" id="btn-agregar-categoria" style="width:auto; padding:10px 18px;">Agregar</button>
+        </div>
+      </div>
+
+      <div class="stub" style="text-align:left; padding:24px;">
+        <p style="margin-top:0;">Todavía no armamos la edición de estos datos. Mientras tanto, podés cargar datos de ejemplo para ver la app funcionando:</p>
+        <button class="submit" id="btn-seed" style="max-width:260px;">Cargar datos de ejemplo</button>
+        <p id="seed-msg" style="font-size:calc(12.5px * var(--ui-scale)); color:rgba(38,42,32,0.55); margin-top:10px;"></p>
+      </div>
+
+      <div class="turno-card" id="sobre-nosotros-config" style="flex-direction:column; align-items:stretch; gap:10px;">
+        <strong>Sobre nosotros</strong>
+        <!-- Sebas: acá va el HTML de TusApp para "sobre nosotros" (pediente de recibir el contenido) -->
+        <p class="turno-servicio" style="margin:0;">TurnApp es una app de TusApp.</p>
+      </div>
+    </section>
+
+    <section class="view" id="view-tusapp">
+      <h1 class="view-title">TusApp</h1>
+      <p class="view-sub">Otras apps y novedades de TusApp para tu negocio.</p>
+      <div class="turno-card" id="tusapp-publicidad" style="flex-direction:column; align-items:stretch; gap:10px;">
+        <!-- Sebas: acá va el HTML de publicidad de TusApp que ibas a pasar -->
+        <p class="turno-servicio" style="margin:0;">Muy pronto vas a ver acá novedades de TusApp.</p>
+      </div>
+    </section>
+
+    <section class="view" id="view-solicitudes">
+      <h1 class="view-title">Solicitudes de turno</h1>
+      <p class="view-sub">Pedidos que llegaron desde tu catálogo público. Confirmalos, modificalos o rechazalos.</p>
+      <div class="turnos-list" id="solicitudes-list">
+        <div class="empty-state">Cargando…</div>
+      </div>
+    </section>
+
+    <section class="view" id="view-disponibilidad">
+      <h1 class="view-title">Excepciones de horario</h1>
+      <p class="view-sub">Acá configurás un día puntual que será diferente del horario habitual. La excepción reemplaza el horario normal solo para esa fecha. Si guardás sin horarios, el día queda cerrado.</p>
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:14px; max-width:520px;">
+        <input type="date" id="disp-fecha">
+        <div id="disp-rangos" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <button type="button" class="btn-secondary" id="disp-agregar-rango" style="width:auto;">+ Agregar franja</button>
+        <div class="slots-grid" id="disp-slots"></div>
+        <button class="submit" id="disp-guardar" style="width:auto; max-width:220px;">Guardar configuración de ese día</button>
+        <div class="msg" id="disp-msg"></div>
+      </div>
+      <div class="turno-card" style="flex-direction:column; align-items:stretch; gap:10px; max-width:520px; margin-top:16px;">
+        <strong>Días con excepciones cargadas</strong>
+        <div class="turnos-list" id="disp-resumen-list">
+          <div class="empty-state">Cargando…</div>
+        </div>
+      </div>
+    </section>
+
+    <button class="fab" id="fab-agregar" title="Agregar">+</button>
+
+  </main>
+</div>
+
+<div class="modal-overlay" id="modal-turno">
+  <div class="modal-card">
+    <h2 id="modal-turno-title">Nuevo turno</h2>
+
+    <div class="modal-field">
+      <label for="mt-cliente">Nombre del cliente</label>
+      <input type="text" id="mt-cliente" list="lista-clientes-conocidos" autocomplete="off">
+      <datalist id="lista-clientes-conocidos"></datalist>
+    </div>
+    <div class="modal-field">
+      <label for="mt-whatsapp">WhatsApp del cliente (opcional, con código de país, ej: 5493751...)</label>
+      <input type="text" id="mt-whatsapp">
+    </div>
+    <div class="modal-field">
+      <label>Servicios (podés elegir más de uno)</label>
+      <div class="servicios-check" id="mt-servicios-check"><span style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);">Cargando servicios…</span></div>
+      <div style="font-size:calc(12.5px * var(--ui-scale)); color:rgba(38,42,32,0.6); margin-top:8px;" id="mt-duracion-total"></div>
+    </div>
+    <div class="modal-field">
+      <label for="mt-fecha">Día</label>
+      <input type="date" id="mt-fecha">
+    </div>
+    <div class="modal-field">
+      <label>Horario disponible</label>
+      <div class="slots-grid" id="mt-slots"><span style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.5);">Elegí un día para ver los horarios</span></div>
+    </div>
+    <div class="msg" id="mt-msg"></div>
+
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="mt-cancelar">Cancelar</button>
+      <button class="submit" id="mt-guardar">Guardar turno</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-servicio">
+  <div class="modal-card">
+    <h2 id="modal-servicio-title">Nuevo servicio</h2>
+    <div class="modal-field"><label for="ms-nombre">Nombre</label><input type="text" id="ms-nombre"></div>
+    <div class="modal-field"><label for="ms-precio">Precio</label><input type="number" id="ms-precio" min="0"></div>
+    <div class="modal-field"><label for="ms-duracion">Duración (minutos)</label><input type="number" id="ms-duracion" min="5" step="5" value="30"></div>
+    <div class="modal-field"><label for="ms-oferta">Oferta o promoción (opcional)</label><input type="text" id="ms-oferta" placeholder="Ej: 20% off los martes"></div>
+    <div class="msg" id="ms-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="ms-cancelar">Cancelar</button>
+      <button class="submit" id="ms-guardar">Guardar servicio</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-caja">
+  <div class="modal-card">
+    <h2>Nuevo movimiento de caja</h2>
+    <div class="modal-field">
+      <label for="mc-tipo">Tipo</label>
+      <select id="mc-tipo"><option value="ingreso">Ingreso</option><option value="gasto">Gasto</option></select>
+    </div>
+    <div class="modal-field"><label for="mc-monto">Monto</label><input type="number" id="mc-monto" min="0"></div>
+    <div class="modal-field">
+      <label for="mc-categoria">Categoría</label>
+      <select id="mc-categoria"><option value="">Sin categoría</option></select>
+    </div>
+    <div class="modal-field">
+      <label for="mc-mediopago">Medio de pago</label>
+      <select id="mc-mediopago"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Cuenta corriente</option><option>Otro</option></select>
+    </div>
+    <div class="msg" id="mc-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="mc-cancelar">Cancelar</button>
+      <button class="submit" id="mc-guardar">Guardar movimiento</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-cliente-detalle">
+  <div class="modal-card" style="max-width:480px;">
+    <h2 id="cd-nombre">Cliente</h2>
+    <p style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.6); margin:-10px 0 14px;" id="cd-whatsapp"></p>
+    <div class="modal-field">
+      <label for="cd-preferencia">Preferencia especial (se guarda para este cliente, no cambia por turno)</label>
+      <textarea id="cd-preferencia" rows="2" style="width:100%; padding:10px 12px; border-radius:9px; border:1px solid var(--line); background:var(--cream); font-family:inherit; font-size:calc(13.5px * var(--ui-scale)); color:var(--ink); resize:vertical;"></textarea>
+      <button class="submit" id="cd-guardar-preferencia" style="width:auto; padding:9px 14px; margin-top:8px;">Guardar preferencia</button>
+      <span class="msg" id="cd-msg-preferencia"></span>
+    </div>
+    <div class="modal-field">
+      <label>Historial (trabajo realizado, servicio, fecha, comentarios)</label>
+      <div id="cd-historial-list"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="cd-cerrar">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-cambio-turno">
+  <div class="modal-card">
+    <h2>Cambiar día y horario</h2>
+    <div class="modal-field"><label for="ct-fecha">Nuevo día</label><input type="date" id="ct-fecha"></div>
+    <div class="modal-field"><label for="ct-hora">Nuevo horario</label><input type="time" id="ct-hora"></div>
+    <div class="msg" id="ct-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="ct-cancelar">Cancelar</button>
+      <button class="submit" id="ct-guardar">Guardar cambio</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-cobro">
+  <div class="modal-card" style="max-width:400px;">
+    <h2>Cobro del turno</h2>
+    <p style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.6); margin:-8px 0 14px;" id="cobro-cliente"></p>
+    <div class="modal-field"><label for="cobro-monto">Monto cobrado</label><input type="number" id="cobro-monto" min="0"></div>
+    <div class="modal-field">
+      <label for="cobro-mediopago">Medio de pago</label>
+      <select id="cobro-mediopago"><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option><option>Cuenta corriente</option><option>Otro</option></select>
+    </div>
+    <div class="msg" id="cobro-msg"></div>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="cobro-cancelar">Cancelar</button>
+      <button class="submit" id="cobro-guardar">Confirmar cobro</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-huecos">
+  <div class="modal-card" style="max-width:400px;">
+    <h2>Editar horario ocupado</h2>
+    <p style="font-size:calc(13px * var(--ui-scale)); color:rgba(38,42,32,0.6); margin:-8px 0 14px;" id="huecos-cliente"></p>
+    <div class="slots-grid" id="huecos-slots"></div>
+    <p style="font-size:calc(12px * var(--ui-scale)); color:rgba(38,42,32,0.5); margin-top:10px; line-height:1.5;">Tocá una franja para dejarla libre (por ejemplo, mientras el cliente espera una tintura) y poder superponer otro turno ahí. Volvé a tocarla para dejarla ocupada de nuevo.</p>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="huecos-cancelar">Cancelar</button>
+      <button class="submit" id="huecos-guardar">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-confirmar">
+  <div class="modal-card" style="max-width:360px;">
+    <h2>TurnApp dice:</h2>
+    <p id="confirmar-texto" style="font-size:calc(14px * var(--ui-scale)); color:rgba(38,42,32,0.75); line-height:1.5; margin:0;"></p>
+    <div class="modal-actions">
+      <button class="btn-cancelar" id="confirmar-cancelar">Cancelar</button>
+      <button class="submit" id="confirmar-aceptar" style="background:var(--rose-deep);">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-aviso">
+  <div class="modal-card" style="max-width:360px;">
+    <h2>TurnApp dice:</h2>
+    <p id="aviso-texto" style="font-size:calc(14px * var(--ui-scale)); color:rgba(38,42,32,0.75); line-height:1.5; margin:0;"></p>
+    <div class="modal-actions">
+      <button class="submit" id="aviso-ok">Entendido</button>
+    </div>
+  </div>
+</div>
+
+<div id="overlay-vencido">
+  <div class="venc-card">
+    <h2>Tu período gratuito terminó</h2>
+    <p>Podés seguir viendo lo que ya tenías cargado, pero no se pueden guardar turnos nuevos ni recibir pedidos desde el catálogo hasta que actives la versión Pro.</p>
+    <a class="venc-btn" id="link-pro" href="#">Pasar a la versión Pro</a>
+  </div>
+</div>
+
+<script type="module" src="./panel.js"></script>
+
+</body>
+</html>
